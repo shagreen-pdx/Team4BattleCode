@@ -19,6 +19,8 @@ public strictfp class RobotPlayer {
 
     static int turnCount;
     static MapLocation hqloc;
+    static int numMiners;
+    static int numLandScapers;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -64,8 +66,13 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
-        for (Direction dir : directions)
-            tryBuild(RobotType.MINER, dir);
+        if(numMiners < 10){
+            for (Direction dir : directions){
+                if(tryBuild(RobotType.MINER, dir)){
+                    ++numMiners;
+                }
+            }
+        }
     }
 
     static void runMiner() throws GameActionException {
@@ -90,12 +97,15 @@ public strictfp class RobotPlayer {
         for (Direction dir : directions)
             if (tryMine(dir))
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
-        if(rc.getSoupCarrying() == rc.getType().soupLimit){
+        if(rc.getSoupCarrying() == rc.getType().soupLimit) {
             System.out.println("At soup carrying limit " + rc.getType().soupLimit);
             Direction dirToHQ = rc.getLocation().directionTo(hqloc);
-            if(tryMove(dirToHQ)){
+            if (tryMove(dirToHQ)) {
                 System.out.println("Moving towards HQ");
             }
+        } else if (!nearbyRobot(RobotType.DESIGN_SCHOOL)){
+            if(tryBuild(RobotType.DESIGN_SCHOOL, randomDirection()))
+                System.out.println("Built Design School");
         }else if (tryMove(randomDirection()))
             System.out.println("I moved!");
 
@@ -110,7 +120,13 @@ public strictfp class RobotPlayer {
     }
 
     static void runDesignSchool() throws GameActionException {
-
+        if(numLandScapers < 10){
+            for (Direction dir : directions){
+                if(tryBuild(RobotType.LANDSCAPER, dir)){
+                    ++numLandScapers;
+                }
+            }
+        }
     }
 
     static void runFulfillmentCenter() throws GameActionException {
@@ -246,6 +262,22 @@ public strictfp class RobotPlayer {
                 rc.submitTransaction(message, 10);
         }
         // System.out.println(rc.getRoundMessages(turnCount-1));
+    }
+
+    /**
+     *
+     * @param target the robot that we want to see if nearby
+     * @return true if target robot is nearby
+     * @throws GameActionException
+     */
+    static boolean nearbyRobot(RobotType target) throws GameActionException{
+        RobotInfo[] robots = rc.senseNearbyRobots();
+        for(RobotInfo robot : robots){
+            if(robot.getType() == target){
+                return true;
+            }
+        }
+        return false;
     }
 }
 
