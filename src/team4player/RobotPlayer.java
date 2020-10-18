@@ -94,18 +94,21 @@ public strictfp class RobotPlayer {
         for (Direction dir : directions)
             if (tryRefine(dir))
                 System.out.println("I refined soup! " + rc.getTeamSoup());
-        for (Direction dir : directions)
+        for (Direction dir : directions){
             if (tryMine(dir))
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
+        }
+        if (!nearbyRobot(RobotType.DESIGN_SCHOOL)) {
+            if (tryBuild(RobotType.DESIGN_SCHOOL, randomDirection()))
+                System.out.println("Built Design School");
+        }
+
         if(rc.getSoupCarrying() == rc.getType().soupLimit) {
             System.out.println("At soup carrying limit " + rc.getType().soupLimit);
             Direction dirToHQ = rc.getLocation().directionTo(hqloc);
             if (tryMove(dirToHQ)) {
                 System.out.println("Moving towards HQ");
             }
-        } else if (!nearbyRobot(RobotType.DESIGN_SCHOOL)){
-            if(tryBuild(RobotType.DESIGN_SCHOOL, randomDirection()))
-                System.out.println("Built Design School");
         }else if (tryMove(randomDirection()))
             System.out.println("I moved!");
 
