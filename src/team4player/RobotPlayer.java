@@ -43,6 +43,7 @@ public strictfp class RobotPlayer {
                 // Here, we've separated the controls into a different method for each RobotType.
                 // You can add the missing ones or rewrite this into your own control structure.
                 System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
+                findHQ();
                 switch (rc.getType()) {
                     case HQ:                 runHQ();                break;
                     case MINER:              runMiner();             break;
@@ -76,16 +77,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runMiner() throws GameActionException {
-        if(hqloc == null){
-            RobotInfo[] robots = rc.senseNearbyRobots();
-            for(RobotInfo robot : robots){
-                if(robot.type == RobotType.HQ && robot.team == rc.getTeam()){
-                    hqloc = robot.location;
-                }
-            }
-        }else{
-            System.out.println("HQ loc: " + hqloc);
-        }
+
 
         tryBlockchain();
 //        tryBuild(randomSpawnedByMiner(), randomDirection());
@@ -138,7 +130,30 @@ public strictfp class RobotPlayer {
     }
 
     static void runLandscaper() throws GameActionException {
+        if(rc.getDirtCarrying() == 0){
+            tryDig();
+        }
 
+        if(hqloc != null){
+            MapLocation bestLocation = null;
+            int lowestElevation = 9999999;
+            for(Direction dir : directions){
+                MapLocation tileToCheck = hqloc.add(dir);
+                if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
+                        && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))){
+                    if(rc.senseElevation(tileToCheck) < lowestElevation){
+                        lowestElevation = rc.senseElevation(tileToCheck);
+                        bestLocation = tileToCheck;
+                    }
+                }
+            }
+            // Will be null if it knows where the hq is but all of the locations are blocked
+            if(bestLocation != null){
+                rc.depositDirt(rc.getLocation().directionTo(bestLocation));
+                System.out.println("Building a wall");
+            }
+        }
+        tryMove(randomDirection());
     }
 
     static void runDeliveryDrone() throws GameActionException {
@@ -160,6 +175,19 @@ public strictfp class RobotPlayer {
 
     static void runNetGun() throws GameActionException {
 
+    }
+
+    static void findHQ() throws GameActionException{
+        if(hqloc == null){
+            RobotInfo[] robots = rc.senseNearbyRobots();
+            for(RobotInfo robot : robots){
+                if(robot.type == RobotType.HQ && robot.team == rc.getTeam()){
+                    hqloc = robot.location;
+                }
+            }
+        }
+
+        // Later: Communicate via blockchain to find HQ location
     }
 
     /**
@@ -252,6 +280,15 @@ public strictfp class RobotPlayer {
             rc.depositSoup(dir, rc.getSoupCarrying());
             return true;
         } else return false;
+    }
+
+    static boolean tryDig() throws GameActionException {
+        Direction dir = randomDirection();
+        if(rc.canDigDirt(dir)){
+            rc.digDirt(dir);
+            return true;
+        }
+        return false;
     }
 
 
