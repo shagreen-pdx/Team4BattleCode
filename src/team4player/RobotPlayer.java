@@ -1,7 +1,7 @@
-package examplefuncsplayer;
+package team4player;
 import battlecode.common.*;
 
-public strictfp class Team4Robot {
+public strictfp class RobotPlayer {
     static RobotController rc;
 
     static Direction[] directions = {
@@ -28,7 +28,7 @@ public strictfp class Team4Robot {
 
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
-        RobotPlayer.rc = rc;
+        team4player.RobotPlayer.rc = rc;
 
         turnCount = 0;
 
@@ -230,4 +230,5 @@ public strictfp class Team4Robot {
         // System.out.println(rc.getRoundMessages(turnCount-1));
     }
 }
+
 
