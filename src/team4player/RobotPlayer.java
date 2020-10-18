@@ -19,6 +19,8 @@ public strictfp class RobotPlayer {
 
     static int turnCount;
     static MapLocation hqloc;
+    static int numMiners;
+    static int numLandScapers;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -41,6 +43,7 @@ public strictfp class RobotPlayer {
                 // Here, we've separated the controls into a different method for each RobotType.
                 // You can add the missing ones or rewrite this into your own control structure.
                 System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
+                findHQ();
                 switch (rc.getType()) {
                     case HQ:                 runHQ();                break;
                     case MINER:              runMiner();             break;
@@ -64,21 +67,17 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
-        for (Direction dir : directions)
-            tryBuild(RobotType.MINER, dir);
+        if(numMiners < 10){
+            for (Direction dir : directions){
+                if(tryBuild(RobotType.MINER, dir)){
+                    ++numMiners;
+                }
+            }
+        }
     }
 
     static void runMiner() throws GameActionException {
-        if(hqloc == null){
-            RobotInfo[] robots = rc.senseNearbyRobots();
-            for(RobotInfo robot : robots){
-                if(robot.type == RobotType.HQ && robot.team == rc.getTeam()){
-                    hqloc = robot.location;
-                }
-            }
-        }else{
-            System.out.println("HQ loc: " + hqloc);
-        }
+
 
         tryBlockchain();
 //        tryBuild(randomSpawnedByMiner(), randomDirection());
@@ -87,13 +86,19 @@ public strictfp class RobotPlayer {
         for (Direction dir : directions)
             if (tryRefine(dir))
                 System.out.println("I refined soup! " + rc.getTeamSoup());
-        for (Direction dir : directions)
+        for (Direction dir : directions){
             if (tryMine(dir))
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
-        if(rc.getSoupCarrying() == rc.getType().soupLimit){
+        }
+        if (!nearbyRobot(RobotType.DESIGN_SCHOOL)) {
+            if (tryBuild(RobotType.DESIGN_SCHOOL, randomDirection()))
+                System.out.println("Built Design School");
+        }
+
+        if(rc.getSoupCarrying() == rc.getType().soupLimit) {
             System.out.println("At soup carrying limit " + rc.getType().soupLimit);
             Direction dirToHQ = rc.getLocation().directionTo(hqloc);
-            if(tryMove(dirToHQ)){
+            if (tryMove(dirToHQ)) {
                 System.out.println("Moving towards HQ");
             }
         }else if (tryMove(randomDirection()))
@@ -110,7 +115,13 @@ public strictfp class RobotPlayer {
     }
 
     static void runDesignSchool() throws GameActionException {
-
+        if(numLandScapers < 10){
+            for (Direction dir : directions){
+                if(tryBuild(RobotType.LANDSCAPER, dir)){
+                    ++numLandScapers;
+                }
+            }
+        }
     }
 
     static void runFulfillmentCenter() throws GameActionException {
@@ -119,7 +130,30 @@ public strictfp class RobotPlayer {
     }
 
     static void runLandscaper() throws GameActionException {
+        if(rc.getDirtCarrying() == 0){
+            tryDig();
+        }
 
+        if(hqloc != null){
+            MapLocation bestLocation = null;
+            int lowestElevation = 9999999;
+            for(Direction dir : directions){
+                MapLocation tileToCheck = hqloc.add(dir);
+                if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
+                        && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))){
+                    if(rc.senseElevation(tileToCheck) < lowestElevation){
+                        lowestElevation = rc.senseElevation(tileToCheck);
+                        bestLocation = tileToCheck;
+                    }
+                }
+            }
+            // Will be null if it knows where the hq is but all of the locations are blocked
+            if(bestLocation != null){
+                rc.depositDirt(rc.getLocation().directionTo(bestLocation));
+                System.out.println("Building a wall");
+            }
+        }
+        tryMove(randomDirection());
     }
 
     static void runDeliveryDrone() throws GameActionException {
@@ -141,6 +175,19 @@ public strictfp class RobotPlayer {
 
     static void runNetGun() throws GameActionException {
 
+    }
+
+    static void findHQ() throws GameActionException{
+        if(hqloc == null){
+            RobotInfo[] robots = rc.senseNearbyRobots();
+            for(RobotInfo robot : robots){
+                if(robot.type == RobotType.HQ && robot.team == rc.getTeam()){
+                    hqloc = robot.location;
+                }
+            }
+        }
+
+        // Later: Communicate via blockchain to find HQ location
     }
 
     /**
@@ -235,6 +282,15 @@ public strictfp class RobotPlayer {
         } else return false;
     }
 
+    static boolean tryDig() throws GameActionException {
+        Direction dir = randomDirection();
+        if(rc.canDigDirt(dir)){
+            rc.digDirt(dir);
+            return true;
+        }
+        return false;
+    }
+
 
     static void tryBlockchain() throws GameActionException {
         if (turnCount < 3) {
@@ -246,6 +302,22 @@ public strictfp class RobotPlayer {
                 rc.submitTransaction(message, 10);
         }
         // System.out.println(rc.getRoundMessages(turnCount-1));
+    }
+
+    /**
+     *
+     * @param target the robot that we want to see if nearby
+     * @return true if target robot is nearby
+     * @throws GameActionException
+     */
+    static boolean nearbyRobot(RobotType target) throws GameActionException{
+        RobotInfo[] robots = rc.senseNearbyRobots();
+        for(RobotInfo robot : robots){
+            if(robot.getType() == target){
+                return true;
+            }
+        }
+        return false;
     }
 }
 
