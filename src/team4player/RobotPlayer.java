@@ -1,6 +1,8 @@
 package team4player;
 import battlecode.common.*;
 
+import static java.lang.Math.min;
+
 public strictfp class RobotPlayer {
     static RobotController rc;
 
@@ -107,6 +109,12 @@ public strictfp class RobotPlayer {
 
     static void runRefinery() throws GameActionException {
         // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
+        if(RobotType.MINER.canDepositSoup()){
+            System.out.println("Soup deposited: " + min(RobotType.REFINERY.maxSoupProduced, rc.getSoupCarrying()));
+            System.out.println("Globe pollution level: " + RobotType.REFINERY.globalPollutionAmount);
+            System.out.println("Range of pollution: " + RobotType.REFINERY.pollutionRadiusSquared);
+            System.out.println("Temp pollution in the range: " + RobotType.REFINERY.localPollutionAdditiveEffect);
+        }
     }
 
     static void runVaporator() throws GameActionException {
