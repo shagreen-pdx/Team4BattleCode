@@ -97,12 +97,11 @@ public strictfp class RobotPlayer {
 
         if(rc.getSoupCarrying() == rc.getType().soupLimit) {
             System.out.println("At soup carrying limit " + rc.getType().soupLimit);
-            Direction dirToHQ = rc.getLocation().directionTo(hqloc);
-            if (tryMove(dirToHQ)) {
+            if(goTo(hqloc)){
                 System.out.println("Moving towards HQ");
             }
-        }else if (tryMove(randomDirection()))
-            System.out.println("I moved!");
+        }else if (goTo(randomDirection()))
+            System.out.println("I moved in random direction!");
 
     }
 
@@ -134,10 +133,13 @@ public strictfp class RobotPlayer {
             tryDig();
         }
 
+        MapLocation bestLocation = null;
         if(hqloc != null){
-            MapLocation bestLocation = null;
+
             int lowestElevation = 9999999;
+            //Loops through all of the locations around hq and checks for the lowest elevation that can be dropped, then drops it
             for(Direction dir : directions){
+                // Add function: Takes a map location add a direction and returns the first location plus the direction
                 MapLocation tileToCheck = hqloc.add(dir);
                 if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
                         && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))){
@@ -148,12 +150,21 @@ public strictfp class RobotPlayer {
                 }
             }
             // Will be null if it knows where the hq is but all of the locations are blocked
+        }
+        if(Math.random() < 0.4){
             if(bestLocation != null){
                 rc.depositDirt(rc.getLocation().directionTo(bestLocation));
                 System.out.println("Building a wall");
             }
         }
-        tryMove(randomDirection());
+
+        // Try to get to hq
+        if(hqloc != null){
+            goTo(hqloc);
+        }else{
+            tryMove(randomDirection());
+        }
+
     }
 
     static void runDeliveryDrone() throws GameActionException {
@@ -289,6 +300,20 @@ public strictfp class RobotPlayer {
             return true;
         }
         return false;
+    }
+
+    static boolean goTo(Direction dir) throws GameActionException {
+        Direction[] toTry = {dir, dir.rotateLeft(), dir.rotateRight(), dir.rotateRight().rotateRight(), dir.rotateLeft().rotateLeft()};
+        for(Direction d : toTry){
+            if(tryMove(d)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static boolean goTo(MapLocation destination) throws GameActionException {
+        return goTo(rc.getLocation().directionTo(destination));
     }
 
 
