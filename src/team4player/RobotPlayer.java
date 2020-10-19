@@ -97,6 +97,12 @@ public strictfp class RobotPlayer {
                 System.out.println("Built Design School");
         }
 
+        //try building refinery
+        if (!nearbyRobot(RobotType.REFINERY)) {
+            if (tryBuild(RobotType.REFINERY, randomDirection()))
+                System.out.println("Built Refinery");
+        }
+
         if(rc.getSoupCarrying() == rc.getType().soupLimit) {
             System.out.println("At soup carrying limit " + rc.getType().soupLimit);
             if(goTo(hqloc)){
