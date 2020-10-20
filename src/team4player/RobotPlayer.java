@@ -130,13 +130,14 @@ public strictfp class RobotPlayer {
     }
 
     static void runDesignSchool() throws GameActionException {
-        if(numLandScapers < 10){
-            for (Direction dir : directions){
-                if(tryBuild(RobotType.LANDSCAPER, dir)){
-                    ++numLandScapers;
-                }
+        for (Direction dir : directions){
+            if(tryBuild(RobotType.LANDSCAPER, dir)){
+                System.out.println("Created a new landscaper!");
+                ++numLandScapers;
+                System.out.println("Number of landscapers:" + numLandScapers);
             }
         }
+
     }
 
     static void runFulfillmentCenter() throws GameActionException {
