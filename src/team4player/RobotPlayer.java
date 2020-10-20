@@ -25,6 +25,7 @@ public strictfp class RobotPlayer {
     static MapLocation hqloc;
     static int numMiners;
     static int numLandScapers;
+    static int numDesignSchool;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -94,9 +95,13 @@ public strictfp class RobotPlayer {
             if (tryMine(dir))
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
         }
-        if (!nearbyRobot(RobotType.DESIGN_SCHOOL)) {
-            if (tryBuild(RobotType.DESIGN_SCHOOL, randomDirection()))
-                System.out.println("Built Design School");
+        if (numDesignSchool < 2) {
+            if (!nearbyRobot(RobotType.DESIGN_SCHOOL)) {
+                if (tryBuild(RobotType.DESIGN_SCHOOL, randomDirection()))
+                    System.out.println("Built Design School");
+                    ++numDesignSchool;
+
+            }
         }
 
         //try building refinery
