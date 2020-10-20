@@ -1,6 +1,8 @@
 package team4player;
 import battlecode.common.*;
 
+import java.util.Map;
+
 import static java.lang.Math.min;
 
 public strictfp class RobotPlayer {
@@ -142,7 +144,16 @@ public strictfp class RobotPlayer {
             tryBuild(RobotType.DELIVERY_DRONE, dir);
     }
 
-    static void runLandscaper() throws GameActionException {
+    static void runLandscaper() throws GameActionException
+    {
+        /* Landscaper: moves dirt around the map to adjust elevation and destroy buildings.
+
+Produced by the design school.
+Can perform the action rc.digDirt() to remove one unit of dirt from an adjacent tile or its current tile, increasing the landscaper’s stored dirt by 1 up to a max of RobotType.LANDSCAPER.dirtLimit (currently set to 25). If the tile is empty, flooded, or contains another unit, this reduces the tile’s elevation by 1. If the tile contains a building, it removes one unit of dirt from the building, or if the building is not buried, has no effect.
+Can perform the action rc.depositDirt() to reduce its stored dirt by one and place one unit of dirt onto an adjacent tile or its current tile. If the tile contains a building, the dirt partially buries it–the health of a building is how much dirt can be placed on it before it is destroyed. If the tile is empty, flooded, or contains another unit, the only effect is that the elevation of that tile increases by 1.
+Note: all this means that buildings may never change elevation, so be careful to contain that water level.
+When a landscaper dies, the dirt it’s carrying is dropped on the current tile.
+If enough dirt is placed on a flooded tile to raise its elevation above the water level, it becomes not flooded. */
         if(rc.getDirtCarrying() == 0){
             tryDig();
         }
@@ -213,6 +224,9 @@ public strictfp class RobotPlayer {
         }
 
         // Later: Communicate via blockchain to find HQ location
+        if(hqloc == null){
+            getHqFromBlockchain();
+        }
     }
 
     /**
@@ -357,6 +371,42 @@ public strictfp class RobotPlayer {
             }
         }
         return false;
+    }
+
+    //beginning communication with blockchain
+    static final int teamSecret = 12345;  //all messages from team4player will begin with this key
+    static final String[] messageType = {"HQ loc", }; //every message has a message type
+
+    /*
+    * send message with location of HQ to the blockchain
+    * */
+    public static void sendHqLoc(MapLocation loc) throws GameActionException
+    {
+        int [] message = new int [7];
+        message[0] = teamSecret;
+        message[1] = 0; //index of message type
+        message[2] = loc.x;
+        message[3] = loc.y;
+
+        if(rc.canSubmitTransaction(message, 3))  //3 is transaction cost?  can be increased to up chances of being visible in blockchain
+            rc.submitTransaction(message, 3);
+    }
+
+    public static void getHqFromBlockchain() throws GameActionException
+    {
+        for(int i = 1; i < rc.getRoundNum(); i++)
+        {
+            for(Transaction tx : rc.getBlock(i))
+            {
+                int [] myMessage = tx.getMessage();
+                if(myMessage[0] == teamSecret && myMessage[1] == 0) { //check that message is from our team and the type is hqloc
+                    System.out.println("got HQ location!");
+                    hqloc = new MapLocation(myMessage[2], myMessage[3]); //hqloc = mew map location with x and y coords from message
+                   // System.out.println(hqloc);
+                }
+            }
+
+        }
     }
 }
 
