@@ -39,6 +39,7 @@ public strictfp class RobotPlayer {
         team4player.RobotPlayer.rc = rc;
 
         turnCount = 0;
+        numDesignSchool = 0;
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
@@ -95,12 +96,12 @@ public strictfp class RobotPlayer {
             if (tryMine(dir))
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
         }
-        if (numDesignSchool < 2) {
+        //only try to build design school every 50 turns, otherwise try to build a refinery
+        if (turnCount % 50 == 0) {
             if (!nearbyRobot(RobotType.DESIGN_SCHOOL)) {
                 if (tryBuild(RobotType.DESIGN_SCHOOL, randomDirection()))
                     System.out.println("Built Design School");
-                    ++numDesignSchool;
-
+                ++numDesignSchool;
             }
         }
 
