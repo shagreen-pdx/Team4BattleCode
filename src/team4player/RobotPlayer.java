@@ -123,10 +123,13 @@ public strictfp class RobotPlayer {
     }
 
     static void runRefinery() throws GameActionException {
-        System.out.println("Pollution(sense): " + rc.sensePollution(rc.getLocation()));
+        int old_soup = rc.getTeamSoup();
+        RobotPlayer.globePollution = RobotType.REFINERY.globalPollutionAmount;
+        //System.out.println("Pollution(sense): " + rc.sensePollution(rc.getLocation()));
         System.out.println("Team Soup deposited: " + rc.getTeamSoup());
-        //min(RobotType.REFINERY.maxSoupProduced, rc.getSoupCarrying());
-        RobotPlayer.globePollution += 1;
+        System.out.println("Soup Refined: " + min(RobotType.REFINERY.maxSoupProduced, rc.getSoupCarrying()));
+        if (old_soup != rc.getTeamSoup())
+            RobotPlayer.globePollution += 1;
         System.out.println("Globe pollution level: " + RobotPlayer.globePollution);
         System.out.println("Range of pollution: " + RobotType.REFINERY.pollutionRadiusSquared);
         System.out.println("Temp pollution in the range: " + RobotType.REFINERY.localPollutionAdditiveEffect);
