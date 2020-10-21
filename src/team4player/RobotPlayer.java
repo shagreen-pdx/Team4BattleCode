@@ -26,6 +26,7 @@ public strictfp class RobotPlayer {
     static int numMiners;
     static int numLandScapers;
     static int numDesignSchool;
+    static int globePollution;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -122,13 +123,13 @@ public strictfp class RobotPlayer {
     }
 
     static void runRefinery() throws GameActionException {
-        // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
-        if(RobotType.MINER.canDepositSoup()){
-            System.out.println("Soup deposited: " + min(RobotType.REFINERY.maxSoupProduced, rc.getSoupCarrying()));
-            System.out.println("Globe pollution level: " + RobotType.REFINERY.globalPollutionAmount);
-            System.out.println("Range of pollution: " + RobotType.REFINERY.pollutionRadiusSquared);
-            System.out.println("Temp pollution in the range: " + RobotType.REFINERY.localPollutionAdditiveEffect);
-        }
+        System.out.println("Pollution(sense): " + rc.sensePollution(rc.getLocation()));
+        System.out.println("Team Soup deposited: " + rc.getTeamSoup());
+        //min(RobotType.REFINERY.maxSoupProduced, rc.getSoupCarrying());
+        RobotPlayer.globePollution += 1;
+        System.out.println("Globe pollution level: " + RobotPlayer.globePollution);
+        System.out.println("Range of pollution: " + RobotType.REFINERY.pollutionRadiusSquared);
+        System.out.println("Temp pollution in the range: " + RobotType.REFINERY.localPollutionAdditiveEffect);
     }
 
     static void runVaporator() throws GameActionException {
