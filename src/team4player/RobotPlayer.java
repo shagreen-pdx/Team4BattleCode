@@ -136,6 +136,9 @@ public strictfp class RobotPlayer {
     }
 
     static void runDesignSchool() throws GameActionException {
+        //broadcast location + existence of design school.  can eventually use to keep track of how many
+        if(!designSchoolMessageSent)
+            sendDesignSchoolLoc(rc.getLocation());
         if (rc.isReady()) {
             for (Direction dir : directions) {
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
@@ -383,7 +386,7 @@ If enough dirt is placed on a flooded tile to raise its elevation above the wate
 
     //beginning communication with blockchain
     static final int teamSecret = 12345;  //all messages from team4player will begin with this key
-    static final String[] messageType = {"HQ loc", }; //every message has a message type
+    static final String[] messageType = {"HQ loc", "design school created" }; //every message has a message type
 
     /*
     * send message with location of HQ to the blockchain
@@ -414,6 +417,24 @@ If enough dirt is placed on a flooded tile to raise its elevation above the wate
                 }
             }
 
+        }
+    }
+
+    public static boolean designSchoolMessageSent = false;
+    /*
+     * send message to the blockchain when design school is created
+     * */
+    public static void sendDesignSchoolLoc(MapLocation loc) throws GameActionException
+    {
+        int [] message = new int [7];
+        message[0] = teamSecret;
+        message[1] = 1; //index of message type
+        message[2] = loc.x;
+        message[3] = loc.y;
+
+        if(rc.canSubmitTransaction(message, 3)) {  //3 is transaction cost?  can be increased to up chances of being visible in blockchain
+            rc.submitTransaction(message, 3);
+            designSchoolMessageSent = true;
         }
     }
 }
