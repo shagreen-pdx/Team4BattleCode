@@ -23,9 +23,9 @@ public strictfp class RobotPlayer {
 
     static int turnCount;
     static MapLocation hqloc;
-    static int numMiners;
-    static int numLandScapers;
-    static int numDesignSchool;
+    static int numMiners = 0;
+    static int numLandScapers = 0;
+    static int numDesignSchool = 0;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -73,6 +73,9 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
+        if(turnCount == 1){
+            sendHqLoc(rc.getLocation());
+        }
         if(numMiners < 10){
             for (Direction dir : directions){
                 if(tryBuild(RobotType.MINER, dir)){
@@ -84,8 +87,9 @@ public strictfp class RobotPlayer {
 
     static void runMiner() throws GameActionException {
 
+        updateUnitCounts();
 
-        tryBlockchain();
+//        tryBlockchain();
 //        tryBuild(randomSpawnedByMiner(), randomDirection());
 //        for (Direction dir : directions)
 //            tryBuild(RobotType.FULFILLMENT_CENTER, dir);
@@ -97,13 +101,15 @@ public strictfp class RobotPlayer {
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
         }
         //only try to build design school every 50 turns, otherwise try to build a refinery
-        if (turnCount % 50 == 0) {
-            if (!nearbyRobot(RobotType.DESIGN_SCHOOL)) {
-                if (tryBuild(RobotType.DESIGN_SCHOOL, randomDirection()))
-                    System.out.println("Built Design School");
+
+        System.out.println("num of design school: " + numDesignSchool);
+        if (numDesignSchool < 3) {
+            if (tryBuild(RobotType.DESIGN_SCHOOL, randomDirection())) {
+                System.out.println("Built Design School");
                 ++numDesignSchool;
             }
         }
+
 
         //try building refinery
         if (!nearbyRobot(RobotType.REFINERY)) {
@@ -136,6 +142,9 @@ public strictfp class RobotPlayer {
     }
 
     static void runDesignSchool() throws GameActionException {
+        if(!broadcastedCreation){
+            broadcastDesignSchoolCreation(rc.getLocation());
+        }
         if (rc.isReady()) {
             for (Direction dir : directions) {
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
@@ -219,22 +228,6 @@ If enough dirt is placed on a flooded tile to raise its elevation above the wate
 
     static void runNetGun() throws GameActionException {
 
-    }
-
-    static void findHQ() throws GameActionException{
-        if(hqloc == null){
-            RobotInfo[] robots = rc.senseNearbyRobots();
-            for(RobotInfo robot : robots){
-                if(robot.type == RobotType.HQ && robot.team == rc.getTeam()){
-                    hqloc = robot.location;
-                }
-            }
-        }
-
-        // Later: Communicate via blockchain to find HQ location
-        if(hqloc == null){
-            getHqFromBlockchain();
-        }
     }
 
     /**
@@ -381,9 +374,53 @@ If enough dirt is placed on a flooded tile to raise its elevation above the wate
         return false;
     }
 
+
+    static void findHQ() throws GameActionException{
+        if(hqloc == null){
+            RobotInfo[] robots = rc.senseNearbyRobots();
+            for(RobotInfo robot : robots){
+                if(robot.type == RobotType.HQ && robot.team == rc.getTeam()){
+                    hqloc = robot.location;
+                }
+            }
+        }
+
+        // Later: Communicate via blockchain to find HQ location
+        if(hqloc == null){
+            getHqFromBlockchain();
+        }
+    }
+
     //beginning communication with blockchain
     static final int teamSecret = 12345;  //all messages from team4player will begin with this key
-    static final String[] messageType = {"HQ loc", }; //every message has a message type
+    static final String[] messageType = {"HQ loc", "design school created"}; //every message has a message type
+
+    public static boolean broadcastedCreation = false;
+
+    public static void broadcastDesignSchoolCreation(MapLocation loc) throws GameActionException {
+        int [] message = new int [7];
+        message[0] = teamSecret;
+        message[1] = 1; //index of message type - 0 = hq location
+        message[2] = loc.x;
+        message[3] = loc.y;
+
+        if(rc.canSubmitTransaction(message, 3)){
+            rc.submitTransaction(message, 3);
+            broadcastedCreation = true;
+        }
+
+    }
+
+    public static void updateUnitCounts() throws GameActionException {
+        for(Transaction tx : rc.getBlock(rc.getRoundNum() - 1))
+        {
+            int [] myMessage = tx.getMessage();
+            if(myMessage[0] == teamSecret && myMessage[1] == 1) { //check that message is from our team and the type is hqloc
+                numDesignSchool += 1;
+            }
+        }
+    }
+
 
     /*
     * send message with location of HQ to the blockchain
@@ -392,7 +429,7 @@ If enough dirt is placed on a flooded tile to raise its elevation above the wate
     {
         int [] message = new int [7];
         message[0] = teamSecret;
-        message[1] = 0; //index of message type
+        message[1] = 0; //index of message type - 0 = hq location
         message[2] = loc.x;
         message[3] = loc.y;
 
