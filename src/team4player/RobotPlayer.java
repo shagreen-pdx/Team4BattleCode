@@ -7,17 +7,6 @@ import java.util.Map;
 import static java.lang.Math.min;
 
 public strictfp class RobotPlayer {
-    static RobotController rc;
-
-
-    static RobotType[] spawnedByMiner = {RobotType.REFINERY, RobotType.VAPORATOR, RobotType.DESIGN_SCHOOL,
-            RobotType.FULFILLMENT_CENTER, RobotType.NET_GUN};
-
-    static int turnCount;
-    static MapLocation hqloc;
-
-
-
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
      * If this method returns, the robot dies!
