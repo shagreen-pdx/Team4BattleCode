@@ -30,7 +30,7 @@ public class Unit extends Robot{
 
         // Later: Communicate via blockchain to find HQ location
         if(hqLoc == null){
-            comms.getHqFromBlockchain();
+            hqLoc = comms.getHqFromBlockchain();
         }
     }
 
