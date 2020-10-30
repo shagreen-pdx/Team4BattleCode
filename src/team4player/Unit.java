@@ -4,7 +4,8 @@ import battlecode.common.*;
 
 public class Unit extends Robot{
 
-    MapLocation hqLoc;
+    MapLocation enemyHqLoc = null;
+    MapLocation hqLoc = null;
     Navigation nav;
 
     public Unit(RobotController r) {
@@ -28,7 +29,6 @@ public class Unit extends Robot{
             }
         }
 
-        // Later: Communicate via blockchain to find HQ location
         if(hqLoc == null){
             hqLoc = comms.getHqFromBlockchain();
         }

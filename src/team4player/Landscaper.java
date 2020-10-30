@@ -1,11 +1,13 @@
 package team4player;
 
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
+import battlecode.common.*;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 public class Landscaper extends Unit{
+
+    ArrayList<MapLocation> posEnemyHqLoc = new ArrayList<MapLocation>();
 
     public Landscaper(RobotController r){
         super(r);
@@ -26,39 +28,51 @@ If enough dirt is placed on a flooded tile to raise its elevation above the wate
         }
 
         MapLocation bestLocation = null;
-        if(hqLoc != null){
-            System.out.println("Found hq");
 
-            int lowestElevation = 9999999;
-            //Loops through all of the locations around hq and checks for the lowest elevation that can be dropped, then drops it
-            for(Direction dir : Util.directions){
-                // Add function: Takes a map location add a direction and returns the first location plus the direction
-                MapLocation tileToCheck = hqLoc.add(dir);
-                if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
-                        && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))){
-                    if(rc.senseElevation(tileToCheck) < lowestElevation){
-                        lowestElevation = rc.senseElevation(tileToCheck);
-                        bestLocation = tileToCheck;
-                    }
-                }
-            }
-            // Will be null if it knows where the hq is but all of the locations are blocked
-        }else{
-            System.out.println("Can't find HQ");
+        if(posEnemyHqLoc.isEmpty()){
+            System.out.println("My ID:");
+            System.out.println(rc.getID());
+            System.out.println("No locations to search for Enemy Hq");
+            calcPosEnemyHqLoc();
         }
-        if(Math.random() < 0.4){
-            if(bestLocation != null){
-                rc.depositDirt(rc.getLocation().directionTo(bestLocation));
-                System.out.println("Building a wall");
-            }
-        }
-
-        // Try to get to hq
-        if(hqLoc != null){
-            nav.goTo(hqLoc);
-        }else{
-            nav.tryMove(Util.randomDirection());
-        }
+        searchForEnemyHq();
+//        if(hqLoc != null){
+//            MapLocation posEnemyHqLoc = new MapLocation((nav.mapWidth - hqLoc.x),(nav.mapHeight - hqLoc.y));
+//            System.out.println("Posib loc: " + posEnemyHqLoc);
+//
+//            System.out.println("Found hq");
+//
+//            int lowestElevation = 9999999;
+//            //Loops through all of the locations around hq and checks for the lowest elevation that can be dropped, then drops it
+//            for(Direction dir : Util.directions){
+//                // Add function: Takes a map location add a direction and returns the first location plus the direction
+//                MapLocation tileToCheck = hqLoc.add(dir);
+//                if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
+//                        && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))){
+//                    if(rc.senseElevation(tileToCheck) < lowestElevation){
+//                        lowestElevation = rc.senseElevation(tileToCheck);
+//                        bestLocation = tileToCheck;
+//                    }
+//                }
+//            }
+//            }
+//            // Will be null if it knows where the hq is but all of the locations are blocked
+//        }else{
+//            System.out.println("Can't find HQ");
+//        }
+//        if(Math.random() < 0.4){
+//            if(bestLocation != null){
+//                rc.depositDirt(rc.getLocation().directionTo(bestLocation));
+//                System.out.println("Building a wall");
+//            }
+//        }
+//
+//        // Try to get to hq
+//        if(hqLoc != null){
+//            nav.goTo(hqLoc);
+//        }else{
+//            nav.tryMove(Util.randomDirection());
+//        }
     }
 
     boolean tryDig() throws GameActionException {
@@ -68,5 +82,49 @@ If enough dirt is placed on a flooded tile to raise its elevation above the wate
             return true;
         }
         return false;
+    }
+
+    public void searchForEnemyHq() throws GameActionException{
+        System.out.println("Searching the following Enemy locations: ");
+        System.out.println(posEnemyHqLoc);
+        if(enemyHqLoc == null){
+            RobotInfo[] robots = rc.senseNearbyRobots();
+            for(RobotInfo robot : robots){
+                if(robot.type == RobotType.HQ && robot.team != rc.getTeam()){
+                    enemyHqLoc = robot.location;
+                    System.out.println("FOUND ENEMY HQ");
+                }
+            }
+
+            if(enemyHqLoc == null){
+                System.out.println("I'm at the location: ");
+                System.out.println(rc.getLocation());
+                if(rc.getLocation().equals(posEnemyHqLoc.get(0))){
+                    posEnemyHqLoc.remove(0);
+                }else{
+                    nav.goTo(posEnemyHqLoc.get(0));
+                }
+            }
+        }else{
+            if(rc.getLocation().distanceSquaredTo(enemyHqLoc) < 4
+                        && rc.canDepositDirt(rc.getLocation().directionTo(enemyHqLoc))){
+                rc.depositDirt(rc.getLocation().directionTo(enemyHqLoc));
+            }
+            else{
+                nav.goTo(enemyHqLoc);
+            }
+        }
+    }
+
+    public void calcPosEnemyHqLoc(){
+        if(hqLoc != null){
+
+            MapLocation enemyHqSymetric = new MapLocation((nav.mapWidth - hqLoc.x),(nav.mapHeight - hqLoc.y));
+            MapLocation enemyHqHorizontal = new MapLocation((nav.mapWidth - hqLoc.x),(hqLoc.y));
+            MapLocation enemyHqVertical = new MapLocation((hqLoc.x),(nav.mapHeight - hqLoc.y));
+            posEnemyHqLoc.add(enemyHqHorizontal);
+            posEnemyHqLoc.add(enemyHqSymetric);
+            posEnemyHqLoc.add(enemyHqVertical);
+        }
     }
 }

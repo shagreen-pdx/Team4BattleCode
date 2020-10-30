@@ -7,9 +7,13 @@ import battlecode.common.RobotController;
 
 public class Navigation {
     RobotController rc;
+    int mapHeight;
+    int mapWidth;
 
     public Navigation(RobotController r){
         rc = r;
+        mapHeight = rc.getMapHeight();
+        mapWidth = rc.getMapWidth();
     }
 
     /**

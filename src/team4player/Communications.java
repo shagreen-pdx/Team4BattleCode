@@ -2,18 +2,21 @@ package team4player;
 import battlecode.common.*;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class Communications {
     RobotController rc;
 
     static final int teamSecret = 444444444;
     public static boolean broadcastedCreation = false;
+    public static boolean rush = false;
 
     // every message has a message type
     static final String[] messageType = {
             "HQ loc",
             "design school created",
-            "Soup Location"
+            "Soup Location",
+            "Enemy HQ"
     };
 
     public Communications(RobotController r){
@@ -80,6 +83,33 @@ public class Communications {
         if(rc.canSubmitTransaction(message, 3)){
             rc.submitTransaction(message, 3);
             System.out.println("new soup!" + loc);
+        }
+    }
+
+    public MapLocation getEnemyHQ() throws GameActionException {
+        int count = 0;
+        for(int i = 1; i < rc.getRoundNum(); i++) {
+            for (Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
+                int[] myMessage = tx.getMessage();
+                if (myMessage[0] == teamSecret && myMessage[1] == 3) { //check that message is from our team and the type is hqloc
+                    return new MapLocation(myMessage[2], myMessage[3]);
+                }
+            }
+        }
+        return null;
+    }
+
+    public void broadcastRush(MapLocation loc) throws GameActionException {
+        int [] message = new int [7];
+        message[0] = teamSecret;
+        message[1] = 3; //index of message type - 0 = hq location
+        message[2] = loc.x;
+        message[3] = loc.y;
+
+        if(rc.canSubmitTransaction(message, 3)){
+            rc.submitTransaction(message, 3);
+            System.out.println("Enemy Location found!" + loc);
+            rush = true;
         }
     }
 
