@@ -12,9 +12,15 @@ public class FulfillmentCenter extends Building{
     }
 
     public void takeTurn() throws GameActionException {
-        super.takeTurn();
-
-        for (Direction dir : Util.directions)
-            tryBuild(RobotType.DELIVERY_DRONE, dir);
+        if(!comms.broadcastedCreation){
+            comms.broadcastFulfillementCenterCreation(rc.getLocation());
+        }
+        if (rc.isReady()) {
+            for (Direction dir : Util.directions) {
+                if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
+                    System.out.println("Created a new delivery drone!");
+                }
+            }
+        }
     }
 }
