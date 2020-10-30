@@ -5,8 +5,15 @@ import battlecode.common.*;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class Landscaper extends Unit{
+/* Landscaper: moves dirt around the map to adjust elevation and destroy buildings.
 
+Produced by the design school.
+Can perform the action rc.digDirt() to remove one unit of dirt from an adjacent tile or its current tile, increasing the landscaper’s stored dirt by 1 up to a max of RobotType.LANDSCAPER.dirtLimit (currently set to 25). If the tile is empty, flooded, or contains another unit, this reduces the tile’s elevation by 1. If the tile contains a building, it removes one unit of dirt from the building, or if the building is not buried, has no effect.
+Can perform the action rc.depositDirt() to reduce its stored dirt by one and place one unit of dirt onto an adjacent tile or its current tile. If the tile contains a building, the dirt partially buries it–the health of a building is how much dirt can be placed on it before it is destroyed. If the tile is empty, flooded, or contains another unit, the only effect is that the elevation of that tile increases by 1.
+Note: all this means that buildings may never change elevation, so be careful to contain that water level.
+When a landscaper dies, the dirt it’s carrying is dropped on the current tile.
+If enough dirt is placed on a flooded tile to raise its elevation above the water level, it becomes not flooded. */
+public class Landscaper extends Unit{
     ArrayList<MapLocation> posEnemyHqLoc = new ArrayList<MapLocation>();
 
     public Landscaper(RobotController r){
@@ -15,14 +22,7 @@ public class Landscaper extends Unit{
 
     public void takeTurn() throws GameActionException {
         super.takeTurn();
-         /* Landscaper: moves dirt around the map to adjust elevation and destroy buildings.
 
-Produced by the design school.
-Can perform the action rc.digDirt() to remove one unit of dirt from an adjacent tile or its current tile, increasing the landscaper’s stored dirt by 1 up to a max of RobotType.LANDSCAPER.dirtLimit (currently set to 25). If the tile is empty, flooded, or contains another unit, this reduces the tile’s elevation by 1. If the tile contains a building, it removes one unit of dirt from the building, or if the building is not buried, has no effect.
-Can perform the action rc.depositDirt() to reduce its stored dirt by one and place one unit of dirt onto an adjacent tile or its current tile. If the tile contains a building, the dirt partially buries it–the health of a building is how much dirt can be placed on it before it is destroyed. If the tile is empty, flooded, or contains another unit, the only effect is that the elevation of that tile increases by 1.
-Note: all this means that buildings may never change elevation, so be careful to contain that water level.
-When a landscaper dies, the dirt it’s carrying is dropped on the current tile.
-If enough dirt is placed on a flooded tile to raise its elevation above the water level, it becomes not flooded. */
         if(rc.getDirtCarrying() == 0){
             tryDig();
         }
@@ -88,24 +88,22 @@ If enough dirt is placed on a flooded tile to raise its elevation above the wate
         System.out.println("Searching the following Enemy locations: ");
         System.out.println(posEnemyHqLoc);
         if(enemyHqLoc == null){
-            RobotInfo[] robots = rc.senseNearbyRobots();
-            for(RobotInfo robot : robots){
-                if(robot.type == RobotType.HQ && robot.team != rc.getTeam()){
-                    enemyHqLoc = robot.location;
-                    System.out.println("FOUND ENEMY HQ");
-                }
-            }
 
+            findEnemyHq();
+
+            // Still havent found enemy Hq
             if(enemyHqLoc == null){
                 System.out.println("I'm at the location: ");
                 System.out.println(rc.getLocation());
+
+                // If at one of the possible locations, remove it
                 if(rc.getLocation().equals(posEnemyHqLoc.get(0))){
                     posEnemyHqLoc.remove(0);
                 }else{
                     nav.goTo(posEnemyHqLoc.get(0));
                 }
             }
-        }else{
+        }else{ // Found enemy Hq
             if(rc.getLocation().distanceSquaredTo(enemyHqLoc) < 4
                         && rc.canDepositDirt(rc.getLocation().directionTo(enemyHqLoc))){
                 rc.depositDirt(rc.getLocation().directionTo(enemyHqLoc));
@@ -127,4 +125,25 @@ If enough dirt is placed on a flooded tile to raise its elevation above the wate
             posEnemyHqLoc.add(enemyHqVertical);
         }
     }
+
+    public void findEnemyHq() throws GameActionException{
+        if(enemyHqLoc == null){
+            RobotInfo[] robots = rc.senseNearbyRobots();
+            for(RobotInfo robot : robots){
+                if(robot.type == RobotType.HQ && robot.team != rc.getTeam()){
+                    enemyHqLoc = robot.location;
+                    System.out.println("FOUND ENEMY HQ");
+                    comms.broadcastRush(enemyHqLoc);
+                }
+            }
+        }
+
+        if (enemyHqLoc == null){
+            enemyHqLoc = comms.getEnemyHQFromBlockchain();
+            if(enemyHqLoc != null){
+                System.out.println("Got enemy Hq from Blockchain");
+            }
+        }
+    }
+
 }

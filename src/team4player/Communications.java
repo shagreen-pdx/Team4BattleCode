@@ -86,14 +86,13 @@ public class Communications {
         }
     }
 
-    public MapLocation getEnemyHQ() throws GameActionException {
+    public MapLocation getEnemyHQFromBlockchain() throws GameActionException {
         int count = 0;
-        for(int i = 1; i < rc.getRoundNum(); i++) {
-            for (Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
-                int[] myMessage = tx.getMessage();
-                if (myMessage[0] == teamSecret && myMessage[1] == 3) { //check that message is from our team and the type is hqloc
-                    return new MapLocation(myMessage[2], myMessage[3]);
-                }
+
+        for (Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
+            int[] myMessage = tx.getMessage();
+            if (myMessage[0] == teamSecret && myMessage[1] == 3) { //check that message is from our team and the type is hqloc
+                return new MapLocation(myMessage[2], myMessage[3]);
             }
         }
         return null;
