@@ -20,7 +20,7 @@ public class Miner extends Unit{
         super.takeTurn();
 
         numDesignSchools += comms.getNewDesignSchoolCount();
-        numDesignSchools += comms.getNewFulfillmentCenterCount();
+        numFulfillmentCenters += comms.getNewFulfillmentCenterCount();
         numRefineries += comms.getNewRefineryCount();
         comms.updateRefineryLocation(refineryLocations);
         comms.updateSoupLocation(soupLocations);
