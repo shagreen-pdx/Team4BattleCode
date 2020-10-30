@@ -59,6 +59,17 @@ public class Communications {
         return count;
     }
 
+    public int getNewLandscaperCount() throws GameActionException {
+        int count = 0;
+        for(Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
+            int [] myMessage = tx.getMessage();
+            if(myMessage[0] == teamSecret && myMessage[1] == 6) { //check that message is from our team and the type is landscaper
+                count += 1;
+            }
+        }
+        return count;
+    }
+
     public int getNewRefineryCount() throws GameActionException {
         int count = 0;
         for(Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
@@ -91,6 +102,17 @@ public class Communications {
         return count;
     }
 
+    public int getNewDeliveryDroneCount() throws GameActionException {
+        int count = 0;
+        for(Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
+            int [] myMessage = tx.getMessage();
+            if(myMessage[0] == teamSecret && myMessage[1] == 5) { //check that message is from our team and the type is delivery drone
+                count += 1;
+            }
+        }
+        return count;
+    }
+
     public void updateSoupLocation(ArrayList<MapLocation> soupLocations) throws GameActionException {
         for(Transaction tx : rc.getBlock(rc.getRoundNum() - 1))
         {
@@ -114,8 +136,6 @@ public class Communications {
             System.out.println("new soup!" + loc);
         }
     }
-
-
 
     public void broadcastDesignSchoolCreation(MapLocation loc) throws GameActionException {
         int [] message = new int [7];
@@ -147,6 +167,32 @@ public class Communications {
         int [] message = new int [7];
         message[0] = teamSecret;
         message[1] = 4; //index of message type - 4 = fulfillment center location
+        message[2] = loc.x;
+        message[3] = loc.y;
+
+        if(rc.canSubmitTransaction(message, 3)){
+            rc.submitTransaction(message, 3);
+            broadcastedCreation = true;
+        }
+    }
+
+    public void broadcastDeliveryDroneCreation(MapLocation loc) throws GameActionException {
+        int [] message = new int [7];
+        message[0] = teamSecret;
+        message[1] = 5; //index of message type - 5 = delivery drone location
+        message[2] = loc.x;
+        message[3] = loc.y;
+
+        if(rc.canSubmitTransaction(message, 3)){
+            rc.submitTransaction(message, 3);
+            broadcastedCreation = true;
+        }
+    }
+
+    public void broadcastLandscaperCreation(MapLocation loc) throws GameActionException {
+        int [] message = new int [7];
+        message[0] = teamSecret;
+        message[1] = 6; //index of message type - 6 = landscaper location
         message[2] = loc.x;
         message[3] = loc.y;
 

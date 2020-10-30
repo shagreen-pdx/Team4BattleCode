@@ -9,6 +9,9 @@ public class DeliveryDrone extends Unit{
     }
 
     public void takeTurn() throws GameActionException{
+        if(!comms.broadcastedCreation){
+            comms.broadcastDeliveryDroneCreation(rc.getLocation());
+        }
 //        Team enemy = rc.getTeam().opponent();
 //        if (!rc.isCurrentlyHoldingUnit()) {
 //            // See if there are any enemy robots within capturing range

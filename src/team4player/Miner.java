@@ -47,23 +47,30 @@ public class Miner extends Unit{
 
         if(numFulfillmentCenters < 2) {
             if (!nearbyRobot(RobotType.FULFILLMENT_CENTER)) {
-                if (tryBuild(RobotType.FULFILLMENT_CENTER, Util.randomDirection())) {
+                Direction dir = Util.randomDirection();
+                if (tryBuild(RobotType.FULFILLMENT_CENTER, dir)) {
                     System.out.println("Built Fulfillment Center");
+                    comms.broadcastFulfillementCenterCreation(rc.getLocation().add(dir));
                 }
             }
         }
 
         System.out.println("num of design school: " + numDesignSchools);
         if (numDesignSchools < 3) {
-            if (tryBuild(RobotType.DESIGN_SCHOOL, Util.randomDirection())) {
+            Direction dir = Util.randomDirection();
+            if (tryBuild(RobotType.DESIGN_SCHOOL, dir)) {
                 System.out.println("Built Design School");
+                comms.broadcastDesignSchoolCreation(rc.getLocation().add(dir));
             }
         }
 
         //try building refinery
         if (!nearbyRobot(RobotType.REFINERY)) {
-            if (tryBuild(RobotType.REFINERY, Util.randomDirection()))
+            Direction dir = Util.randomDirection();
+            if (tryBuild(RobotType.REFINERY, dir)) {
                 System.out.println("Built Refinery");
+                comms.broadcastRefineryCreation(rc.getLocation().add(dir));
+            }
         }
 
         if(rc.getSoupCarrying() == rc.getType().soupLimit) {
