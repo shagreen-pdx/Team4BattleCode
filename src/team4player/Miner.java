@@ -38,7 +38,7 @@ public class Miner extends Unit{
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
                 MapLocation soupLoc = rc.getLocation().add(dir);
                 if(!soupLocations.contains(soupLoc)){
-                    comms.broadcastSoupLocation(soupLoc);
+                    comms.broadcastMessage(soupLoc, 2);
                 }
             }
 
@@ -50,7 +50,6 @@ public class Miner extends Unit{
                 Direction dir = Util.randomDirection();
                 if (tryBuild(RobotType.FULFILLMENT_CENTER, dir)) {
                     System.out.println("Built Fulfillment Center");
-                    comms.broadcastFulfillementCenterCreation(rc.getLocation().add(dir));
                 }
             }
         }
@@ -60,7 +59,6 @@ public class Miner extends Unit{
             Direction dir = Util.randomDirection();
             if (tryBuild(RobotType.DESIGN_SCHOOL, dir)) {
                 System.out.println("Built Design School");
-                comms.broadcastDesignSchoolCreation(rc.getLocation().add(dir));
             }
         }
 
@@ -69,7 +67,6 @@ public class Miner extends Unit{
             Direction dir = Util.randomDirection();
             if (tryBuild(RobotType.REFINERY, dir)) {
                 System.out.println("Built Refinery");
-                comms.broadcastRefineryCreation(rc.getLocation().add(dir));
             }
         }
 

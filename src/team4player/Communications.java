@@ -6,33 +6,31 @@ import java.util.ArrayList;
 public class Communications {
     RobotController rc;
 
-    static final int teamSecret = 444444444;
+    static final int teamSecret = 77;
     public static boolean broadcastedCreation = false;
 
     // every message has a message type
     static final String[] messageType = {
             "HQ loc",
-            "design school created",
-            "Soup Location"
+            "design school loc",
+            "Soup loc",
+            "Refinery loc",
+            "Fufilment Center loc"
     };
 
     public Communications(RobotController r){
         rc = r;
     }
 
-    /*
-     * send message with location of HQ to the blockchain
-     * */
-    public void sendHqLoc(MapLocation loc) throws GameActionException
-    {
-        int [] message = new int [7];
-        message[0] = teamSecret;
-        message[1] = 0; //index of message type - 0 = hq location
-        message[2] = loc.x;
-        message[3] = loc.y;
+    public MapLocation GetMessageFromBlockchain(int messageIndex) throws GameActionException {
+        for(Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
+            int [] myMessage = tx.getMessage();
+            if(myMessage[0] == teamSecret && myMessage[1] == messageIndex) {
+                return new MapLocation(myMessage[2], myMessage[3]);
+            }
+        }
 
-        if(rc.canSubmitTransaction(message, 3))  //3 is transaction cost?  can be increased to up chances of being visible in blockchain
-            rc.submitTransaction(message, 3);
+        return null;
     }
 
     public MapLocation getHqFromBlockchain() throws GameActionException {
@@ -124,81 +122,17 @@ public class Communications {
         }
     }
 
-    public void broadcastSoupLocation(MapLocation loc) throws GameActionException {
+    public boolean broadcastMessage(MapLocation loc, int messageIndex) throws GameActionException {
         int [] message = new int [7];
         message[0] = teamSecret;
-        message[1] = 2; //index of message type - 0 = hq location
+        message[1] = messageIndex; //index of message type - 6 = landscaper location
         message[2] = loc.x;
         message[3] = loc.y;
 
         if(rc.canSubmitTransaction(message, 3)){
             rc.submitTransaction(message, 3);
-            System.out.println("new soup!" + loc);
+            return true;
         }
-    }
-
-    public void broadcastDesignSchoolCreation(MapLocation loc) throws GameActionException {
-        int [] message = new int [7];
-        message[0] = teamSecret;
-        message[1] = 1; //index of message type - 1 = design school location
-        message[2] = loc.x;
-        message[3] = loc.y;
-
-        if(rc.canSubmitTransaction(message, 3)){
-            rc.submitTransaction(message, 3);
-            broadcastedCreation = true;
-        }
-    }
-
-    public void broadcastRefineryCreation(MapLocation loc) throws GameActionException {
-        int [] message = new int [7];
-        message[0] = teamSecret;
-        message[1] = 3; //index of message type - 3 = refinery location
-        message[2] = loc.x;
-        message[3] = loc.y;
-
-        if(rc.canSubmitTransaction(message, 3)){
-            rc.submitTransaction(message, 3);
-            broadcastedCreation = true;
-        }
-    }
-
-    public void broadcastFulfillementCenterCreation(MapLocation loc) throws GameActionException {
-        int [] message = new int [7];
-        message[0] = teamSecret;
-        message[1] = 4; //index of message type - 4 = fulfillment center location
-        message[2] = loc.x;
-        message[3] = loc.y;
-
-        if(rc.canSubmitTransaction(message, 3)){
-            rc.submitTransaction(message, 3);
-            broadcastedCreation = true;
-        }
-    }
-
-    public void broadcastDeliveryDroneCreation(MapLocation loc) throws GameActionException {
-        int [] message = new int [7];
-        message[0] = teamSecret;
-        message[1] = 5; //index of message type - 5 = delivery drone location
-        message[2] = loc.x;
-        message[3] = loc.y;
-
-        if(rc.canSubmitTransaction(message, 3)){
-            rc.submitTransaction(message, 3);
-            broadcastedCreation = true;
-        }
-    }
-
-    public void broadcastLandscaperCreation(MapLocation loc) throws GameActionException {
-        int [] message = new int [7];
-        message[0] = teamSecret;
-        message[1] = 6; //index of message type - 6 = landscaper location
-        message[2] = loc.x;
-        message[3] = loc.y;
-
-        if(rc.canSubmitTransaction(message, 3)){
-            rc.submitTransaction(message, 3);
-            broadcastedCreation = true;
-        }
+        return false;
     }
 }

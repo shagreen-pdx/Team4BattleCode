@@ -17,7 +17,7 @@ public class HQ extends Building{
         System.out.println("I'm the Hq");
 
         if(turnCount == 1) {
-            comms.sendHqLoc(rc.getLocation());
+            comms.broadcastMessage(rc.getLocation(), 0);
         }
         if(numMiners < 10){
             for (Direction dir : Util.directions){

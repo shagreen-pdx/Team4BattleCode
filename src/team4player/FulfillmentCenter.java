@@ -18,14 +18,14 @@ public class FulfillmentCenter extends Building{
         numDeliveryDrones += comms.getNewDeliveryDroneCount();
 
         if(!comms.broadcastedCreation){
-            comms.broadcastFulfillementCenterCreation(rc.getLocation());
+            comms.broadcastedCreation = comms.broadcastMessage(rc.getLocation(), 4);
         }
         if(numDeliveryDrones < 3) {
             if (rc.isReady()) {
                 for (Direction dir : Util.directions) {
                     if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
                         System.out.println("Created a new delivery drone!");
-                        comms.broadcastDeliveryDroneCreation(rc.getLocation().add(dir));
+                        ++numDeliveryDrones;
                     }
                 }
             }
