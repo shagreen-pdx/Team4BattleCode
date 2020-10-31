@@ -20,7 +20,7 @@ public class DesignSchool extends Building{
         if(!comms.broadcastedCreation){
             comms.broadcastedCreation = comms.broadcastMessage(rc.getLocation(), 1);
         }
-        if(numLandscapers < 10) {
+        if(numLandscapers < 5) {
             if (rc.isReady()) {
                 for (Direction dir : Util.directions) {
                     if (tryBuild(RobotType.LANDSCAPER, dir)) {

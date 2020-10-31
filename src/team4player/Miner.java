@@ -21,28 +21,38 @@ public class Miner extends Unit{
 
         numDesignSchools += comms.getNewDesignSchoolCount();
         numFulfillmentCenters += comms.getNewFulfillmentCenterCount();
-        numRefineries += comms.getNewRefineryCount();
+//        numRefineries += comms.getNewRefineryCount();
         comms.updateRefineryLocation(refineryLocations);
         comms.updateSoupLocation(soupLocations);
         checkIfSoupGone();
 
-//        tryBlockchain();
-//        tryBuild(randomSpawnedByMiner(), randomDirection());
-//        for (Direction dir : directions)
-//            tryBuild(RobotType.FULFILLMENT_CENTER, dir);
-        for (Direction dir : Util.directions)
+        // Try and refine
+        for (Direction dir : Util.directions){
             if (tryRefine(dir))
                 System.out.println("I refined soup! " + rc.getTeamSoup());
+        }
+
+
+        // Try and mine soup
         for (Direction dir : Util.directions){
-            if (tryMine(dir)){
-                System.out.println("I mined soup! " + rc.getSoupCarrying());
-                MapLocation soupLoc = rc.getLocation().add(dir);
-                if(!soupLocations.contains(soupLoc)){
-                    comms.broadcastMessage(soupLoc, 2);
+            if(rc.onTheMap(rc.getLocation().add(dir)) && rc.senseSoup(rc.getLocation().add(dir)) > 0){
+                if(!nearbyRobot(RobotType.HQ) && !nearbyRobot(RobotType.REFINERY)){
+                    for(Direction dir2 : Util.directions){
+                        if (tryBuild(RobotType.REFINERY, dir2)) {
+                            System.out.println("Built Refinery");
+                            break;
+                        }
+                    }
+                }
+
+                if (tryMine(dir)){
+                    System.out.println("I mined soup! " + rc.getSoupCarrying());
+                    MapLocation soupLoc = rc.getLocation().add(dir);
+                    if(!soupLocations.contains(soupLoc)){
+                        comms.broadcastMessage(soupLoc, 2);
+                    }
                 }
             }
-
-
         }
 
         if(numFulfillmentCenters < 2) {
@@ -55,18 +65,10 @@ public class Miner extends Unit{
         }
 
         System.out.println("num of design school: " + numDesignSchools);
-        if (numDesignSchools < 3) {
+        if (numDesignSchools < 2) {
             Direction dir = Util.randomDirection();
             if (tryBuild(RobotType.DESIGN_SCHOOL, dir)) {
                 System.out.println("Built Design School");
-            }
-        }
-
-        //try building refinery
-        if (!nearbyRobot(RobotType.REFINERY)) {
-            Direction dir = Util.randomDirection();
-            if (tryBuild(RobotType.REFINERY, dir)) {
-                System.out.println("Built Refinery");
             }
         }
 
