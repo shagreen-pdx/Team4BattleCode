@@ -73,6 +73,14 @@ public class Landscaper extends Unit{
 
             } else { // Protect Hq
                 System.out.println("PROTECTING HQ");
+
+                if (hqLoc != null && hqLoc.isAdjacentTo(rc.getLocation())) {
+                    Direction dirtohq = rc.getLocation().directionTo(hqLoc);
+                    if(rc.canDigDirt(dirtohq)){
+                        rc.digDirt(dirtohq);
+                    }
+                }
+
                 MapLocation bestLocation = null;
                 if(hqLoc != null){
 
@@ -93,7 +101,7 @@ public class Landscaper extends Unit{
                 } else {
                     System.out.println("Can't find HQ");
                 }
-                if(Math.random() < 0.6){
+                if(Math.random() < 0.8){
                     if(bestLocation != null){
                         rc.depositDirt(rc.getLocation().directionTo(bestLocation));
                         System.out.println("Building a wall");

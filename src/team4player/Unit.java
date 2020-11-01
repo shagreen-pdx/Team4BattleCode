@@ -39,4 +39,17 @@ public class Unit extends Robot{
             hqLoc = comms.getHqFromBlockchain();
         }
     }
+
+    boolean tryBuildBuilding(RobotType type, Direction dir) throws GameActionException {
+        RobotInfo[] robots = rc.senseNearbyRobots();
+        for(RobotInfo robot : robots){
+            if(robot.type == RobotType.HQ && robot.team == rc.getTeam()){
+                return false;
+            }
+        }
+        if (rc.isReady() && rc.canBuildRobot(type, dir)) {
+            rc.buildRobot(type, dir);
+            return true;
+        } else return false;
+    }
 }
