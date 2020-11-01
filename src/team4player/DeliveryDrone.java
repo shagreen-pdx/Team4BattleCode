@@ -1,6 +1,7 @@
 package team4player;
-
 import battlecode.common.*;
+
+import static team4player.Util.randomDirection;
 
 public class DeliveryDrone extends Unit{
 
@@ -9,6 +10,10 @@ public class DeliveryDrone extends Unit{
     }
 
     public void takeTurn() throws GameActionException{
+        Team enemy = rc.getTeam().opponent();
+        if(!rc.isCurrentlyHoldingUnit()){
+            nav.tryMove(randomDirection());
+        }
 //        if(!comms.broadcastedCreation){
 //            comms.broadcastDeliveryDroneCreation(rc.getLocation());
 //        }
