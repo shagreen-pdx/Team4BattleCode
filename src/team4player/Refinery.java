@@ -14,7 +14,7 @@ public class Refinery extends Building{
 
     public void takeTurn() throws GameActionException {
         if(!comms.broadcastedCreation){
-            comms.broadcastRefineryCreation(rc.getLocation());
+            comms.broadcastedCreation = comms.broadcastMessage(rc.getLocation(),3);
         }
         int old_soup = rc.getTeamSoup();
         //System.out.println("Pollution(sense): " + rc.sensePollution(rc.getLocation()));

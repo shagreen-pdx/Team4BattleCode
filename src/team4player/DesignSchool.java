@@ -18,14 +18,13 @@ public class DesignSchool extends Building{
         numLandscapers += comms.getNewLandscaperCount();
 
         if(!comms.broadcastedCreation){
-            comms.broadcastDesignSchoolCreation(rc.getLocation());
+            comms.broadcastedCreation = comms.broadcastMessage(rc.getLocation(), 1);
         }
-        if(numLandscapers < 10) {
+        if(numLandscapers < 5) {
             if (rc.isReady()) {
                 for (Direction dir : Util.directions) {
                     if (tryBuild(RobotType.LANDSCAPER, dir)) {
                         System.out.println("Created a new landscaper!");
-                        comms.broadcastLandscaperCreation(rc.getLocation().add(dir));
                     }
                 }
             }
