@@ -30,9 +30,6 @@ public class Landscaper extends Unit{
         MapLocation bestLocation = null;
 
         if(posEnemyHqLoc.isEmpty()){
-            System.out.println("My ID:");
-            System.out.println(rc.getID());
-            System.out.println("No locations to search for Enemy Hq");
             calcPosEnemyHqLoc();
         }
         searchForEnemyHq();
@@ -85,9 +82,10 @@ public class Landscaper extends Unit{
     }
 
     public void searchForEnemyHq() throws GameActionException{
-        System.out.println("Searching the following Enemy locations: ");
-        System.out.println(posEnemyHqLoc);
+
         if(enemyHqLoc == null){
+            System.out.println("Searching the following Enemy locations: ");
+            System.out.println(posEnemyHqLoc);
 
             findEnemyHq();
 
@@ -97,7 +95,8 @@ public class Landscaper extends Unit{
                 System.out.println(rc.getLocation());
 
                 // If at one of the possible locations, remove it
-                if(rc.getLocation().equals(posEnemyHqLoc.get(0))){
+                if(rc.canSenseLocation(posEnemyHqLoc.get(0))){
+                    System.out.println("Enemy HQ not found at: " + posEnemyHqLoc.get(0));
                     posEnemyHqLoc.remove(0);
                 }else{
                     nav.goTo(posEnemyHqLoc.get(0));

@@ -14,6 +14,13 @@ public class Unit extends Robot{
     }
 
     public void takeTurn() throws GameActionException {
+        System.out.println(nav.prevLocations);
+        if(nav.prevLocations.size() > 7){
+            nav.prevLocations.remove(0);
+        }
+
+        nav.prevLocations.add(rc.getLocation());
+
         super.takeTurn();
         findHQ();
         System.out.println("I'm a Unit");
