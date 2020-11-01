@@ -44,7 +44,6 @@ public class Navigation {
     boolean goTo(Direction dir) throws GameActionException {
         Direction[] toTry = {dir, dir.rotateLeft(), dir.rotateRight(),dir.rotateLeft().rotateLeft(), dir.rotateRight().rotateRight(), dir.opposite().rotateRight(), dir.opposite().rotateLeft(), dir.opposite() };
         for(Direction d : toTry){
-            System.out.println(dir);
             if(!prevLocations.contains(rc.getLocation().add(d))){
                 if(tryMove(d)){
                     return true;

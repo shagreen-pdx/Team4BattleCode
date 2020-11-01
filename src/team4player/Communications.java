@@ -17,22 +17,23 @@ public class Communications {
             "design school loc",
             "Soup loc",
             "Refinery loc",
-            "Fufilment Center loc"
+            "Fufilment Center loc",
+            "Search for hq"
     };
 
     public Communications(RobotController r){
         rc = r;
     }
 
-    public MapLocation GetMessageFromBlockchain(int messageIndex) throws GameActionException {
+    public boolean getMessageFromBlockchain(int messageIndex, int id) throws GameActionException {
         for(Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
             int [] myMessage = tx.getMessage();
-            if(myMessage[0] == teamSecret && myMessage[1] == messageIndex) {
-                return new MapLocation(myMessage[2], myMessage[3]);
+            if(myMessage[0] == teamSecret && myMessage[1] == messageIndex && myMessage[4] == id) {
+                return true;
             }
         }
 
-        return null;
+        return false;
     }
 
     public MapLocation getHqFromBlockchain() throws GameActionException {
@@ -124,19 +125,6 @@ public class Communications {
         }
     }
 
-    public void broadcastSoupLocation(MapLocation loc) throws GameActionException {
-        int [] message = new int [7];
-        message[0] = teamSecret;
-        message[1] = 2; //index of message type - 0 = hq location
-        message[2] = loc.x;
-        message[3] = loc.y;
-
-        if(rc.canSubmitTransaction(message, 3)){
-            rc.submitTransaction(message, 3);
-            System.out.println("new soup!" + loc);
-        }
-    }
-
     public MapLocation getEnemyHQFromBlockchain() throws GameActionException {
         int count = 0;
 
@@ -163,40 +151,24 @@ public class Communications {
         }
     }
 
-
-
-    public void broadcastDesignSchoolCreation(MapLocation loc) throws GameActionException {
-        int [] message = new int [7];
-        message[0] = teamSecret;
-        message[1] = 1; //index of message type - 1 = design school location
-        message[2] = loc.x;
-        message[3] = loc.y;
-
-        if(rc.canSubmitTransaction(message, 3)){
-            rc.submitTransaction(message, 3);
-            broadcastedCreation = true;
-        }
-    }
-
-    public void broadcastRefineryCreation(MapLocation loc) throws GameActionException {
-        int [] message = new int [7];
-        message[0] = teamSecret;
-        message[1] = 3; //index of message type - 3 = refinery location
-        message[2] = loc.x;
-        message[3] = loc.y;
-
-        if(rc.canSubmitTransaction(message, 3)){
-            rc.submitTransaction(message, 3);
-            broadcastedCreation = true;
-        }
-    }
-
     public boolean broadcastMessage(MapLocation loc, int messageIndex) throws GameActionException {
         int [] message = new int [7];
         message[0] = teamSecret;
         message[1] = messageIndex; //index of message type - 6 = landscaper location
         message[2] = loc.x;
         message[3] = loc.y;
+
+        if(rc.canSubmitTransaction(message, 3)){
+            rc.submitTransaction(message, 3);
+            return true;
+        }
+        return false;
+    }
+    public boolean broadcastMessage(int id, int messageIndex) throws GameActionException {
+        int [] message = new int [7];
+        message[0] = teamSecret;
+        message[1] = messageIndex; //index of message type - 6 = landscaper location
+        message[4] = id;
 
         if(rc.canSubmitTransaction(message, 3)){
             rc.submitTransaction(message, 3);

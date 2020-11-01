@@ -14,7 +14,6 @@ public class Unit extends Robot{
     }
 
     public void takeTurn() throws GameActionException {
-        System.out.println(nav.prevLocations);
         if(nav.prevLocations.size() > 7){
             nav.prevLocations.remove(0);
         }
@@ -40,23 +39,4 @@ public class Unit extends Robot{
             hqLoc = comms.getHqFromBlockchain();
         }
     }
-
-    /**
-     *
-     * @param target the robot that we want to see if nearby
-     * @return true if target robot is nearby
-     * @throws GameActionException
-     */
-     boolean nearbyRobot(RobotType target) throws GameActionException{
-        RobotInfo[] robots = rc.senseNearbyRobots();
-        for(RobotInfo robot : robots){
-            if(robot.getType() == target){
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-
 }

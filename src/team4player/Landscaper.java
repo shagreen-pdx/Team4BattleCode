@@ -14,62 +14,104 @@ Note: all this means that buildings may never change elevation, so be careful to
 When a landscaper dies, the dirt it’s carrying is dropped on the current tile.
 If enough dirt is placed on a flooded tile to raise its elevation above the water level, it becomes not flooded. */
 public class Landscaper extends Unit{
+    boolean search = false;
+    boolean rush = false;
+    int roundCreated = 0;
     ArrayList<MapLocation> posEnemyHqLoc = new ArrayList<MapLocation>();
 
     public Landscaper(RobotController r){
         super(r);
+
     }
 
     public void takeTurn() throws GameActionException {
         super.takeTurn();
 
+        // Get instructions when just created
+        if(roundCreated == 0){
+            search = comms.getMessageFromBlockchain(5, rc.getID());
+            if(search)
+                System.out.println("Searching for enemy Hq");
+            else{
+                System.out.println("Defending Hq");
+            }
+            roundCreated = rc.getRoundNum();
+        }
+
+        // Dig dirt
         if(rc.getDirtCarrying() == 0){
             tryDig();
         }
 
-        MapLocation bestLocation = null;
-
-        if(posEnemyHqLoc.isEmpty()){
-            calcPosEnemyHqLoc();
+        // Check blockchain for enemy HQ
+        if (enemyHqLoc == null){
+            enemyHqLoc = comms.getEnemyHQFromBlockchain();
+            if(enemyHqLoc != null){
+                rush = true;
+                System.out.println("Got enemy Hq from Blockchain");
+            }
         }
-        searchForEnemyHq();
-//        if(hqLoc != null){
-//            MapLocation posEnemyHqLoc = new MapLocation((nav.mapWidth - hqLoc.x),(nav.mapHeight - hqLoc.y));
-//            System.out.println("Posib loc: " + posEnemyHqLoc);
-//
-//            System.out.println("Found hq");
-//
-//            int lowestElevation = 9999999;
-//            //Loops through all of the locations around hq and checks for the lowest elevation that can be dropped, then drops it
-//            for(Direction dir : Util.directions){
-//                // Add function: Takes a map location add a direction and returns the first location plus the direction
-//                MapLocation tileToCheck = hqLoc.add(dir);
-//                if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
-//                        && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))){
-//                    if(rc.senseElevation(tileToCheck) < lowestElevation){
-//                        lowestElevation = rc.senseElevation(tileToCheck);
-//                        bestLocation = tileToCheck;
-//                    }
-//                }
-//            }
-//            }
-//            // Will be null if it knows where the hq is but all of the locations are blocked
-//        }else{
-//            System.out.println("Can't find HQ");
-//        }
-//        if(Math.random() < 0.4){
-//            if(bestLocation != null){
-//                rc.depositDirt(rc.getLocation().directionTo(bestLocation));
-//                System.out.println("Building a wall");
-//            }
-//        }
-//
-//        // Try to get to hq
-//        if(hqLoc != null){
-//            nav.goTo(hqLoc);
-//        }else{
-//            nav.tryMove(Util.randomDirection());
-//        }
+
+        // Rush Hq
+        if(rush) {
+            System.out.println("RUSHING HQ");
+            if(rc.getLocation().distanceSquaredTo(enemyHqLoc) < 4
+                    && rc.canDepositDirt(rc.getLocation().directionTo(enemyHqLoc))){
+                rc.depositDirt(rc.getLocation().directionTo(enemyHqLoc));
+            }
+            else{
+                nav.goTo(enemyHqLoc);
+            }
+        } else {
+            // Search Hq
+            if(search){
+                System.out.println("SEARCHING HQ");
+                if(posEnemyHqLoc.isEmpty()){
+                    calcPosEnemyHqLoc();
+                }
+                searchForEnemyHq();
+
+            } else { // Protect Hq
+                System.out.println("PROTECTING HQ");
+                MapLocation bestLocation = null;
+                if(hqLoc != null){
+                    MapLocation posEnemyHqLoc = new MapLocation((nav.mapWidth - hqLoc.x),(nav.mapHeight - hqLoc.y));
+                    System.out.println("Posib loc: " + posEnemyHqLoc);
+
+                    System.out.println("Found hq");
+
+                    int lowestElevation = 9999999;
+                    //Loops through all of the locations around hq and checks for the lowest elevation that can be dropped, then drops it
+                    for(Direction dir : Util.directions){
+                        // Add function: Takes a map location add a direction and returns the first location plus the direction
+                        MapLocation tileToCheck = hqLoc.add(dir);
+                        if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
+                                && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))){
+                            if(rc.senseElevation(tileToCheck) < lowestElevation){
+                                lowestElevation = rc.senseElevation(tileToCheck);
+                                bestLocation = tileToCheck;
+                            }
+                        }
+                    }
+                    // Will be null if it knows where the hq is but all of the locations are blocked
+                } else {
+                    System.out.println("Can't find HQ");
+                }
+                if(Math.random() < 0.6){
+                    if(bestLocation != null){
+                        rc.depositDirt(rc.getLocation().directionTo(bestLocation));
+                        System.out.println("Building a wall");
+                    }
+                }
+
+                // Try to get to hq
+                if(hqLoc != null){
+                    nav.goTo(hqLoc);
+                }else{
+                    nav.tryMove(Util.randomDirection());
+                }
+            }
+        }
     }
 
     boolean tryDig() throws GameActionException {
@@ -102,14 +144,6 @@ public class Landscaper extends Unit{
                     nav.goTo(posEnemyHqLoc.get(0));
                 }
             }
-        }else{ // Found enemy Hq
-            if(rc.getLocation().distanceSquaredTo(enemyHqLoc) < 4
-                        && rc.canDepositDirt(rc.getLocation().directionTo(enemyHqLoc))){
-                rc.depositDirt(rc.getLocation().directionTo(enemyHqLoc));
-            }
-            else{
-                nav.goTo(enemyHqLoc);
-            }
         }
     }
 
@@ -133,14 +167,9 @@ public class Landscaper extends Unit{
                     enemyHqLoc = robot.location;
                     System.out.println("FOUND ENEMY HQ");
                     comms.broadcastRush(enemyHqLoc);
+                    search = false;
+                    rush = true;
                 }
-            }
-        }
-
-        if (enemyHqLoc == null){
-            enemyHqLoc = comms.getEnemyHQFromBlockchain();
-            if(enemyHqLoc != null){
-                System.out.println("Got enemy Hq from Blockchain");
             }
         }
     }
