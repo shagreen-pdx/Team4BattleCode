@@ -31,4 +31,20 @@ public class Robot {
             return true;
         } else return false;
     }
+
+    /**
+     *
+     * @param target the robot that we want to see if nearby
+     * @return true if target robot is nearby
+     * @throws GameActionException
+     */
+    boolean nearbyRobot(RobotType target) throws GameActionException{
+        RobotInfo[] robots = rc.senseNearbyRobots();
+        for(RobotInfo robot : robots){
+            if(robot.getType() == target){
+                return true;
+            }
+        }
+        return false;
+    }
 }

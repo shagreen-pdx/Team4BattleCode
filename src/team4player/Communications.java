@@ -2,12 +2,14 @@ package team4player;
 import battlecode.common.*;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class Communications {
     RobotController rc;
 
     static final int teamSecret = 77;
     public static boolean broadcastedCreation = false;
+    public static boolean rush = false;
 
     // every message has a message type
     static final String[] messageType = {
@@ -15,22 +17,25 @@ public class Communications {
             "design school loc",
             "Soup loc",
             "Refinery loc",
-            "Fulfilment Center loc"
+            "Fufilment Center loc",
+            "Search for hq",
+            "Rush Hq"
+
     };
 
     public Communications(RobotController r){
         rc = r;
     }
 
-    public MapLocation GetMessageFromBlockchain(int messageIndex) throws GameActionException {
+    public boolean getMessageFromBlockchain(int messageIndex, int id) throws GameActionException {
         for(Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
             int [] myMessage = tx.getMessage();
-            if(myMessage[0] == teamSecret && myMessage[1] == messageIndex) {
-                return new MapLocation(myMessage[2], myMessage[3]);
+            if(myMessage[0] == teamSecret && myMessage[1] == messageIndex && myMessage[4] == id) {
+                return true;
             }
         }
 
-        return null;
+        return false;
     }
 
     public MapLocation getHqFromBlockchain() throws GameActionException {
@@ -122,12 +127,36 @@ public class Communications {
         }
     }
 
+    public MapLocation getEnemyHQFromBlockchain() throws GameActionException {
+        int count = 0;
+
+        for (Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
+            int[] myMessage = tx.getMessage();
+            if (myMessage[0] == teamSecret && myMessage[1] == 6) { //check that message is from our team and the type is hqloc
+                return new MapLocation(myMessage[2], myMessage[3]);
+            }
+        }
+        return null;
+    }
+
     public boolean broadcastMessage(MapLocation loc, int messageIndex) throws GameActionException {
         int [] message = new int [7];
         message[0] = teamSecret;
         message[1] = messageIndex; //index of message type - 6 = landscaper location
         message[2] = loc.x;
         message[3] = loc.y;
+
+        if(rc.canSubmitTransaction(message, 3)){
+            rc.submitTransaction(message, 3);
+            return true;
+        }
+        return false;
+    }
+    public boolean broadcastMessage(int id, int messageIndex) throws GameActionException {
+        int [] message = new int [7];
+        message[0] = teamSecret;
+        message[1] = messageIndex; //index of message type - 6 = landscaper location
+        message[4] = id;
 
         if(rc.canSubmitTransaction(message, 3)){
             rc.submitTransaction(message, 3);
