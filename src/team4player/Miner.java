@@ -25,6 +25,7 @@ public class Miner extends Unit{
         comms.updateRefineryLocation(refineryLocations);
         comms.updateSoupLocation(soupLocations);
         checkIfSoupGone();
+        checkIfRefineryNearby();
 
         // Try and refine
         for (Direction dir : Util.directions){
@@ -55,7 +56,7 @@ public class Miner extends Unit{
             }
         }
 
-        if(numFulfillmentCenters < 2) {
+        if(numFulfillmentCenters < 1) {
             if (!nearbyRobot(RobotType.FULFILLMENT_CENTER)) {
                 Direction dir = Util.randomDirection();
                 if (tryBuild(RobotType.FULFILLMENT_CENTER, dir)) {
@@ -74,6 +75,11 @@ public class Miner extends Unit{
 
         if(rc.getSoupCarrying() == rc.getType().soupLimit) {
             System.out.println("At soup carrying limit " + rc.getType().soupLimit);
+            //find refinery
+            if(refineryLocations.size() != 0){
+                nav.goTo(refineryLocations.get(0));
+                System.out.println("I moved toward a refinery!");
+            }
             if (nav.goTo(hqLoc)) {
                 System.out.println("Moving towards HQ");
             }
@@ -83,6 +89,17 @@ public class Miner extends Unit{
             System.out.println("I moved in random direction!");
 
     }
+
+    void checkIfRefineryNearby() throws GameActionException {
+        RobotInfo[] robots = rc.senseNearbyRobots();
+        for (RobotInfo robot : robots) {
+            if (robot.type == RobotType.REFINERY && robot.team == rc.getTeam() && !refineryLocations.contains(robot.location)) {
+                comms.broadcastMessage(robot.location, 3);
+                System.out.println("Refinery Nearby");  //FOR TESTING DELETE LATER
+            }
+        }
+    }
+
 
     void checkIfSoupGone() throws GameActionException {
         if(soupLocations.size() > 0){

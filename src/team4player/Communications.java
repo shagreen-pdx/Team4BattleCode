@@ -15,7 +15,7 @@ public class Communications {
             "design school loc",
             "Soup loc",
             "Refinery loc",
-            "Fufilment Center loc"
+            "Fulfilment Center loc"
     };
 
     public Communications(RobotController r){
