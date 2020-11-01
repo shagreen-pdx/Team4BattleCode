@@ -20,6 +20,7 @@ public class Communications {
             "Fufilment Center loc",
             "Search for hq",
             "Rush Hq"
+
     };
 
     public Communications(RobotController r){
