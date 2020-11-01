@@ -75,10 +75,6 @@ public class Landscaper extends Unit{
                 System.out.println("PROTECTING HQ");
                 MapLocation bestLocation = null;
                 if(hqLoc != null){
-                    MapLocation posEnemyHqLoc = new MapLocation((nav.mapWidth - hqLoc.x),(nav.mapHeight - hqLoc.y));
-                    System.out.println("Posib loc: " + posEnemyHqLoc);
-
-                    System.out.println("Found hq");
 
                     int lowestElevation = 9999999;
                     //Loops through all of the locations around hq and checks for the lowest elevation that can be dropped, then drops it
@@ -150,9 +146,9 @@ public class Landscaper extends Unit{
     public void calcPosEnemyHqLoc(){
         if(hqLoc != null){
 
-            MapLocation enemyHqSymetric = new MapLocation((nav.mapWidth - hqLoc.x),(nav.mapHeight - hqLoc.y));
-            MapLocation enemyHqHorizontal = new MapLocation((nav.mapWidth - hqLoc.x),(hqLoc.y));
-            MapLocation enemyHqVertical = new MapLocation((hqLoc.x),(nav.mapHeight - hqLoc.y));
+            MapLocation enemyHqSymetric = new MapLocation((nav.mapWidth - 1 - hqLoc.x),(nav.mapHeight - 1 - hqLoc.y));
+            MapLocation enemyHqHorizontal = new MapLocation((nav.mapWidth - 1 - hqLoc.x),(hqLoc.y));
+            MapLocation enemyHqVertical = new MapLocation((hqLoc.x),(nav.mapHeight - 1 - hqLoc.y));
             posEnemyHqLoc.add(enemyHqHorizontal);
             posEnemyHqLoc.add(enemyHqSymetric);
             posEnemyHqLoc.add(enemyHqVertical);
@@ -166,7 +162,7 @@ public class Landscaper extends Unit{
                 if(robot.type == RobotType.HQ && robot.team != rc.getTeam()){
                     enemyHqLoc = robot.location;
                     System.out.println("FOUND ENEMY HQ");
-                    comms.broadcastRush(enemyHqLoc);
+                    comms.broadcastMessage(enemyHqLoc, 6);
                     search = false;
                     rush = true;
                 }

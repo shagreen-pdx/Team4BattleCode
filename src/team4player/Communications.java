@@ -18,7 +18,8 @@ public class Communications {
             "Soup loc",
             "Refinery loc",
             "Fufilment Center loc",
-            "Search for hq"
+            "Search for hq",
+            "Rush Hq"
     };
 
     public Communications(RobotController r){
@@ -130,25 +131,11 @@ public class Communications {
 
         for (Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
             int[] myMessage = tx.getMessage();
-            if (myMessage[0] == teamSecret && myMessage[1] == 3) { //check that message is from our team and the type is hqloc
+            if (myMessage[0] == teamSecret && myMessage[1] == 6) { //check that message is from our team and the type is hqloc
                 return new MapLocation(myMessage[2], myMessage[3]);
             }
         }
         return null;
-    }
-
-    public void broadcastRush(MapLocation loc) throws GameActionException {
-        int [] message = new int [7];
-        message[0] = teamSecret;
-        message[1] = 3; //index of message type - 0 = hq location
-        message[2] = loc.x;
-        message[3] = loc.y;
-
-        if(rc.canSubmitTransaction(message, 3)){
-            rc.submitTransaction(message, 3);
-            System.out.println("Enemy Location found!" + loc);
-            rush = true;
-        }
     }
 
     public boolean broadcastMessage(MapLocation loc, int messageIndex) throws GameActionException {
