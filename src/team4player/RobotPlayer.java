@@ -92,10 +92,10 @@ public strictfp class RobotPlayer {
             if (tryMine(dir))
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
         }
-        /*if (!nearbyRobot(RobotType.DESIGN_SCHOOL)) {
+        if (!nearbyRobot(RobotType.DESIGN_SCHOOL)) {
             if (tryBuild(RobotType.DESIGN_SCHOOL, randomDirection()))
                 System.out.println("Built Design School");
-        }*/
+        }
 
         //try building refinery
         if (!nearbyRobot(RobotType.REFINERY)) {
@@ -116,8 +116,7 @@ public strictfp class RobotPlayer {
     static void runRefinery() throws GameActionException {
         // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
         if(RobotType.MINER.canDepositSoup()){
-            System.out.println("Soup deposited: " + rc.getSoupCarrying());
-            //min(RobotType.REFINERY.maxSoupProduced, rc.getSoupCarrying()));
+            System.out.println("Soup deposited: " + min(RobotType.REFINERY.maxSoupProduced, rc.getSoupCarrying()));
             System.out.println("Globe pollution level: " + RobotType.REFINERY.globalPollutionAmount);
             System.out.println("Range of pollution: " + RobotType.REFINERY.pollutionRadiusSquared);
             System.out.println("Temp pollution in the range: " + RobotType.REFINERY.localPollutionAdditiveEffect);
