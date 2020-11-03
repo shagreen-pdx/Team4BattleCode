@@ -11,8 +11,7 @@ public class Util {
             Direction.SOUTH,
             Direction.SOUTHWEST,
             Direction.WEST,
-            Direction.NORTHWEST,
-            Direction.CENTER
+            Direction.NORTHWEST
     };
 
     /**

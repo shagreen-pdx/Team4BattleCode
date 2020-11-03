@@ -24,7 +24,5 @@ public class DeliveryDrone extends Unit{
             if(rc.senseFlooding(loc))
                 System.out.println("This place is flooded.");
         }
-
-
     }
 }
