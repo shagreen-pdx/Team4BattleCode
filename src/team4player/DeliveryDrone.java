@@ -20,7 +20,7 @@ public class DeliveryDrone extends Unit{
         if (!rc.isCurrentlyHoldingUnit()) {
             nav.tryMove(randomDirection());
             //if(rc.canPickUpUnit())
-            System.out.println("nothing" + Arrays.toString(rc.senseNearbyRobots(24, enemy)));
+            System.out.println("Found an enemy unit: \n" + Arrays.toString(rc.senseNearbyRobots(24, enemy)));
             if(rc.senseFlooding(loc))
                 System.out.println("This place is flooded.");
         }
