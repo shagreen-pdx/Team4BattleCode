@@ -1,4 +1,4 @@
-package team4player;
+package SimpleRushTestBot;
 import battlecode.common.*;
 
 import java.util.ArrayList;
