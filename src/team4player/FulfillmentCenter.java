@@ -1,9 +1,6 @@
 package team4player;
 
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.RobotController;
-import battlecode.common.RobotType;
+import battlecode.common.*;
 
 public class FulfillmentCenter extends Building{
 
@@ -15,17 +12,23 @@ public class FulfillmentCenter extends Building{
 
     public void takeTurn() throws GameActionException {
 
-        numDeliveryDrones += comms.getNewDeliveryDroneCount();
+//        numDeliveryDrones += comms.getNewDeliveryDroneCount();
 
         if(!comms.broadcastedCreation){
             comms.broadcastedCreation = comms.broadcastMessage(rc.getLocation(), 4);
         }
-        if(numDeliveryDrones < 3) {
-            if (rc.isReady()) {
+        System.out.println(numDeliveryDrones);
+
+        if(numDeliveryDrones < 5 && rc.getTeamSoup() > 300){
+            if (rc.isReady() ) {
                 for (Direction dir : Util.directions) {
                     if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
-                        System.out.println("Created a new delivery drone!");
                         ++numDeliveryDrones;
+                        if(numDeliveryDrones < 3){
+                            RobotInfo drone = rc.senseRobotAtLocation(rc.getLocation().add(dir));
+                            System.out.println("Drone id: " + drone.ID);
+                            comms.broadcastMessage(drone.ID, 5);
+                        }
                     }
                 }
             }

@@ -2,11 +2,15 @@ package team4player;
 
 import battlecode.common.*;
 
+import java.util.ArrayList;
+
 public class Unit extends Robot{
 
     MapLocation enemyHqLoc = null;
     MapLocation hqLoc = null;
     Navigation nav;
+    ArrayList<MapLocation> posEnemyHqLoc = new ArrayList<MapLocation>();
+
 
     public Unit(RobotController r) {
         super(r);
@@ -19,25 +23,7 @@ public class Unit extends Robot{
         }
 
         nav.prevLocations.add(rc.getLocation());
-
         super.takeTurn();
-        findHQ();
-        System.out.println("I'm a Unit");
-    }
-
-    public void findHQ() throws GameActionException{
-        if(hqLoc == null){
-            RobotInfo[] robots = rc.senseNearbyRobots();
-            for(RobotInfo robot : robots){
-                if(robot.type == RobotType.HQ && robot.team == rc.getTeam()){
-                    hqLoc = robot.location;
-                }
-            }
-        }
-
-        if(hqLoc == null){
-            hqLoc = comms.getHqFromBlockchain();
-        }
     }
 
     boolean tryBuildBuilding(RobotType type, Direction dir) throws GameActionException {
@@ -50,6 +36,18 @@ public class Unit extends Robot{
         if (rc.isReady() && rc.canBuildRobot(type, dir)) {
             rc.buildRobot(type, dir);
             return true;
-        } else return false;
+        } else
+            return false;
+    }
+
+    public void calcPosEnemyHqLoc(){
+        if(hqLoc != null){
+            MapLocation enemyHqSymetric = new MapLocation((nav.mapWidth - 1 - hqLoc.x),(nav.mapHeight - 1 - hqLoc.y));
+            MapLocation enemyHqHorizontal = new MapLocation((nav.mapWidth - 1 - hqLoc.x),(hqLoc.y));
+            MapLocation enemyHqVertical = new MapLocation((hqLoc.x),(nav.mapHeight - 1 - hqLoc.y));
+            posEnemyHqLoc.add(enemyHqHorizontal);
+            posEnemyHqLoc.add(enemyHqSymetric);
+            posEnemyHqLoc.add(enemyHqVertical);
+        }
     }
 }

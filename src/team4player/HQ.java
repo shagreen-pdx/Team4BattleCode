@@ -19,7 +19,7 @@ public class HQ extends Building{
         if(turnCount == 1) {
             comms.broadcastMessage(rc.getLocation(), 0);
         }
-        if(numMiners < 10){
+        if((numMiners < 7 && rc.getTeamSoup() > 300) || rc.getRoundNum() < 50){
             for (Direction dir : Util.directions){
                 if(tryBuild(RobotType.MINER, dir)){
                     ++numMiners;
