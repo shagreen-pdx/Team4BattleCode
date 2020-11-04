@@ -1,11 +1,10 @@
-package team4player;
+package SimpleRushTestBot;
 
 import battlecode.common.*;
 
 import java.util.ArrayList;
-import java.util.Map;
 
-public class Miner extends Unit{
+public class Miner extends Unit {
 
     boolean buildDesignSchool = false;
     int numDesignSchools = 0;
