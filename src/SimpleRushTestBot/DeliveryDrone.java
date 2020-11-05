@@ -1,14 +1,13 @@
-package team4player;
+package SimpleRushTestBot;
 
 import battlecode.common.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
-import static team4player.Util.directions;
-import static team4player.Util.randomDirection;
+import static SimpleRushTestBot.Util.directions;
+import static SimpleRushTestBot.Util.randomDirection;
 
-public class DeliveryDrone extends Unit{
+public class DeliveryDrone extends Unit {
 
     ArrayList<MapLocation> refineryLocations = new ArrayList<MapLocation>();
     ArrayList<MapLocation> floodedLocations = new ArrayList<MapLocation>();
