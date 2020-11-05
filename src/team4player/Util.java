@@ -19,7 +19,12 @@ public class Util {
      *
      * @return a random Direction
      */
-    static Direction randomDirection() {
-        return directions[(int) (Math.random() * directions.length)];
+    public static Direction randomDirection() {
+        return directions[random()];
     }
+
+    public static int random(){
+        return (int) (Math.random() * directions.length);
+    }
+
 }
