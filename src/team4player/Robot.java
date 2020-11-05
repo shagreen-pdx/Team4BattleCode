@@ -1,11 +1,7 @@
 package team4player;
 import battlecode.common.*;
 
-import java.util.ArrayList;
-
 public class Robot {
-    ArrayList<int []> teamMessages = new ArrayList<int []>();
-    boolean teamMessagesSearched = false;
     RobotController rc;
     Communications comms;
 
@@ -17,12 +13,9 @@ public class Robot {
     }
 
     public void takeTurn() throws GameActionException {
-        if(teamMessages.isEmpty()){
-            comms.getAllTeamMessages(teamMessages);
-        }
         turnCount += 1;
+        System.out.println("I'm a robot");
     }
-
 
     /**
      * Attempts to build a given robot in a given direction.
@@ -39,8 +32,8 @@ public class Robot {
         } else return false;
     }
 
-
     /**
+     *
      * @param target the robot that we want to see if nearby
      * @return true if target robot is nearby
      * @throws GameActionException
@@ -49,17 +42,6 @@ public class Robot {
         RobotInfo[] robots = rc.senseNearbyRobots();
         for(RobotInfo robot : robots){
             if(robot.getType() == target){
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    boolean nearbyRobot(RobotType target, Team team) throws GameActionException{
-        RobotInfo[] robots = rc.senseNearbyRobots();
-        for(RobotInfo robot : robots){
-            if(robot.getType() == target && robot.getTeam() == team){
                 return true;
             }
         }

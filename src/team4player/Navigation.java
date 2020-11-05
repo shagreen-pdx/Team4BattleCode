@@ -56,27 +56,4 @@ public class Navigation {
     boolean goTo(MapLocation destination) throws GameActionException {
         return goTo(rc.getLocation().directionTo(destination));
     }
-
-    // DRONE NAVIGATION
-    boolean tryFly(Direction dir) throws GameActionException {
-        if (rc.isReady() && rc.canMove(dir)) {
-            rc.move(dir);
-            return true;
-        } else return false;
-    }
-
-    boolean flyTo(Direction dir) throws GameActionException {
-        Direction[] toTry = {dir, dir.rotateLeft(), dir.rotateRight(),dir.rotateLeft().rotateLeft(), dir.rotateRight().rotateRight()};
-        for(Direction d : toTry){
-            if(tryFly(d)){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    boolean flyTo(MapLocation destination) throws GameActionException {
-        return flyTo(rc.getLocation().directionTo(destination));
-    }
-
 }
