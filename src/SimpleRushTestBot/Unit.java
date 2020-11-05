@@ -1,10 +1,10 @@
-package team4player;
+package SimpleRushTestBot;
 
 import battlecode.common.*;
 
 import java.util.ArrayList;
 
-public class Unit extends Robot{
+public class Unit extends Robot {
 
     MapLocation enemyHqLoc = null;
     MapLocation hqLoc = null;

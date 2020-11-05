@@ -1,13 +1,16 @@
-package team4player;
-import battlecode.common.*;
+package SimpleRushTestBot;
+
+import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
+import battlecode.common.Transaction;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class Communications {
     RobotController rc;
 
-    static final int teamSecret = 77;
+    static final int teamSecret = 888;
     public static boolean broadcastedCreation = false;
     public static boolean rush = false;
 

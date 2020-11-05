@@ -1,8 +1,8 @@
-package team4player;
+package SimpleRushTestBot;
 
 import battlecode.common.*;
 
-public class FulfillmentCenter extends Building{
+public class FulfillmentCenter extends Building {
 
     int numDeliveryDrones = 0;
 

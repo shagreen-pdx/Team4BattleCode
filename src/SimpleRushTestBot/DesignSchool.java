@@ -1,10 +1,13 @@
-package team4player;
+package SimpleRushTestBot;
 
-import battlecode.common.*;
+import battlecode.common.Direction;
+import battlecode.common.GameActionException;
+import battlecode.common.RobotController;
+import battlecode.common.RobotType;
 
 import java.util.ArrayList;
 
-public class DesignSchool extends Building{
+public class DesignSchool extends Building {
 
 
     int numLandscapers = 0;

@@ -1,9 +1,11 @@
-package team4player;
+package SimpleRushTestBot;
 
-import battlecode.common.*;
+import battlecode.common.Direction;
+import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 /* Landscaper: moves dirt around the map to adjust elevation and destroy buildings.
 
@@ -13,7 +15,7 @@ Can perform the action rc.depositDirt() to reduce its stored dirt by one and pla
 Note: all this means that buildings may never change elevation, so be careful to contain that water level.
 When a landscaper dies, the dirt it’s carrying is dropped on the current tile.
 If enough dirt is placed on a flooded tile to raise its elevation above the water level, it becomes not flooded. */
-public class Landscaper extends Unit{
+public class Landscaper extends Unit {
     boolean job = false;
     boolean protect = false;
     boolean search = false;
@@ -61,19 +63,6 @@ public class Landscaper extends Unit{
                 rc.depositDirt(rc.getLocation().directionTo(enemyHqLoc));
             }
             else{
-                System.out.println(enemyHqLoc.distanceSquaredTo(rc.getLocation()));
-                if(rc.getLocation().distanceSquaredTo(enemyHqLoc) == 4 && !rc.canMove(rc.getLocation().directionTo(enemyHqLoc))){
-                    System.out.println("THERE IS A WALL");
-                    for (Direction direction : Util.directions){
-                        if(rc.getLocation().add(direction).isAdjacentTo(enemyHqLoc))
-                            if(rc.canDigDirt(direction)){
-                                rc.digDirt(direction);
-                            }
-                    }
-                    if(rc.canDepositDirt(Direction.CENTER)){
-                        rc.depositDirt(Direction.CENTER);
-                    }
-                }
                 nav.goTo(enemyHqLoc);
             }
         } else {
