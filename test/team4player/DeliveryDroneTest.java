@@ -37,13 +37,13 @@ public class DeliveryDroneTest {
     MockitoAnnotations.initMocks(this);
   }
 
-  @Test (expected = NullPointerException.class)
-  public void testSearchForEnemyHq() throws Exception {
-    when(nav.flyTo((Direction) any())).thenReturn(true);
-    when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
-
-    deliveryDrone.searchForEnemyHq();
-  }
+//  @Test (expected = NullPointerException.class)
+//  public void testSearchForEnemyHq() throws Exception {
+//    when(nav.flyTo((Direction) any())).thenReturn(true);
+//    when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
+//
+//    deliveryDrone.searchForEnemyHq();
+//  }
 
   @Test(expected = NullPointerException.class)
   public void testFindEnemyHq() throws Exception {
