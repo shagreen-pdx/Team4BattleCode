@@ -2,14 +2,10 @@ package team4player;
 
 import battlecode.common.*;
 
-import java.util.ArrayList;
-
 public class DesignSchool extends Building{
-
 
     int numLandscapers = 0;
     boolean broadcastedCreation = false;
-    boolean rampUpProduction = false;
 
     public DesignSchool(RobotController r){
         super(r);
@@ -17,58 +13,30 @@ public class DesignSchool extends Building{
 
     public void takeTurn() throws GameActionException {
 
-
+        numLandscapers += comms.getNewLandscaperCount();
         System.out.println(numLandscapers);
 
         if(!broadcastedCreation){
             broadcastedCreation = comms.broadcastMessage(rc.getLocation(), 1);
         }
-
-        if(!teamMessagesSearched){
-            decipherAllBlockChainMessages();
-        }
-
-        decipherCurrentBlockChainMessage();
-
-        if(rampUpProduction){
-            for (Direction dir : Util.directions) {
-                if (tryBuild(RobotType.LANDSCAPER, dir)) {
-                    numLandscapers++;
-                    System.out.println("Created a new landscaper!");
-
-                }
-            }
-        } else {
-            if(numLandscapers < 5) {
-                if (rc.isReady()) {
-                    for (Direction dir : Util.directions) {
-                        if (tryBuild(RobotType.LANDSCAPER, dir)) {
-                            numLandscapers++;
-                            System.out.println("Created a new landscaper!");
+        if(numLandscapers < 5) {
+            if (rc.isReady()) {
+                for (Direction dir : Util.directions) {
+                    if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                        numLandscapers++;
+                        System.out.println("Created a new landscaper!");
+                        if(numLandscapers < 3){
+                            RobotInfo[] robots = rc.senseNearbyRobots();
+                            for(RobotInfo robot : robots){
+                                if(robot.getType() == RobotType.LANDSCAPER){
+                                    int robotId = robot.getID();
+                                    comms.broadcastMessage(robotId, 5);
+                                    System.out.println("Sent message to search for enemy Hq");
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
-    }
-
-    public void decipherAllBlockChainMessages(){
-        for(int [] message : teamMessages){
-            // Robot specific messages
-            if(message[1] == 8 && message[4] == rc.getID()){
-                System.out.print("Recieved personal message");
-                rampUpProduction = true;
-            }
-        }
-        teamMessagesSearched = true;
-    }
-
-    public void decipherCurrentBlockChainMessage() throws GameActionException{
-        ArrayList<int []> currentBlockChainMessage = comms.getPrevRoundMessages();
-        for(int [] message : currentBlockChainMessage){
-            if(message[1] == 8 && message[4] == rc.getID()){
-                System.out.print("Recieved personal message");
-                rampUpProduction = true;
             }
         }
     }

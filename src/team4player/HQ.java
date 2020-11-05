@@ -1,6 +1,9 @@
 package team4player;
 
-import battlecode.common.*;
+import battlecode.common.Direction;
+import battlecode.common.GameActionException;
+import battlecode.common.RobotController;
+import battlecode.common.RobotType;
 
 public class HQ extends Building{
     static int numMiners = 0;
@@ -16,17 +19,7 @@ public class HQ extends Building{
         if(turnCount == 1) {
             comms.broadcastMessage(rc.getLocation(), 0);
         }
-
-        RobotInfo [] robots = rc.senseNearbyRobots(49, rc.getTeam().opponent());
-        for(RobotInfo robot : robots){
-            if(robot.getType() == RobotType.DELIVERY_DRONE){
-                if(rc.canShootUnit(robot.getID())){
-                    rc.shootUnit(robot.getID());
-                }
-            }
-        }
-
-        if((numMiners < 7 && rc.getTeamSoup() > 300) || rc.getRoundNum() < 50){
+        if(numMiners < 10){
             for (Direction dir : Util.directions){
                 if(tryBuild(RobotType.MINER, dir)){
                     ++numMiners;
