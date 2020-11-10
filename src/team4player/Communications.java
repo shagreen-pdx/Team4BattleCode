@@ -88,4 +88,16 @@ public class Communications {
         }
         return currentRoundMessages;
     }
+    // Get all messages in previous round
+    public ArrayList<int []> getAllPrevRoundMessages() throws GameActionException{
+        ArrayList<int []> currentRoundMessages = new ArrayList<int []>();
+
+        for (Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
+            int[] myMessage = tx.getMessage();
+             //check that message is from our team and the type is hqloc
+            currentRoundMessages.add(myMessage);
+
+        }
+        return currentRoundMessages;
+    }
 }

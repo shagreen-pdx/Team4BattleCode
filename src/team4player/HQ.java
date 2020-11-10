@@ -13,12 +13,13 @@ public class HQ extends Building{
 
     public void takeTurn() throws GameActionException {
         super.takeTurn();
-        decipherCurrentBlockChainMessage();
+
         System.out.println("I'm the Hq");
 
         if(turnCount == 1) {
             comms.broadcastMessage(rc.getLocation(), 0);
         }
+        decipherCurrentBlockChainMessage();
 
         RobotInfo [] robots = rc.senseNearbyRobots(49, rc.getTeam().opponent());
         for(RobotInfo robot : robots){
@@ -39,7 +40,7 @@ public class HQ extends Building{
     }
 
     public void decipherCurrentBlockChainMessage() throws GameActionException {
-        ArrayList<int []> currentBlockChainMessage = comms.getPrevRoundMessages();
+        ArrayList<int []> currentBlockChainMessage = comms.getAllPrevRoundMessages();
         for(int [] message : currentBlockChainMessage){
             if (message[0] != comms.getSecretCode()) {
                 // Try dumb hack
@@ -52,6 +53,8 @@ public class HQ extends Building{
                 if(rc.canSubmitTransaction(enemyMessage, 3)){
                     rc.submitTransaction(enemyMessage, 3);
                     System.out.println("Broadcasted Enemy message");
+                }else {
+                    System.out.println("failed to broadcast");
                 }
             }
 
