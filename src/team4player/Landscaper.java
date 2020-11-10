@@ -35,10 +35,7 @@ public class Landscaper extends Unit{
 
         decipherCurrentBlockChainMessage();
 
-        // Dig dirt
-        if(rc.getDirtCarrying() == 0){
-            tryDig();
-        }
+
 
         if(!job){
             if(enemyHqLoc == null){
@@ -56,6 +53,11 @@ public class Landscaper extends Unit{
         }
 
         if (rush){
+            // Dig dirt
+            if(rc.getDirtCarrying() == 0){
+                tryDig();
+            }
+
             if(rc.getLocation().distanceSquaredTo(enemyHqLoc) < 4
                     && rc.canDepositDirt(rc.getLocation().directionTo(enemyHqLoc))){
                 rc.depositDirt(rc.getLocation().directionTo(enemyHqLoc));
@@ -84,6 +86,13 @@ public class Landscaper extends Unit{
                 Direction dirtohq = rc.getLocation().directionTo(hqLoc);
                 if(rc.canDigDirt(dirtohq)){
                     rc.digDirt(dirtohq);
+                }else {
+                    Direction[] directions = {dirtohq.opposite(),dirtohq.opposite().rotateLeft(), dirtohq.rotateRight()};
+                    for(Direction dir : directions){
+                        if(rc.canDigDirt(dir)){
+                            rc.digDirt(dir);
+                        }
+                    }
                 }
             }
 
