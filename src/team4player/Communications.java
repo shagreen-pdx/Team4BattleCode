@@ -2,14 +2,18 @@ package team4player;
 import battlecode.common.*;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class Communications {
     RobotController rc;
 
-    static final int teamSecret = 77;
+    public final int secretCode = 77;
     public static boolean broadcastedCreation = false;
     public static boolean rush = false;
+
+    // Get secret code
+    public int getSecretCode(){
+        return this.secretCode;
+    }
 
     // every message has a message type
     static final String[] messageType = {
@@ -32,7 +36,7 @@ public class Communications {
     // Broadcast message to every team
     public boolean broadcastMessage(MapLocation loc, int messageIndex) throws GameActionException {
         int [] message = new int [7];
-        message[0] = teamSecret;
+        message[0] = secretCode;
         message[1] = messageIndex; //index of message type - 6 = landscaper location
         message[2] = loc.x;
         message[3] = loc.y;
@@ -47,7 +51,7 @@ public class Communications {
     // Send message to specific robot
     public boolean broadcastMessage(int id, int messageIndex) throws GameActionException {
         int [] message = new int [7];
-        message[0] = teamSecret;
+        message[0] = secretCode;
         message[1] = messageIndex; //index of message type - 6 = landscaper location
         message[4] = id;
 
@@ -65,7 +69,7 @@ public class Communications {
         for(int i = 1; i < rc.getRoundNum(); i++) {
             for (Transaction tx : rc.getBlock(i)) {
                 int[] myMessage = tx.getMessage();
-                if (myMessage[0] == teamSecret) { //check that message is from our team and the type is hqloc
+                if (myMessage[0] == secretCode) { //check that message is from our team and the type is hqloc
                     teamMessages.add(myMessage);
                 }
             }
@@ -78,7 +82,7 @@ public class Communications {
 
         for (Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
             int[] myMessage = tx.getMessage();
-            if (myMessage[0] == teamSecret) { //check that message is from our team and the type is hqloc
+            if (myMessage[0] == secretCode) { //check that message is from our team and the type is hqloc
                 currentRoundMessages.add(myMessage);
             }
         }

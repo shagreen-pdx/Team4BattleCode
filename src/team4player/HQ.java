@@ -2,6 +2,8 @@ package team4player;
 
 import battlecode.common.*;
 
+import java.util.ArrayList;
+
 public class HQ extends Building{
     static int numMiners = 0;
 
@@ -11,6 +13,7 @@ public class HQ extends Building{
 
     public void takeTurn() throws GameActionException {
         super.takeTurn();
+        decipherCurrentBlockChainMessage();
         System.out.println("I'm the Hq");
 
         if(turnCount == 1) {
@@ -32,6 +35,26 @@ public class HQ extends Building{
                     ++numMiners;
                 }
             }
+        }
+    }
+
+    public void decipherCurrentBlockChainMessage() throws GameActionException {
+        ArrayList<int []> currentBlockChainMessage = comms.getPrevRoundMessages();
+        for(int [] message : currentBlockChainMessage){
+            if (message[0] != comms.getSecretCode()) {
+                // Try dumb hack
+                int [] enemyMessage = new int [7];
+                enemyMessage[0] = message[0];
+                enemyMessage[1] = message[1]; //index of message type - 6 = landscaper location
+                enemyMessage[2] = 0;
+                enemyMessage[3] = 0;
+
+                if(rc.canSubmitTransaction(enemyMessage, 3)){
+                    rc.submitTransaction(enemyMessage, 3);
+                    System.out.println("Broadcasted Enemy message");
+                }
+            }
+
         }
     }
 }

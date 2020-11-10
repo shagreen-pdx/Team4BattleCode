@@ -12,7 +12,7 @@ public class Miner extends Unit{
     int numFulfillmentCenters = 0;
     int numRefineries = 0;
     ArrayList<MapLocation> soupLocations = new ArrayList<MapLocation>();
-        ArrayList<MapLocation> refineryLocations = new ArrayList<MapLocation>();
+    ArrayList<MapLocation> refineryLocations = new ArrayList<MapLocation>();
 
     public Miner(RobotController r){
         super(r);
@@ -22,42 +22,10 @@ public class Miner extends Unit{
         super.takeTurn();
 
         if(!teamMessagesSearched){
-            for(int [] message : teamMessages){
-                // Set Hq Location
-                if(message[1] == 0){
-                    System.out.println("Got Hq Location");
-                    hqLoc = new MapLocation(message[2], message[3]);
-                    System.out.println(hqLoc);
-                }
-                // Set Enemy Hq Location
-                else if(message[1] == 6){
-                    System.out.println("Got enemy location");
-                    enemyHqLoc = new MapLocation(message[2], message[3]);
-                    System.out.println(enemyHqLoc);
-                }
-                //Get Num of design schools
-                else if(message[1] == 1){
-                    ++numDesignSchools;
-                }
-                // Get num of fulfilment Centers
-                else if(message[1] == 4){
-                    ++numFulfillmentCenters;
-
-                }
-                else if(message[1] == 3){
-                    ++numRefineries;
-                    refineryLocations.add(new MapLocation(message[2],message[3]));
-                }
-                // Robot specific messages
-                else if(message[1] == 7){
-                    System.out.print("Recieved personal message");
-                }
-            }
-            System.out.println("Num of design schools = " + numDesignSchools);
-            System.out.println("Num of fulfilment centers = " + numFulfillmentCenters);
-            System.out.println("Num of Refineries = " + numRefineries);
-            teamMessagesSearched = true;
+            decipherAllBlockChainMessages();
         }
+
+        //decipherCurrentBlockChainMessage();
 
         if(buildDesignSchool){
             if(!nearbyRobot(RobotType.DESIGN_SCHOOL, rc.getTeam())){
@@ -253,5 +221,55 @@ public class Miner extends Unit{
          }
 
          return true;
+    }
+
+    public void decipherAllBlockChainMessages() {
+        for(int [] message : teamMessages) {
+            // Set Hq Location
+            if (message[1] == 0) {
+                System.out.println("Got Hq Location");
+                hqLoc = new MapLocation(message[2], message[3]);
+                System.out.println(hqLoc);
+            }
+            // Set Enemy Hq Location
+            else if (message[1] == 6) {
+                System.out.println("Got enemy location");
+                enemyHqLoc = new MapLocation(message[2], message[3]);
+                System.out.println(enemyHqLoc);
+            }
+            //Get Num of design schools
+            else if (message[1] == 1) {
+                ++numDesignSchools;
+            }
+            // Get num of fulfilment Centers
+            else if (message[1] == 4) {
+                ++numFulfillmentCenters;
+
+            } else if (message[1] == 3) {
+                ++numRefineries;
+                refineryLocations.add(new MapLocation(message[2], message[3]));
+            }
+            // Robot specific messages
+            else if (message[1] == 7) {
+                System.out.print("Recieved personal message");
+            }
+        }
+        teamMessagesSearched = true;
+    }
+
+    public void decipherCurrentBlockChainMessage() throws GameActionException {
+            ArrayList<int []> currentBlockChainMessage = comms.getPrevRoundMessages();
+            for(int [] message : currentBlockChainMessage){
+                // Check if message from our team
+                if (message[0] == comms.getSecretCode()){
+                    if (message[1] == 6) {
+                        enemyHqLoc = new MapLocation(message[2], message[3]);
+                    }
+                    if (message[1] == 7){
+                        buildDesignSchool = true;
+                    }
+                }
+
+            }
     }
 }
