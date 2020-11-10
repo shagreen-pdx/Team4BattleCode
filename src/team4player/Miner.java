@@ -3,7 +3,6 @@ package team4player;
 import battlecode.common.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 
 public class Miner extends Unit{
@@ -45,15 +44,22 @@ public class Miner extends Unit{
         // Try and refine
         for (Direction dir : Util.directions){
             if (tryRefine(dir))
+                nav.prevLocations.clear();
                 System.out.println("I refined soup! " + rc.getTeamSoup());
         }
 
         checkIfSoupGone();
 
-        // Every Five turns try and sense soup.
+
         if(turnCount % 5==0){
             MapLocation[] sensedSoup = rc.senseNearbySoup();
-            soupLocations.addAll(Arrays.asList(sensedSoup));
+            System.out.println(soupLocations);
+            for(MapLocation location : sensedSoup){
+                System.out.println(location);
+                if(!soupLocations.contains(location))
+                    comms.broadcastMessage(location, 2);
+            }
+
         }
         // Try and mine soup
         for (Direction dir : Util.directions){
@@ -87,8 +93,6 @@ public class Miner extends Unit{
             }
         }
 
-        System.out.println("num of refineries: " + numRefineries);
-        System.out.println("num of design school: " + numDesignSchools);
         if (numDesignSchools < 1) {
             Direction dir = Util.randomDirection();
             if (tryBuildBuilding(RobotType.DESIGN_SCHOOL, dir)) {
@@ -102,6 +106,7 @@ public class Miner extends Unit{
             MapLocation closestRefinery = findClosestRefinery(refineryLocations);
             nav.goTo(closestRefinery);
         } else if (soupLocations.size() > 0){
+            System.out.println("Moving toward soup loc: " + soupLocations.get(0));
             nav.goTo(soupLocations.get(0));
         }else if (nav.goTo(Util.randomDirection()))
             System.out.println("I moved in random direction!");
@@ -122,16 +127,6 @@ public class Miner extends Unit{
         }
         return closestRefinery;
     }
-
-//    void checkIfRefineryNearby() throws GameActionException {
-//        RobotInfo[] robots = rc.senseNearbyRobots();
-//        for (RobotInfo robot : robots) {
-//            if (robot.type == RobotType.REFINERY && robot.team == rc.getTeam() && !refineryLocations.contains(robot.location)) {
-//                comms.broadcastMessage(robot.location, 3);
-//                System.out.println("Refinery Nearby");  //FOR TESTING DELETE LATER
-//            }
-//        }
-//    }
 
 
     void checkIfSoupGone() throws GameActionException {
@@ -185,13 +180,6 @@ public class Miner extends Unit{
              return false;
          }
 
-         // Check if close to hq
-         if(locToBuild.isWithinDistanceSquared(hqLoc, 15)){
-             System.out.println("To close to other refinery");
-             return false;
-         }
-         System.out.println("Distance to HQ = " + locToBuild.distanceSquaredTo(hqLoc));
-
          // Check if close to refineries
          for (MapLocation refinery : refineryLocations){
              if(locToBuild.isWithinDistanceSquared(refinery, 75)){
@@ -213,7 +201,7 @@ public class Miner extends Unit{
             }
             // Set Enemy Hq Location
             else if (message[1] == 6) {
-                System.out.println("Got enemy location");
+                System.out.println("Got enemy Hq location");
                 enemyHqLoc = new MapLocation(message[2], message[3]);
                 System.out.println(enemyHqLoc);
             }
@@ -251,6 +239,7 @@ public class Miner extends Unit{
                 refineryLocations.add(new MapLocation(message[2], message[3]));
             }
             else if (message[1] == 2) {
+                System.out.println("New Soup Location");
                 soupLocations.add(new MapLocation(message[2], message[3]));
             }
             // Set Enemy Hq Location

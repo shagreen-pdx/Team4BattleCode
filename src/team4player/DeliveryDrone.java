@@ -128,7 +128,6 @@ public class DeliveryDrone extends Unit{
 
             // Still havent found enemy Hq
             if(enemyHqLoc == null){
-                System.out.println("I'm at the location: ");
                 System.out.println(rc.getLocation());
 
                 // If at one of the possible locations, remove it

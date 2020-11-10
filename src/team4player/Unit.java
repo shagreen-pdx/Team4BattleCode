@@ -29,7 +29,6 @@ public class Unit extends Robot{
 
 
         if(rc.getLocation().add(dir).isWithinDistanceSquared(hqLoc,9)){
-            System.out.println("To close to hq. Distance = " + rc.getLocation().distanceSquaredTo(hqLoc));
             return false;
         }
 

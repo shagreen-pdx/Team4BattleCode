@@ -70,7 +70,6 @@ public class Communications {
 
             for (Transaction tx : rc.getBlock(i)) {
                 int[] myMessage = tx.getMessage();
-                System.out.println("Round: " + (rc.getRoundNum() - 1) +"/tMessage: " + myMessage[0]);
                 if (myMessage[0] == (i % secretCode)) { //check that message is from our team and the type is hqloc
                     teamMessages.add(myMessage);
                 }
@@ -84,7 +83,6 @@ public class Communications {
 
         for (Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
             int[] myMessage = tx.getMessage();
-            System.out.println("Round: " + (rc.getRoundNum() - 1) +"/tMessage: " + myMessage[0]);
             if (myMessage[0] == ((rc.getRoundNum() - 1) % secretCode)) { //check that message is from our team and the type is hqloc
                 currentRoundMessages.add(myMessage);
             }
