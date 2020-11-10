@@ -40,25 +40,22 @@ public class HQ extends Building{
     }
 
     public void decipherCurrentBlockChainMessage() throws GameActionException {
-        ArrayList<int []> currentBlockChainMessage = comms.getAllPrevRoundMessages();
+        ArrayList<int []> currentBlockChainMessage = comms.getEnemyPrevRoundMessages();
         for(int [] message : currentBlockChainMessage){
-            if (message[0] != comms.getSecretCode() && message[2] != 0) {
-                // Try dumb hack
-                int [] enemyMessage = new int [7];
-                enemyMessage[0] = message[0];
-                enemyMessage[1] = message[1]; //index of message type - 6 = landscaper location
-                enemyMessage[2] = 0;
-                enemyMessage[3] = 0;
+            // Try dumb hack
+            int [] enemyMessage = new int [7];
+            enemyMessage[0] = message[0];
+            enemyMessage[1] = message[1]; //index of message type - 6 = landscaper location
+            enemyMessage[2] = 0;
+            enemyMessage[3] = 0;
 
 
-                if(rc.canSubmitTransaction(enemyMessage, 3)){
-                    rc.submitTransaction(enemyMessage, 3);
-                    System.out.println("Broadcasted Enemy message");
-                }else {
-                    System.out.println("failed to broadcast");
-                }
+            if(rc.canSubmitTransaction(enemyMessage, 3)){
+                rc.submitTransaction(enemyMessage, 3);
+                System.out.println("Broadcasted Enemy message");
+            }else {
+                System.out.println("failed to broadcast");
             }
-
         }
     }
 }
