@@ -25,8 +25,6 @@ public class Miner extends Unit{
             decipherAllBlockChainMessages();
         }
 
-        //decipherCurrentBlockChainMessage();
-
         if(buildDesignSchool){
             if(!nearbyRobot(RobotType.DESIGN_SCHOOL, rc.getTeam())){
                 for(Direction dir : Util.directions){
@@ -41,31 +39,7 @@ public class Miner extends Unit{
             }
         }
 
-        ArrayList<int []> currentRoundMessages = comms.getPrevRoundMessages();
-        for(int [] message : currentRoundMessages){
-            if (message[1] == 1) {
-                ++numDesignSchools;
-            }
-            else if (message[1] == 4) {
-                ++numFulfillmentCenters;
-            }
-            else if (message[1] == 3) {
-                ++numRefineries;
-                refineryLocations.add(new MapLocation(message[2], message[3]));
-            }
-            else if (message[1] == 2) {
-                soupLocations.add(new MapLocation(message[2], message[3]));
-            }
-            else if (message[1] == 7 && message[4] == rc.getID()){
-                buildDesignSchool = true;
-            }
-        }
-//        numDesignSchools += comms.getNewDesignSchoolCount();
-//        numFulfillmentCenters += comms.getNewFulfillmentCenterCount();
-//        numRefineries += comms.getNewRefineryCount();
-//        comms.updateRefineryLocation(refineryLocations);
-//        comms.updateSoupLocation(soupLocations);
-
+        decipherCurrentBlockChainMessage();
 
         // Try and refine
         for (Direction dir : Util.directions){
@@ -258,18 +232,30 @@ public class Miner extends Unit{
     }
 
     public void decipherCurrentBlockChainMessage() throws GameActionException {
-            ArrayList<int []> currentBlockChainMessage = comms.getPrevRoundMessages();
-            for(int [] message : currentBlockChainMessage){
-                // Check if message from our team
-                if (message[0] == comms.getSecretCode()){
-                    if (message[1] == 6) {
-                        enemyHqLoc = new MapLocation(message[2], message[3]);
-                    }
-                    if (message[1] == 7){
-                        buildDesignSchool = true;
-                    }
-                }
-
+        ArrayList<int []> currentRoundMessages = comms.getPrevRoundMessages();
+        for(int [] message : currentRoundMessages){
+            if (message[1] == 1) {
+                ++numDesignSchools;
             }
+            else if (message[1] == 4) {
+                ++numFulfillmentCenters;
+            }
+            else if (message[1] == 3) {
+                ++numRefineries;
+                refineryLocations.add(new MapLocation(message[2], message[3]));
+            }
+            else if (message[1] == 2) {
+                soupLocations.add(new MapLocation(message[2], message[3]));
+            }
+            // Set Enemy Hq Location
+            else if (message[1] == 6) {
+                System.out.println("Got enemy location");
+                enemyHqLoc = new MapLocation(message[2], message[3]);
+                System.out.println(enemyHqLoc);
+            }
+            else if (message[1] == 7 && message[4] == rc.getID()){
+                buildDesignSchool = true;
+            }
+        }
     }
 }
