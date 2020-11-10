@@ -45,7 +45,7 @@ public class HQ extends Building{
             // Try dumb hack
             int [] enemyMessage = new int [7];
             enemyMessage[0] = message[0];
-            enemyMessage[1] = message[1]; //index of message type - 6 = landscaper location
+            enemyMessage[1] = message[1];
             enemyMessage[2] = 0;
             enemyMessage[3] = 0;
 

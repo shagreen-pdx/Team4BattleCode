@@ -3,6 +3,7 @@ package team4player;
 import battlecode.common.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 public class Miner extends Unit{
@@ -49,6 +50,11 @@ public class Miner extends Unit{
 
         checkIfSoupGone();
 
+        // Every Five turns try and sense soup.
+        if(turnCount % 5==0){
+            MapLocation[] sensedSoup = rc.senseNearbySoup();
+            soupLocations.addAll(Arrays.asList(sensedSoup));
+        }
         // Try and mine soup
         for (Direction dir : Util.directions){
             if(rc.onTheMap(rc.getLocation().add(dir)) && rc.senseSoup(rc.getLocation().add(dir)) > 0){
