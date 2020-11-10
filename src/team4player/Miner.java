@@ -180,7 +180,7 @@ public class Miner extends Unit{
          }
 
          // Check if close to hq
-         if(locToBuild.isWithinDistanceSquared(hqLoc, 100)){
+         if(locToBuild.isWithinDistanceSquared(hqLoc, 15)){
              System.out.println("To close to other refinery");
              return false;
          }

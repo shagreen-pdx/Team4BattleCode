@@ -26,12 +26,13 @@ public class Unit extends Robot{
     }
 
     boolean tryBuildBuilding(RobotType type, Direction dir) throws GameActionException {
-        RobotInfo[] robots = rc.senseNearbyRobots();
-        for(RobotInfo robot : robots){
-            if(robot.type == RobotType.HQ && robot.team == rc.getTeam()){
-                return false;
-            }
+
+
+        if(rc.getLocation().add(dir).isWithinDistanceSquared(hqLoc,9)){
+            System.out.println("To close to hq. Distance = " + rc.getLocation().distanceSquaredTo(hqLoc));
+            return false;
         }
+
         if (rc.isReady() && rc.canBuildRobot(type, dir)) {
             rc.buildRobot(type, dir);
             return true;
