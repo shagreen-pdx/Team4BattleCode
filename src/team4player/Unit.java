@@ -44,9 +44,16 @@ public class Unit extends Robot{
             MapLocation enemyHqSymetric = new MapLocation((nav.mapWidth - 1 - hqLoc.x),(nav.mapHeight - 1 - hqLoc.y));
             MapLocation enemyHqHorizontal = new MapLocation((nav.mapWidth - 1 - hqLoc.x),(hqLoc.y));
             MapLocation enemyHqVertical = new MapLocation((hqLoc.x),(nav.mapHeight - 1 - hqLoc.y));
-            posEnemyHqLoc.add(enemyHqHorizontal);
-            posEnemyHqLoc.add(enemyHqSymetric);
-            posEnemyHqLoc.add(enemyHqVertical);
+            if(nav.mapHeight == nav.mapWidth){
+                posEnemyHqLoc.add(enemyHqSymetric);
+                posEnemyHqLoc.add(enemyHqHorizontal);
+                posEnemyHqLoc.add(enemyHqVertical);
+            } else {
+                posEnemyHqLoc.add(enemyHqHorizontal);
+                posEnemyHqLoc.add(enemyHqSymetric);
+                posEnemyHqLoc.add(enemyHqVertical);
+            }
+
         }
     }
 }
