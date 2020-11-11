@@ -54,6 +54,7 @@ public class Navigation {
     }
 
     boolean goTo(MapLocation destination) throws GameActionException {
+        System.out.println(prevLocations);
         return goTo(rc.getLocation().directionTo(destination));
     }
 

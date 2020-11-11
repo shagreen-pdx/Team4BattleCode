@@ -5,11 +5,12 @@ import battlecode.common.*;
 import java.util.ArrayList;
 
 public class HQ extends Building{
-    static int numMiners = 0;
 
+    static int numMiners = 0;
     public HQ(RobotController r){
         super(r);
     }
+    boolean wallBuilt = false;
 
     public void takeTurn() throws GameActionException {
         super.takeTurn();
@@ -30,7 +31,7 @@ public class HQ extends Building{
             }
         }
 
-        if((numMiners < 7 && rc.getTeamSoup() > 300) || rc.getRoundNum() < 50){
+        if((numMiners < 5 && rc.getTeamSoup() > 300) || rc.getRoundNum() < 50){
             for (Direction dir : Util.directions){
                 if(tryBuild(RobotType.MINER, dir)){
                     ++numMiners;

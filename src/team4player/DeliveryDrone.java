@@ -211,6 +211,7 @@ public class DeliveryDrone extends Unit{
                 System.out.println("Got enemy location");
                 enemyHqLoc = new MapLocation(message[2], message[3]);
                 System.out.println(enemyHqLoc);
+                search = false;
             }
             else if (message[1] == 5 && message[4] == rc.getID()){
                 search = true;

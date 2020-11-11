@@ -51,16 +51,16 @@ public class Miner extends Unit{
         checkIfSoupGone();
 
 
-        if(turnCount % 5==0){
-            MapLocation[] sensedSoup = rc.senseNearbySoup();
-            System.out.println(soupLocations);
-            for(MapLocation location : sensedSoup){
-                System.out.println(location);
-                if(!soupLocations.contains(location))
-                    comms.broadcastMessage(location, 2);
-            }
-
-        }
+//        if(turnCount % 5==0){
+//            MapLocation[] sensedSoup = rc.senseNearbySoup();
+//            System.out.println(soupLocations);
+//            for(MapLocation location : sensedSoup){
+//                System.out.println(location);
+//                if(!soupLocations.contains(location))
+//                    comms.broadcastMessage(location, 2);
+//            }
+//
+//        }
         // Try and mine soup
         for (Direction dir : Util.directions){
             if(rc.onTheMap(rc.getLocation().add(dir)) && rc.senseSoup(rc.getLocation().add(dir)) > 0){
@@ -84,19 +84,19 @@ public class Miner extends Unit{
             }
         }
 
+        if (numDesignSchools < 1) {
+            Direction dir = Util.randomDirection();
+            if (tryBuildBuilding(RobotType.DESIGN_SCHOOL, dir)) {
+                System.out.println("Built Design School");
+            }
+        }
+
         if(numFulfillmentCenters < 1) {
             if (!nearbyRobot(RobotType.FULFILLMENT_CENTER)) {
                 Direction dir = Util.randomDirection();
                 if (tryBuildBuilding(RobotType.FULFILLMENT_CENTER, dir)) {
                     System.out.println("Built Fulfillment Center");
                 }
-            }
-        }
-
-        if (numDesignSchools < 1) {
-            Direction dir = Util.randomDirection();
-            if (tryBuildBuilding(RobotType.DESIGN_SCHOOL, dir)) {
-                System.out.println("Built Design School");
             }
         }
 
@@ -108,9 +108,28 @@ public class Miner extends Unit{
         } else if (soupLocations.size() > 0){
             System.out.println("Moving toward soup loc: " + soupLocations.get(0));
             nav.goTo(soupLocations.get(0));
+//            MapLocation closestSoup = findClosestSoup(soupLocations);
+//            if(closestSoup != null){
+//                nav.goTo(closestSoup);
+//            }
         }else if (nav.goTo(Util.randomDirection()))
             System.out.println("I moved in random direction!");
 
+    }
+
+    public MapLocation findClosestSoup(ArrayList<MapLocation> soupLocations){
+        MapLocation currentLoc = rc.getLocation();
+        int closestDistance = 9999;
+        MapLocation closestSoup = null;
+
+        for(MapLocation souploc : soupLocations){
+            int distanceToSoup = currentLoc.distanceSquaredTo(souploc);
+            if( distanceToSoup < closestDistance){
+                closestDistance = distanceToSoup;
+                closestSoup = souploc;
+            }
+        }
+        return closestSoup;
     }
 
     public MapLocation findClosestRefinery(ArrayList<MapLocation> refineryLocations){
