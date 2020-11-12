@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class Miner extends Unit{
 
+    int stuck = 0;
     boolean buildDesignSchool = false;
     int numDesignSchools = 0;
     int numFulfillmentCenters = 0;
@@ -20,6 +21,11 @@ public class Miner extends Unit{
 
     public void takeTurn() throws GameActionException{
         super.takeTurn();
+
+        // Destroy self
+        if(stuck > 50){
+            rc.disintegrate();
+        }
 
         if(!teamMessagesSearched){
             decipherAllBlockChainMessages();
@@ -43,9 +49,11 @@ public class Miner extends Unit{
 
         // Try and refine
         for (Direction dir : Util.directions){
-            if (tryRefine(dir))
+            if (tryRefine(dir)){
                 nav.prevLocations.clear();
                 System.out.println("I refined soup! " + rc.getTeamSoup());
+            }
+
         }
 
         checkIfSoupGone();
@@ -104,16 +112,28 @@ public class Miner extends Unit{
             System.out.println("At soup carrying limit " + rc.getType().soupLimit);
             //find refinery
             MapLocation closestRefinery = findClosestRefinery(refineryLocations);
-            nav.goTo(closestRefinery);
+            if(nav.goTo(closestRefinery)){
+                stuck = 0;
+            } else {
+                ++stuck;
+            }
+
         } else if (soupLocations.size() > 0){
             System.out.println("Moving toward soup loc: " + soupLocations.get(0));
-            nav.goTo(soupLocations.get(0));
-//            MapLocation closestSoup = findClosestSoup(soupLocations);
-//            if(closestSoup != null){
-//                nav.goTo(closestSoup);
-//            }
-        }else if (nav.goTo(Util.randomDirection()))
-            System.out.println("I moved in random direction!");
+            if(nav.goTo(soupLocations.get(0))){
+                stuck = 0;
+            } else {
+                ++stuck;
+            }
+
+        }else {
+            if (nav.goTo(Util.randomDirection())){
+                stuck = 0;
+            }else {
+                ++stuck;
+            }
+        }
+
 
     }
 

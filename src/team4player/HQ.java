@@ -23,7 +23,7 @@ public class HQ extends Building{
         }
         decipherCurrentBlockChainMessage();
 
-        if(hqAttacked == false){
+        if(!hqAttacked){
             RobotInfo[] robots = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(),rc.getTeam().opponent());
             if(robots.length != 0){
                 hqAttacked = true;

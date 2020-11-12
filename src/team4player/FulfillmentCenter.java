@@ -24,7 +24,7 @@ public class FulfillmentCenter extends Building{
                 for (Direction dir : Util.directions) {
                     if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
                         ++numDeliveryDrones;
-                        if(numDeliveryDrones == 2){
+                        if(numDeliveryDrones == -1){
                             RobotInfo drone = rc.senseRobotAtLocation(rc.getLocation().add(dir));
                             System.out.println("Drone id: " + drone.ID);
                             comms.broadcastMessage(drone.ID, 5);
