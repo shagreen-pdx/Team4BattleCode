@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 import static org.mockito.Mockito.*;
 
-public class BuildingTest {
+public class HQTest {
   @Mock
   ArrayList<Integer> teamMessages;
   @Mock
@@ -19,16 +19,17 @@ public class BuildingTest {
   @Mock
   Communications comms;
   @InjectMocks
-  Building building;
+  HQ hQ;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testTakeTurn() throws Exception {
-    building.takeTurn();
+    when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
+
+    hQ.takeTurn();
   }
 }
-

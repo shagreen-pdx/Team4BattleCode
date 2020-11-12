@@ -8,10 +8,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.mockito.Mockito.*;
 
-public class BuildingTest {
+public class DesignSchoolTest {
   @Mock
   ArrayList<Integer> teamMessages;
   @Mock
@@ -19,16 +20,17 @@ public class BuildingTest {
   @Mock
   Communications comms;
   @InjectMocks
-  Building building;
+  DesignSchool designSchool;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
   }
 
-  @Test
-  public void testTakeTurn() throws Exception {
-    building.takeTurn();
-  }
-}
 
+  @Test
+  public void testDecipherAllBlockChainMessages() throws Exception {
+    designSchool.decipherAllBlockChainMessages();
+  }
+
+}

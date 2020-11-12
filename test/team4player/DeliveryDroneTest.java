@@ -20,9 +20,6 @@ public class DeliveryDroneTest {
   ArrayList<MapLocation> refineryLocations;
   @Mock
   ArrayList<MapLocation> floodedLocations;
-  //Field enemyHqLoc of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
-  //Field hqLoc of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
-  @Mock
   Navigation nav;
   @Mock
   ArrayList<MapLocation> posEnemyHqLoc;
@@ -40,13 +37,13 @@ public class DeliveryDroneTest {
     MockitoAnnotations.initMocks(this);
   }
 
-  @Test (expected = NullPointerException.class)
-  public void testSearchForEnemyHq() throws Exception {
-    when(nav.flyTo((Direction) any())).thenReturn(true);
-    when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
-
-    deliveryDrone.searchForEnemyHq();
-  }
+//  @Test (expected = NullPointerException.class)
+//  public void testSearchForEnemyHq() throws Exception {
+//    when(nav.flyTo((Direction) any())).thenReturn(true);
+//    when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
+//
+//    deliveryDrone.searchForEnemyHq();
+//  }
 
   @Test(expected = NullPointerException.class)
   public void testFindEnemyHq() throws Exception {
@@ -72,4 +69,3 @@ public class DeliveryDroneTest {
   }
 }
 
-//Generated with love by TestMe :) Please report issues and submit feature requests at: http://weirddev.com/forum#!/testme
