@@ -39,7 +39,7 @@ public class DesignSchool extends Building{
                 }
             }
         } else {
-            if(numLandscapers < 5) {
+            if(numLandscapers < 8) {
                 if (rc.isReady()) {
                     for (Direction dir : Util.directions) {
                         if (tryBuild(RobotType.LANDSCAPER, dir)) {

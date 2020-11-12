@@ -8,6 +8,7 @@ import battlecode.common.RobotController;
 import java.util.ArrayList;
 
 public class Navigation {
+    boolean stuck = false;
     RobotController rc;
     int mapHeight;
     int mapWidth;

@@ -25,7 +25,8 @@ public class Communications {
             "Search for hq", // 5
             "Enemy HQ loc", // 6
             "Build Design School", // 7
-            "Rush HQ" // 8
+            "Rush HQ", // 8,
+            "Enemy Miner" // 9
     };
 
 

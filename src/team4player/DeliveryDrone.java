@@ -114,6 +114,9 @@ public class DeliveryDrone extends Unit{
 
         } else {
             System.out.println("Protect Hq");
+            if(!rc.getLocation().isWithinDistanceSquared(hqLoc, 9)){
+                nav.flyTo(hqLoc);
+            }
             pickupEnemyBots();
         }
     }
@@ -159,16 +162,21 @@ public class DeliveryDrone extends Unit{
     public void pickupEnemyBots() throws GameActionException {
         if (!rc.isCurrentlyHoldingUnit()) {
             RobotInfo[] robots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, rc.getTeam().opponent());
-
+            System.out.println(robots.length);
             if (robots.length > 0) {
                 // Pick up a first robot within range
                 if(rc.canPickUpUnit(robots[0].getID())){
                     rc.pickUpUnit(robots[0].getID());
                     System.out.println("I picked up an enemy bot");
                     haveEnemyBot = true;
+                }else {
+                    System.out.println("Flying to enemey location");
+                    nav.flyTo(robots[0].location);
                 }
+            }else {
+
+                System.out.println("No enemy units found");
             }
-            nav.tryFly(randomDirection());
         }
     }
 

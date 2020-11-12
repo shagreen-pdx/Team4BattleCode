@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 public class HQ extends Building{
 
+    boolean hqAttacked = false;
     static int numMiners = 0;
     public HQ(RobotController r){
         super(r);
@@ -21,6 +22,24 @@ public class HQ extends Building{
             comms.broadcastMessage(rc.getLocation(), 0);
         }
         decipherCurrentBlockChainMessage();
+
+        if(hqAttacked == false){
+            RobotInfo[] robots = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(),rc.getTeam().opponent());
+            if(robots.length != 0){
+                hqAttacked = true;
+                for(RobotInfo robot : robots){
+                    if(robot.getType() == RobotType.MINER || robot.getType() == RobotType.LANDSCAPER){
+                        comms.broadcastMessage(robots[0].location,9);
+                    }
+                    if(robot.getType() == RobotType.DESIGN_SCHOOL){
+                        comms.broadcastMessage(robot.location, 10);
+                    }
+                }
+            }
+        }
+
+
+
 
         RobotInfo [] robots = rc.senseNearbyRobots(49, rc.getTeam().opponent());
         for(RobotInfo robot : robots){

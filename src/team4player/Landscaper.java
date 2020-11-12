@@ -79,8 +79,6 @@ public class Landscaper extends Unit{
                 nav.goTo(enemyHqLoc);
             }
         } else {
-            System.out.println("PROTECTING HQ");
-
             // Dig dirt off of hq if being attacked
             if (hqLoc.isAdjacentTo(rc.getLocation())) {
                 Direction dirtohq = rc.getLocation().directionTo(hqLoc);
@@ -89,9 +87,11 @@ public class Landscaper extends Unit{
                 }else {
                     if (rc.getDirtCarrying() == 0){
                         Direction[] directions = {dirtohq.opposite(),dirtohq.opposite().rotateLeft(), dirtohq.rotateRight()};
-                        for(Direction dir : directions){
-                            if(rc.canDigDirt(dir)){
-                                rc.digDirt(dir);
+                        boolean dugDirt = false;
+                        for(int i = 0; i < directions.length && !dugDirt; ++i){
+                            if(rc.canDigDirt(directions[i])){
+                                rc.digDirt(directions[i]);
+                                dugDirt = true;
                             }
                         }
                     }
@@ -105,6 +105,7 @@ public class Landscaper extends Unit{
                 for(Direction dir : Util.directions){
                     // Add function: Takes a map location add a direction and returns the first location plus the direction
                     MapLocation tileToCheck = hqLoc.add(dir);
+                    System.out.println(tileToCheck);
                     if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
                             && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))){
                         if(rc.senseElevation(tileToCheck) < lowestElevation){
@@ -114,17 +115,16 @@ public class Landscaper extends Unit{
                     }
                 }
 
+                System.out.println(bestLocation);
                 if(rc.isReady()){
-                    if (Math.random() < 0.8) {
+                    if (Math.random() < .8) {
                         if (bestLocation != null) {
                             rc.depositDirt(rc.getLocation().directionTo(bestLocation));
                         }
-                    }
-                }
-
-                if (rc.isReady()){
-                    if (bestLocation != null && rc.canMove(rc.getLocation().directionTo(bestLocation))){
-                        rc.move(rc.getLocation().directionTo(bestLocation));
+                    } else {
+                        if (bestLocation != null && rc.canMove(rc.getLocation().directionTo(bestLocation))){
+                            rc.move(rc.getLocation().directionTo(bestLocation));
+                        }
                     }
                 }
 
