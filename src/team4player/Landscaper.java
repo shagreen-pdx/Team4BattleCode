@@ -129,27 +129,53 @@ public class Landscaper extends Unit{
                 }
 
             } else {
-                int distanceToHq = rc.getLocation().distanceSquaredTo(hqLoc);
-                if(distanceToHq < 9 && distanceToHq > 3){
-                    int elevationChange = rc.senseElevation(rc.getLocation().add(rc.getLocation().directionTo(hqLoc))) - rc.senseElevation(rc.getLocation());
-                    if(elevationChange > 3){
-                        System.out.println("Wall found, can't move");
-                        if(rc.getDirtCarrying() == 0){
-                            Direction[] dirToDig = {rc.getLocation().directionTo(hqLoc).opposite(),rc.getLocation().directionTo(hqLoc).opposite().rotateRight(),rc.getLocation().directionTo(hqLoc).opposite().rotateLeft()};
-                            for(Direction dir : dirToDig){
-                                if(rc.canDigDirt(dir)){
-                                    rc.digDirt(dir);
-                                    System.out.println("Dug dirt");
+                RobotInfo[] robots = rc.senseNearbyRobots(30, rc.getTeam().opponent());
+
+                for(RobotInfo robot : robots){
+                    if(robot.getType() == RobotType.DESIGN_SCHOOL || robot.getType() == RobotType.REFINERY){
+                        System.out.println("Found enemy building");
+                        if(rc.getLocation().isAdjacentTo(robot.location)){
+                            if(rc.getDirtCarrying() == 0){
+                                for(Direction dir : Util.directions){
+                                    if(rc.canDigDirt(dir)){
+                                        rc.digDirt(dir);
+                                    }
+                                }
+                            } else {
+                                if(rc.canDepositDirt(rc.getLocation().directionTo(robot.location))){
+                                    rc.depositDirt(rc.getLocation().directionTo(robot.location));
                                 }
                             }
                         } else {
-                            if(rc.canDepositDirt((Direction.CENTER))){
-                                rc.depositDirt(Direction.CENTER);
-                            }
+                            nav.goTo(robot.location);
                         }
                     }
                 }
-                nav.goTo(hqLoc);
+
+                if(robots.length == 0)
+                    nav.goTo(hqLoc);
+
+//                int distanceToHq = rc.getLocation().distanceSquaredTo(hqLoc);
+//                if(distanceToHq < 9 && distanceToHq > 3){
+//                    int elevationChange = rc.senseElevation(rc.getLocation().add(rc.getLocation().directionTo(hqLoc))) - rc.senseElevation(rc.getLocation());
+//                    if(elevationChange > 3){
+//                        System.out.println("Wall found, can't move");
+//                        if(rc.getDirtCarrying() == 0){
+//                            Direction[] dirToDig = {rc.getLocation().directionTo(hqLoc).opposite(),rc.getLocation().directionTo(hqLoc).opposite().rotateRight(),rc.getLocation().directionTo(hqLoc).opposite().rotateLeft()};
+//                            for(Direction dir : dirToDig){
+//                                if(rc.canDigDirt(dir)){
+//                                    rc.digDirt(dir);
+//                                    System.out.println("Dug dirt");
+//                                }
+//                            }
+//                        } else {
+//                            if(rc.canDepositDirt((Direction.CENTER))){
+//                                rc.depositDirt(Direction.CENTER);
+//                            }
+//                        }
+//                    }
+//                }
+
             }
         }
     }

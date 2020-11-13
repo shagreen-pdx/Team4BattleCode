@@ -202,20 +202,20 @@ public class DeliveryDrone extends Unit{
                     System.out.println("Flying to location: " + closestEnemyBot.location);
                 }
             }else {
-                RobotInfo[] landscapers = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, rc.getTeam());
-                for(RobotInfo landscaper : landscapers){
-                    if(landscaper.getType() == RobotType.LANDSCAPER && !hqLoc.isAdjacentTo(landscaper.location)){
-                        if(rc.canPickUpUnit(landscaper.getID())){
-                            rc.pickUpUnit(landscaper.getID());
-                        }
-                    }
-                }
-
-                if(Math.random() < .8){
-                    nav.tryFly(rc.getLocation().directionTo(enemyHqSymetric));
-                }else {
-                    nav.tryFly(randomDirection());
-                }
+//                RobotInfo[] landscapers = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, rc.getTeam());
+//                for(RobotInfo landscaper : landscapers){
+//                    if(landscaper.getType() == RobotType.LANDSCAPER && !hqLoc.isAdjacentTo(landscaper.location)){
+//                        if(rc.canPickUpUnit(landscaper.getID())){
+//                            rc.pickUpUnit(landscaper.getID());
+//                        }
+//                    }
+//                }
+//
+//                if(Math.random() < .8){
+//                    nav.tryFly(rc.getLocation().directionTo(enemyHqSymetric));
+//                }else {
+//                    nav.tryFly(randomDirection());
+//                }
 
                 System.out.println("No enemy units found");
             }
