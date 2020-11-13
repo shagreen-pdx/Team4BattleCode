@@ -29,7 +29,7 @@ public class HQ extends Building{
                 hqAttacked = true;
                 for(RobotInfo robot : robots){
                     if(robot.getType() == RobotType.MINER || robot.getType() == RobotType.LANDSCAPER){
-                        comms.broadcastMessage(robots[0].location,9);
+                        comms.broadcastMessage(robot.location,9);
                     }
                     if(robot.getType() == RobotType.DESIGN_SCHOOL){
                         comms.broadcastMessage(robot.location, 10);
