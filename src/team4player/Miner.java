@@ -23,7 +23,7 @@ public class Miner extends Unit{
         super.takeTurn();
 
         // Destroy self
-        if(stuck > 50){
+        if(stuck > 200){
             rc.disintegrate();
         }
 
@@ -40,7 +40,6 @@ public class Miner extends Unit{
                         RobotInfo designSchool = rc.senseRobotAtLocation(rc.getLocation().add(dir));
                         comms.broadcastMessage(designSchool.ID, 8);
                     }
-
                 }
             }
         }
@@ -52,6 +51,11 @@ public class Miner extends Unit{
             if (tryRefine(dir)){
                 nav.prevLocations.clear();
                 System.out.println("I refined soup! " + rc.getTeamSoup());
+            }
+            MapLocation tileToCheckForFlooding = rc.getLocation().add(dir);
+            if(rc.canSenseLocation(tileToCheckForFlooding) && rc.senseFlooding(tileToCheckForFlooding)){
+                comms.broadcastMessage(tileToCheckForFlooding,11);
+                floodedLocations.add(tileToCheckForFlooding);
             }
 
         }
@@ -117,7 +121,6 @@ public class Miner extends Unit{
             } else {
                 ++stuck;
             }
-
         } else if (soupLocations.size() > 0){
             System.out.println("Moving toward soup loc: " + soupLocations.get(0));
             if(nav.goTo(soupLocations.get(0))){
@@ -125,7 +128,6 @@ public class Miner extends Unit{
             } else {
                 ++stuck;
             }
-
         }else {
             if (nav.goTo(Util.randomDirection())){
                 stuck = 0;
@@ -133,8 +135,6 @@ public class Miner extends Unit{
                 ++stuck;
             }
         }
-
-
     }
 
     public MapLocation findClosestSoup(ArrayList<MapLocation> soupLocations){
@@ -154,8 +154,12 @@ public class Miner extends Unit{
 
     public MapLocation findClosestRefinery(ArrayList<MapLocation> refineryLocations){
         MapLocation currentLoc = rc.getLocation();
-        int closestDistance = currentLoc.distanceSquaredTo(hqLoc);
-        MapLocation closestRefinery = hqLoc;
+        int closestDistance = 99999;
+        MapLocation closestRefinery = null;
+        if(rc.getRoundNum() < 150){
+            closestDistance = currentLoc.distanceSquaredTo(hqLoc);
+            closestRefinery = hqLoc;
+        }
 
         for(MapLocation refinery : refineryLocations){
             int distanceToRefinery = currentLoc.distanceSquaredTo(refinery);
