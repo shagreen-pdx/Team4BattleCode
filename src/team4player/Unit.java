@@ -5,10 +5,14 @@ import battlecode.common.*;
 import java.util.ArrayList;
 
 public class Unit extends Robot{
+    MapLocation enemyHqSymetric;
+    MapLocation enemyHqHorizontal;
+    MapLocation enemyHqVertical;
 
     MapLocation enemyHqLoc = null;
     MapLocation hqLoc = null;
     Navigation nav;
+    ArrayList<MapLocation> floodedLocations = new ArrayList<MapLocation>();
     ArrayList<MapLocation> posEnemyHqLoc = new ArrayList<MapLocation>();
 
     public Unit(RobotController r) {
@@ -41,9 +45,9 @@ public class Unit extends Robot{
 
     public void calcPosEnemyHqLoc(){
         if(hqLoc != null){
-            MapLocation enemyHqSymetric = new MapLocation((nav.mapWidth - 1 - hqLoc.x),(nav.mapHeight - 1 - hqLoc.y));
-            MapLocation enemyHqHorizontal = new MapLocation((nav.mapWidth - 1 - hqLoc.x),(hqLoc.y));
-            MapLocation enemyHqVertical = new MapLocation((hqLoc.x),(nav.mapHeight - 1 - hqLoc.y));
+            enemyHqSymetric = new MapLocation((nav.mapWidth - 1 - hqLoc.x),(nav.mapHeight - 1 - hqLoc.y));
+            enemyHqHorizontal = new MapLocation((nav.mapWidth - 1 - hqLoc.x),(hqLoc.y));
+            enemyHqVertical = new MapLocation((hqLoc.x),(nav.mapHeight - 1 - hqLoc.y));
             if(nav.mapHeight == nav.mapWidth){
                 posEnemyHqLoc.add(enemyHqSymetric);
                 posEnemyHqLoc.add(enemyHqHorizontal);
@@ -55,5 +59,9 @@ public class Unit extends Robot{
             }
 
         }
+    }
+
+    public boolean isPickable(RobotInfo robot){
+        return robot.getType() == RobotType.MINER || robot.getType() == RobotType.LANDSCAPER;
     }
 }
