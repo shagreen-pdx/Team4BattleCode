@@ -39,12 +39,14 @@ public class DesignSchool extends Building{
                 }
             }
         } else {
-            if(numLandscapers < 8) {
+            if(canBuild && rc.getTeamSoup() > 210) {
                 if (rc.isReady()) {
                     for (Direction dir : Util.directions) {
                         if (tryBuild(RobotType.LANDSCAPER, dir)) {
                             numLandscapers++;
                             System.out.println("Created a new landscaper!");
+                            canBuild = false;
+                            comms.broadcastMessage(rc.getLocation(),15);
                         }
                     }
                 }
@@ -69,6 +71,12 @@ public class DesignSchool extends Building{
             if(message[1] == 8 && message[4] == rc.getID()){
                 System.out.print("Recieved personal message");
                 rampUpProduction = true;
+            } else if (message[1] == 15 ){
+                MapLocation loc = new MapLocation(message[2], message[3]);
+                if(!loc.equals(rc.getLocation())){
+                    canBuild = true;
+                }
+
             }
         }
     }

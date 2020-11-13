@@ -54,8 +54,12 @@ public class Miner extends Unit{
             }
             MapLocation tileToCheckForFlooding = rc.getLocation().add(dir);
             if(rc.canSenseLocation(tileToCheckForFlooding) && rc.senseFlooding(tileToCheckForFlooding)){
-                comms.broadcastMessage(tileToCheckForFlooding,11);
-                floodedLocations.add(tileToCheckForFlooding);
+                for(MapLocation loc : floodedLocations){
+                    if(!tileToCheckForFlooding.isWithinDistanceSquared(loc ,25)){
+                        comms.broadcastMessage(tileToCheckForFlooding,11);
+                        floodedLocations.add(tileToCheckForFlooding);
+                    }
+                }
             }
 
         }
