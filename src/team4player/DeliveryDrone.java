@@ -120,7 +120,18 @@ public class DeliveryDrone extends Unit{
             if(!rc.getLocation().isWithinDistanceSquared(hqLoc, 20)){
                 nav.flyTo(hqLoc);
             }
-            pickupEnemyBots();
+
+            if(rc.isCurrentlyHoldingUnit()){
+                for(Direction dir : directions){
+                    if(rc.getLocation().add(dir).isAdjacentTo(hqLoc) && rc.canDropUnit(dir)){
+                        rc.dropUnit(dir);
+                    }
+                }
+                nav.flyTo(hqLoc);
+            } else {
+                pickupEnemyBots();
+            }
+
         }
     }
 
@@ -191,6 +202,15 @@ public class DeliveryDrone extends Unit{
                     System.out.println("Flying to location: " + closestEnemyBot.location);
                 }
             }else {
+                RobotInfo[] landscapers = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, rc.getTeam());
+                for(RobotInfo landscaper : landscapers){
+                    if(landscaper.getType() == RobotType.LANDSCAPER && !hqLoc.isAdjacentTo(landscaper.location)){
+                        if(rc.canPickUpUnit(landscaper.getID())){
+                            rc.pickUpUnit(landscaper.getID());
+                        }
+                    }
+                }
+
                 if(Math.random() < .8){
                     nav.tryFly(rc.getLocation().directionTo(enemyHqSymetric));
                 }else {

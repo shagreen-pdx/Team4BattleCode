@@ -228,12 +228,19 @@ public class Miner extends Unit{
          }
 
          // Check if close to refineries
-         for (MapLocation refinery : refineryLocations){
-             if(locToBuild.isWithinDistanceSquared(refinery, 75)){
-                 System.out.println("To close to other refinery");
+         RobotInfo[] robots = rc.senseNearbyRobots(30, rc.getTeam());
+
+         for(RobotInfo robot : robots){
+             if(robot.getType() == RobotType.REFINERY){
                  return false;
              }
          }
+//         for (MapLocation refinery : refineryLocations){
+//             if(locToBuild.isWithinDistanceSquared(refinery, 75)){
+//                 System.out.println("To close to other refinery");
+//                 return false;
+//             }
+//         }
 
          return true;
     }
