@@ -9,6 +9,7 @@ public class Miner extends Unit{
     int numDesignSchools = 0;
     int numFulfillmentCenters = 0;
     int numRefineries = 0;
+    int numVaporators = 0;
     ArrayList<MapLocation> soupLocations = new ArrayList<MapLocation>();
     ArrayList<MapLocation> refineryLocations = new ArrayList<MapLocation>();
 
@@ -78,6 +79,13 @@ public class Miner extends Unit{
             Direction dir = Util.randomDirection();
             if (tryBuildBuilding(RobotType.DESIGN_SCHOOL, dir)) {
                 System.out.println("Built Design School");
+            }
+        }
+        if(numVaporators < 1){
+            Direction dir = Util.randomDirection();
+            if (tryBuildBuilding(RobotType.VAPORATOR, dir)) {
+                System.out.println("Built Vaporator");
+                numVaporators ++;
             }
         }
 

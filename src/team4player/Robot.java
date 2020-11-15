@@ -47,4 +47,13 @@ public class Robot {
         }
         return false;
     }
+    boolean nearbyRobot(RobotType target, Team targetTeam) throws GameActionException{
+        RobotInfo[] robots = rc.senseNearbyRobots();
+        for(RobotInfo robot : robots){
+            if(robot.getType() == target && robot.getTeam() == targetTeam){
+                return true;
+            }
+        }
+        return false;
+    }
 }
