@@ -11,8 +11,9 @@ public class Miner extends Unit{
     int numDesignSchools = 0;
     int numFulfillmentCenters = 0;
     int numRefineries = 0;
+    int numVaporators = 0;
     ArrayList<MapLocation> soupLocations = new ArrayList<MapLocation>();
-        ArrayList<MapLocation> refineryLocations = new ArrayList<MapLocation>();
+    ArrayList<MapLocation> refineryLocations = new ArrayList<MapLocation>();
 
     public Miner(RobotController r){
         super(r);
@@ -138,7 +139,13 @@ public class Miner extends Unit{
                 }
             }
         }
-
+        if(numVaporators < 1) {
+            Direction dir = Util.randomDirection();
+            if (tryBuildBuilding(RobotType.VAPORATOR, dir)) {
+                System.out.println("Built Vaporator");
+                numVaporators++;
+            }
+        }
         System.out.println("num of refineries: " + numRefineries);
         System.out.println("num of design school: " + numDesignSchools);
         if (numDesignSchools < 1) {
@@ -202,7 +209,7 @@ public class Miner extends Unit{
      * @return true if a move was performed
      * @throws GameActionException
      */
-     boolean tryMine(Direction dir) throws GameActionException {
+    boolean tryMine(Direction dir) throws GameActionException {
         if (rc.isReady() && rc.canMineSoup(dir)) {
             rc.mineSoup(dir);
             return true;
@@ -216,7 +223,7 @@ public class Miner extends Unit{
      * @return true if a move was performed
      * @throws GameActionException
      */
-     boolean tryRefine(Direction dir) throws GameActionException {
+    boolean tryRefine(Direction dir) throws GameActionException {
         if (rc.isReady() && rc.canDepositSoup(dir)) {
             rc.depositSoup(dir, rc.getSoupCarrying());
             return true;
@@ -225,33 +232,33 @@ public class Miner extends Unit{
 
     boolean canBuildRefinery(MapLocation locToBuild) throws GameActionException {
 
-         if(numDesignSchools < 1){
-             return false;
-         }
+        if(numDesignSchools < 1){
+            return false;
+        }
 
-         if(numFulfillmentCenters < 1){
-             return false;
-         }
+        if(numFulfillmentCenters < 1){
+            return false;
+        }
 
-         if(numRefineries > 3){
-             return false;
-         }
+        if(numRefineries > 3){
+            return false;
+        }
 
-         // Check if close to hq
-         if(locToBuild.isWithinDistanceSquared(hqLoc, 100)){
-             System.out.println("To close to other refinery");
-             return false;
-         }
-         System.out.println("Distance to HQ = " + locToBuild.distanceSquaredTo(hqLoc));
+        // Check if close to hq
+        if(locToBuild.isWithinDistanceSquared(hqLoc, 100)){
+            System.out.println("To close to other refinery");
+            return false;
+        }
+        System.out.println("Distance to HQ = " + locToBuild.distanceSquaredTo(hqLoc));
 
-         // Check if close to refineries
-         for (MapLocation refinery : refineryLocations){
-             if(locToBuild.isWithinDistanceSquared(refinery, 75)){
-                 System.out.println("To close to other refinery");
-                 return false;
-             }
-         }
+        // Check if close to refineries
+        for (MapLocation refinery : refineryLocations){
+            if(locToBuild.isWithinDistanceSquared(refinery, 75)){
+                System.out.println("To close to other refinery");
+                return false;
+            }
+        }
 
-         return true;
+        return true;
     }
 }
