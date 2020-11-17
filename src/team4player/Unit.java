@@ -1,6 +1,7 @@
 package team4player;
 
 import battlecode.common.*;
+import com.sun.javafx.collections.MappingChange;
 
 import java.util.ArrayList;
 
@@ -63,5 +64,22 @@ public class Unit extends Robot{
 
     public boolean isPickable(RobotInfo robot){
         return robot.getType() == RobotType.MINER || robot.getType() == RobotType.LANDSCAPER;
+    }
+
+    // Given an array of locations, return the closest location
+    public MapLocation getClosestLoc(ArrayList<MapLocation> locations) {
+        MapLocation currentLoc = rc.getLocation();
+
+        int closestDistance = 9999;
+        MapLocation closestLoc = null;
+
+        for(MapLocation loc : locations){
+            int distanceToLoc = currentLoc.distanceSquaredTo(loc);
+            if( distanceToLoc < closestDistance){
+                closestDistance = distanceToLoc;
+                closestLoc = loc;
+            }
+        }
+        return closestLoc;
     }
 }

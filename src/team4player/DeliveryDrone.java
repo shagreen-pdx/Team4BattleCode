@@ -11,11 +11,12 @@ import static team4player.Util.randomDirection;
 
 public class DeliveryDrone extends Unit{
 
+    int numRobotsAdjacentToHq = 0;
     MapLocation locEnemyBot = null;
     ArrayList<MapLocation> refineryLocations = new ArrayList<MapLocation>();
     int currentlyHeldRobotId = 0;
     boolean haveEnemyBot = false;
-    boolean search = false;
+    boolean search = true;
     boolean rush = false;
     int roundCreated = 0;
 
@@ -51,7 +52,7 @@ public class DeliveryDrone extends Unit{
                     haveEnemyBot = false;
                 }
             }
-            MapLocation closestFloodedLoc = findClosestFloodedLoc(floodedLocations);
+            MapLocation closestFloodedLoc = getClosestLoc(floodedLocations);
             if(closestFloodedLoc != null){
                 nav.tryFly(rc.getLocation().directionTo(closestFloodedLoc));
             }else {
@@ -60,19 +61,21 @@ public class DeliveryDrone extends Unit{
 
         } else if(rush){
             System.out.println("Rush HQ");
-            if(rc.canSenseLocation(enemyHqLoc)){
+            if(rc.getLocation().isWithinDistanceSquared(enemyHqLoc,35)){
                 if(rc.isCurrentlyHoldingUnit()){
                     for(Direction dir : directions){
-                        if (rc.canDropUnit(dir)) {
+                        if (rc.canDropUnit(dir) && !rc.senseFlooding(rc.getLocation().add(dir))) {
                             rc.dropUnit(dir);
                             comms.broadcastMessage(currentlyHeldRobotId, 7);
                         }
                     }
+                    nav.tryFly(randomDirection());
                 }
 
                 pickupEnemyBots();
 
             } else {
+                System.out.println("Flying to enemy hq");
                 nav.flyTo(enemyHqLoc);
             }
 
@@ -122,14 +125,24 @@ public class DeliveryDrone extends Unit{
             }
 
             if(rc.isCurrentlyHoldingUnit()){
-                for(Direction dir : directions){
-                    if(rc.getLocation().add(dir).isAdjacentTo(hqLoc) && rc.canDropUnit(dir)){
-                        rc.dropUnit(dir);
+                if(numRobotsAdjacentToHq == 8){
+                    for(Direction dir : directions){
+                        if(rc.canDropUnit(dir)){
+                            rc.dropUnit(dir);
+                        }
+                    }
+                }else {
+                    for(Direction dir : directions){
+                        if(rc.getLocation().add(dir).isAdjacentTo(hqLoc) && rc.canDropUnit(dir)){
+                            rc.dropUnit(dir);
+                        }
                     }
                 }
+
                 nav.flyTo(hqLoc);
             } else {
                 pickupEnemyBots();
+                moveLandscaper();
             }
 
         }
@@ -174,6 +187,7 @@ public class DeliveryDrone extends Unit{
     }
 
     public void pickupEnemyBots() throws GameActionException {
+        System.out.println("Trying to pick up enemy bot");
         if (!rc.isCurrentlyHoldingUnit()) {
             RobotInfo[] robots = rc.senseNearbyRobots(20, rc.getTeam().opponent());
             System.out.println(robots.length);
@@ -183,16 +197,30 @@ public class DeliveryDrone extends Unit{
                 int closestEnemyBotDistance = 9999;
                 RobotInfo closestEnemyBot = null;
                 for(int i = 0; i < robots.length && !haveEnemyBot; ++i){
+
+                    System.out.println("Robot locaiton: " + robots[i].location);
                     if(rc.canPickUpUnit(robots[i].getID())){
                         rc.pickUpUnit(robots[i].getID());
                         System.out.println("I picked up an enemy bot");
                         haveEnemyBot = true;
                     } else {
                         if(isPickable(robots[i])){
-                            int distanceToEnemyBot = rc.getLocation().distanceSquaredTo(robots[i].location);
-                            if( distanceToEnemyBot < closestEnemyBotDistance){
-                                closestEnemyBot = robots[i];
-                                closestEnemyBotDistance = distanceToEnemyBot;
+                            if(enemyHqLoc != null){
+                                if(!robots[i].location.isWithinDistanceSquared(enemyHqLoc,GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)){
+                                    System.out.println("Not within distance");
+                                    int distanceToEnemyBot = rc.getLocation().distanceSquaredTo(robots[i].location);
+                                    if( distanceToEnemyBot < closestEnemyBotDistance){
+                                        closestEnemyBot = robots[i];
+                                        closestEnemyBotDistance = distanceToEnemyBot;
+                                    }
+                                }
+                            }else {
+                                System.out.println("Found enemy bot");
+                                int distanceToEnemyBot = rc.getLocation().distanceSquaredTo(robots[i].location);
+                                if( distanceToEnemyBot < closestEnemyBotDistance){
+                                    closestEnemyBot = robots[i];
+                                    closestEnemyBotDistance = distanceToEnemyBot;
+                                }
                             }
                         }
                     }
@@ -201,23 +229,27 @@ public class DeliveryDrone extends Unit{
                     nav.flyTo(closestEnemyBot.location);
                     System.out.println("Flying to location: " + closestEnemyBot.location);
                 }
-            }else {
-//                RobotInfo[] landscapers = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, rc.getTeam());
-//                for(RobotInfo landscaper : landscapers){
-//                    if(landscaper.getType() == RobotType.LANDSCAPER && !hqLoc.isAdjacentTo(landscaper.location)){
-//                        if(rc.canPickUpUnit(landscaper.getID())){
-//                            rc.pickUpUnit(landscaper.getID());
-//                        }
-//                    }
-//                }
-//
-//                if(Math.random() < .8){
-//                    nav.tryFly(rc.getLocation().directionTo(enemyHqSymetric));
-//                }else {
-//                    nav.tryFly(randomDirection());
-//                }
+            }
+        }
+    }
 
-                System.out.println("No enemy units found");
+    public void moveLandscaper() throws GameActionException {
+        System.out.println("Can't sense enemy robots");
+        if(numRobotsAdjacentToHq < 8){
+            System.out.println("Trying to pick up friendly landscaper");
+            RobotInfo[] landscapers = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, rc.getTeam());
+            for(RobotInfo landscaper : landscapers){
+                if(landscaper.getType() == RobotType.LANDSCAPER && !hqLoc.isAdjacentTo(landscaper.location)){
+                    if(rc.canPickUpUnit(landscaper.getID())){
+                        rc.pickUpUnit(landscaper.getID());
+                    }
+                }
+            }
+
+            if(Math.random() < .8){
+                nav.tryFly(rc.getLocation().directionTo(enemyHqSymetric));
+            }else {
+                nav.tryFly(randomDirection());
             }
         }
     }
@@ -244,7 +276,11 @@ public class DeliveryDrone extends Unit{
             }
             // Robot specific messages
             else if (message[1] == 5 && message[4] == rc.getID()){
-                search = true;
+                search = false;
+            }
+            else if (message[1] == 12){
+                numRobotsAdjacentToHq = message[4];
+                System.out.println(numRobotsAdjacentToHq);
             }
         }
         teamMessagesSearched = true;
@@ -259,6 +295,9 @@ public class DeliveryDrone extends Unit{
                 locEnemyBot = new MapLocation(message[2], message[3]);
             }else if (message[1] == 11){
                 floodedLocations.add(new MapLocation(message[2], message[3]));
+            } else if (message[1] == 12){
+                numRobotsAdjacentToHq = message[4];
+                System.out.println(numRobotsAdjacentToHq);
             }
             // Set Enemy Hq Location
             else if(message[1] == 6){
@@ -268,7 +307,7 @@ public class DeliveryDrone extends Unit{
                 search = false;
             }
             else if (message[1] == 5 && message[4] == rc.getID()){
-                search = true;
+                search = false;
             }
             else if (message[1] == 3) {
                 refineryLocations.add(new MapLocation(message[2], message[3]));
@@ -280,20 +319,5 @@ public class DeliveryDrone extends Unit{
         if(rc.senseFlooding(rc.getLocation())){
             floodedLocations.add(rc.getLocation());
         }
-    }
-
-    public MapLocation findClosestFloodedLoc(ArrayList<MapLocation> floodedLocations){
-        MapLocation currentLoc = rc.getLocation();
-        int closestDistance = 9999;
-        MapLocation closestFloodedLoc = null;
-
-        for(MapLocation water : floodedLocations){
-            int distanceToWater = currentLoc.distanceSquaredTo(water);
-            if( distanceToWater < closestDistance){
-                closestDistance = distanceToWater;
-                closestFloodedLoc = water;
-            }
-        }
-        return closestFloodedLoc;
     }
 }
