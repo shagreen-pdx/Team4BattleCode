@@ -2,14 +2,16 @@ package team4player;
 import battlecode.common.*;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class Communications {
     RobotController rc;
 
-    static final int teamSecret = 77;
+    public final int secretCode = 9234;
     public static boolean broadcastedCreation = false;
     public static boolean rush = false;
+
+    // Get secret code
+    public int getSecretCode(){ return this.secretCode + rc.getRoundNum(); }
 
     // every message has a message type
     static final String[] messageType = {
@@ -21,7 +23,10 @@ public class Communications {
             "Search for hq", // 5
             "Enemy HQ loc", // 6
             "Build Design School", // 7
-            "Rush HQ" // 8
+            "Rush HQ", // 8,
+            "Enemy Miner", // 9,
+            "Enemy Design School", // 10
+            "Flooded Location" // 11
     };
 
 
@@ -32,7 +37,7 @@ public class Communications {
     // Broadcast message to every team
     public boolean broadcastMessage(MapLocation loc, int messageIndex) throws GameActionException {
         int [] message = new int [7];
-        message[0] = teamSecret;
+        message[0] = (secretCode + rc.getRoundNum());
         message[1] = messageIndex; //index of message type - 6 = landscaper location
         message[2] = loc.x;
         message[3] = loc.y;
@@ -47,7 +52,7 @@ public class Communications {
     // Send message to specific robot
     public boolean broadcastMessage(int id, int messageIndex) throws GameActionException {
         int [] message = new int [7];
-        message[0] = teamSecret;
+        message[0] = (secretCode + rc.getRoundNum());
         message[1] = messageIndex; //index of message type - 6 = landscaper location
         message[4] = id;
 
@@ -63,9 +68,10 @@ public class Communications {
     public void getAllTeamMessages(ArrayList<int []> teamMessages) throws GameActionException {
 
         for(int i = 1; i < rc.getRoundNum(); i++) {
+
             for (Transaction tx : rc.getBlock(i)) {
                 int[] myMessage = tx.getMessage();
-                if (myMessage[0] == teamSecret) { //check that message is from our team and the type is hqloc
+                if (myMessage[0] == (secretCode + i)) { //check that message is from our team and the type is hqloc
                     teamMessages.add(myMessage);
                 }
             }
@@ -78,7 +84,20 @@ public class Communications {
 
         for (Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
             int[] myMessage = tx.getMessage();
-            if (myMessage[0] == teamSecret) { //check that message is from our team and the type is hqloc
+            if (myMessage[0] == (secretCode + (rc.getRoundNum() - 1))) { //check that message is from our team and the type is hqloc
+                currentRoundMessages.add(myMessage);
+            }
+        }
+        return currentRoundMessages;
+    }
+
+    // Get all messages in previous round
+    public ArrayList<int []> getEnemyPrevRoundMessages() throws GameActionException{
+        ArrayList<int []> currentRoundMessages = new ArrayList<int []>();
+
+        for (Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
+            int[] myMessage = tx.getMessage();
+            if (myMessage[0] != (secretCode + (rc.getRoundNum() - 1)) && myMessage[2] != 0) {
                 currentRoundMessages.add(myMessage);
             }
         }

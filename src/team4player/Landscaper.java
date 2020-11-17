@@ -35,10 +35,7 @@ public class Landscaper extends Unit{
 
         decipherCurrentBlockChainMessage();
 
-        // Dig dirt
-        if(rc.getDirtCarrying() == 0){
-            tryDig();
-        }
+
 
         if(!job){
             if(enemyHqLoc == null){
@@ -56,6 +53,11 @@ public class Landscaper extends Unit{
         }
 
         if (rush){
+            // Dig dirt
+            if(rc.getDirtCarrying() == 0){
+                tryDig();
+            }
+
             if(rc.getLocation().distanceSquaredTo(enemyHqLoc) < 4
                     && rc.canDepositDirt(rc.getLocation().directionTo(enemyHqLoc))){
                 rc.depositDirt(rc.getLocation().directionTo(enemyHqLoc));
@@ -77,44 +79,103 @@ public class Landscaper extends Unit{
                 nav.goTo(enemyHqLoc);
             }
         } else {
-            System.out.println("PROTECTING HQ");
-
             // Dig dirt off of hq if being attacked
             if (hqLoc.isAdjacentTo(rc.getLocation())) {
                 Direction dirtohq = rc.getLocation().directionTo(hqLoc);
                 if(rc.canDigDirt(dirtohq)){
                     rc.digDirt(dirtohq);
-                }
-            }
-
-            MapLocation bestLocation = null;
-
-            int lowestElevation = 9999999;
-            //Loops through all of the locations around hq and checks for the lowest elevation that can be dropped, then drops it
-            for(Direction dir : Util.directions){
-                // Add function: Takes a map location add a direction and returns the first location plus the direction
-                MapLocation tileToCheck = hqLoc.add(dir);
-                if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
-                        && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))){
-                    if(rc.senseElevation(tileToCheck) < lowestElevation){
-                        lowestElevation = rc.senseElevation(tileToCheck);
-                        bestLocation = tileToCheck;
+                }else {
+                    if (rc.getDirtCarrying() == 0){
+                        Direction[] directions = {dirtohq.opposite(),dirtohq.opposite().rotateLeft(), dirtohq.rotateRight()};
+                        boolean dugDirt = false;
+                        for(int i = 0; i < directions.length && !dugDirt; ++i){
+                            if(rc.canDigDirt(directions[i])){
+                                rc.digDirt(directions[i]);
+                                dugDirt = true;
+                            }
+                        }
                     }
                 }
-            }
 
-            if (bestLocation != null && rc.canMove(rc.getLocation().directionTo(bestLocation))){
-                rc.move(rc.getLocation().directionTo(bestLocation));
-            }
 
-            if (Math.random() < 0.8){
-                if(bestLocation != null){
-                    rc.depositDirt(rc.getLocation().directionTo(bestLocation));
-                    System.out.println("Building a wall");
+                MapLocation bestLocation = null;
+
+                int lowestElevation = 9999999;
+                //Loops through all of the locations around hq and checks for the lowest elevation that can be dropped, then drops it
+                for(Direction dir : Util.directions){
+                    // Add function: Takes a map location add a direction and returns the first location plus the direction
+                    MapLocation tileToCheck = hqLoc.add(dir);
+                    System.out.println(tileToCheck);
+                    if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
+                            && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))){
+                        if(rc.senseElevation(tileToCheck) < lowestElevation){
+                            lowestElevation = rc.senseElevation(tileToCheck);
+                            bestLocation = tileToCheck;
+                        }
+                    }
                 }
-            }
-            if (!rc.getLocation().isAdjacentTo(hqLoc)){
-                nav.goTo(hqLoc);
+
+                System.out.println(bestLocation);
+                if(rc.isReady()){
+                    if (Math.random() < .8) {
+                        if (bestLocation != null) {
+                            rc.depositDirt(rc.getLocation().directionTo(bestLocation));
+                        }
+                    } else {
+                        if (bestLocation != null && rc.canMove(rc.getLocation().directionTo(bestLocation))){
+                            rc.move(rc.getLocation().directionTo(bestLocation));
+                        }
+                    }
+                }
+
+            } else {
+                RobotInfo[] robots = rc.senseNearbyRobots(30, rc.getTeam().opponent());
+
+                for(RobotInfo robot : robots){
+                    if(robot.getType() == RobotType.DESIGN_SCHOOL || robot.getType() == RobotType.REFINERY){
+                        System.out.println("Found enemy building");
+                        if(rc.getLocation().isAdjacentTo(robot.location)){
+                            if(rc.getDirtCarrying() == 0){
+                                for(Direction dir : Util.directions){
+                                    if(rc.canDigDirt(dir)){
+                                        rc.digDirt(dir);
+                                    }
+                                }
+                            } else {
+                                if(rc.canDepositDirt(rc.getLocation().directionTo(robot.location))){
+                                    rc.depositDirt(rc.getLocation().directionTo(robot.location));
+                                }
+                            }
+                        } else {
+                            nav.goTo(robot.location);
+                        }
+                    }
+                }
+
+                if(robots.length == 0)
+                    nav.goTo(hqLoc);
+
+//                int distanceToHq = rc.getLocation().distanceSquaredTo(hqLoc);
+//                if(distanceToHq < 9 && distanceToHq > 3){
+//                    int elevationChange = rc.senseElevation(rc.getLocation().add(rc.getLocation().directionTo(hqLoc))) - rc.senseElevation(rc.getLocation());
+//                    if(elevationChange > 3){
+//                        System.out.println("Wall found, can't move");
+//                        if(rc.getDirtCarrying() == 0){
+//                            Direction[] dirToDig = {rc.getLocation().directionTo(hqLoc).opposite(),rc.getLocation().directionTo(hqLoc).opposite().rotateRight(),rc.getLocation().directionTo(hqLoc).opposite().rotateLeft()};
+//                            for(Direction dir : dirToDig){
+//                                if(rc.canDigDirt(dir)){
+//                                    rc.digDirt(dir);
+//                                    System.out.println("Dug dirt");
+//                                }
+//                            }
+//                        } else {
+//                            if(rc.canDepositDirt((Direction.CENTER))){
+//                                rc.depositDirt(Direction.CENTER);
+//                            }
+//                        }
+//                    }
+//                }
+
             }
         }
     }
