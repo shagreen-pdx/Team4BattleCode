@@ -2,6 +2,7 @@ package team4player;
 
 import battlecode.common.*;
 
+import javax.xml.stream.Location;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -60,6 +61,15 @@ public class Miner extends Unit{
             teamMessagesSearched = true;
         }
 
+        //sense nearby soup and add to soup locations
+        MapLocation [] nearbySoup = rc.senseNearbySoup();
+        //better way to do this?  addAll?
+        for(MapLocation soup : nearbySoup){
+            if(!soupLocations.contains(soup))
+                soupLocations.add(soup);
+            System.out.println("nearby soup added successfully");//test
+        }
+
         if(buildDesignSchool){
             if(!nearbyRobot(RobotType.DESIGN_SCHOOL, rc.getTeam())){
                 for(Direction dir : Util.directions){
@@ -109,7 +119,7 @@ public class Miner extends Unit{
         checkIfSoupGone();
 
         // Try and mine soup
-        for (Direction dir : Util.directions){
+        for (Direction dir : Util.directions)
             if(rc.onTheMap(rc.getLocation().add(dir)) && rc.senseSoup(rc.getLocation().add(dir)) > 0){
 
                 if(canBuildRefinery(rc.getLocation())){
@@ -129,7 +139,7 @@ public class Miner extends Unit{
                     }
                 }
             }
-        }
+
 
         if(numFulfillmentCenters < 1) {
             if (!nearbyRobot(RobotType.FULFILLMENT_CENTER)) {
@@ -261,4 +271,6 @@ public class Miner extends Unit{
 
         return true;
     }
+
+
 }
