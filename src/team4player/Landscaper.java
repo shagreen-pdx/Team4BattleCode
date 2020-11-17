@@ -177,6 +177,35 @@ public class Landscaper extends Unit{
         return false;
     }
 
+    void digToDir(Direction toGo) throws GameActionException {
+        MapLocation currentLoc = rc.getLocation();
+        int currentElevation = rc.senseElevation(currentLoc);
+    }
+
+    void digDown(Direction toGo) throws GameActionException {
+        if(rc.getDirtCarrying() == 0){
+            if(rc.canDigDirt(Direction.CENTER)){
+                rc.digDirt(Direction.CENTER);
+            }
+        } else {
+            if(rc.canDepositDirt(toGo)){
+                rc.depositDirt(toGo);
+            }
+        }
+    }
+
+    void digUp(Direction toGo) throws GameActionException {
+        if(rc.getDirtCarrying() == 0){
+            if(rc.canDigDirt(toGo)){
+                rc.digDirt(toGo);
+            }
+        } else {
+            if(rc.canDepositDirt(Direction.CENTER)){
+                rc.depositDirt(Direction.CENTER);
+            }
+        }
+    }
+
     // Decipher all blockchain messages
     public void decipherAllBlockChainMessages(){
         for(int [] message : teamMessages){
