@@ -26,7 +26,8 @@ public class Communications {
             "Rush HQ", // 8,
             "Enemy Miner", // 9,
             "Enemy Design School", // 10
-            "Flooded Location" // 11
+            "Flooded Location", // 11
+            "num units around hq" // 12
     };
 
 

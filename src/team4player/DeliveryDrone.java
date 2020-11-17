@@ -18,8 +18,6 @@ public class DeliveryDrone extends Unit{
     boolean haveEnemyBot = false;
     boolean search = true;
     boolean rush = false;
-    int roundCreated = 0;
-
 
     public DeliveryDrone(RobotController r){
         super(r);
@@ -124,6 +122,7 @@ public class DeliveryDrone extends Unit{
                 nav.flyTo(hqLoc);
             }
 
+            // Drop landscaper off at wall
             if(rc.isCurrentlyHoldingUnit()){
                 if(numRobotsAdjacentToHq == 8){
                     for(Direction dir : directions){
@@ -245,12 +244,11 @@ public class DeliveryDrone extends Unit{
                     }
                 }
             }
-
-            if(Math.random() < .8){
-                nav.tryFly(rc.getLocation().directionTo(enemyHqSymetric));
-            }else {
-                nav.tryFly(randomDirection());
-            }
+        }
+        if(Math.random() < .8){
+            nav.tryFly(rc.getLocation().directionTo(enemyHqSymetric));
+        }else {
+            nav.tryFly(randomDirection());
         }
     }
 
@@ -316,8 +314,21 @@ public class DeliveryDrone extends Unit{
     }
 
     public void recordWater() throws GameActionException {
-        if(rc.senseFlooding(rc.getLocation())){
-            floodedLocations.add(rc.getLocation());
+        MapLocation curLoc = rc.getLocation();
+
+        // If flooded location is not near other recorded flooded locations, broadcast location.
+        if(rc.senseFlooding(curLoc)){
+            if(!floodedLocations.isEmpty()){
+                for(MapLocation floodedLoc : floodedLocations){
+                    System.out.println("found flooded location");
+                    if(floodedLoc.distanceSquaredTo(curLoc) > 15){
+                        System.out.println("broadcast");
+                        comms.broadcastMessage(curLoc, 11);
+                    }
+                }
+            } else {
+                comms.broadcastMessage(curLoc, 11);
+            }
         }
     }
 }
