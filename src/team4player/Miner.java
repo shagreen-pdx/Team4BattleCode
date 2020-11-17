@@ -13,6 +13,7 @@ public class Miner extends Unit{
     int numFulfillmentCenters = 0;
     int numRefineries = 0;
     int numVaporators = 0;
+    int numNetGuns = 0;
     ArrayList<MapLocation> soupLocations = new ArrayList<MapLocation>();
     ArrayList<MapLocation> refineryLocations = new ArrayList<MapLocation>();
 
@@ -67,7 +68,6 @@ public class Miner extends Unit{
         for(MapLocation soup : nearbySoup){
             if(!soupLocations.contains(soup))
                 soupLocations.add(soup);
-            System.out.println("nearby soup added successfully");//test
         }
 
         if(buildDesignSchool){
@@ -156,6 +156,18 @@ public class Miner extends Unit{
                 numVaporators++;
             }
         }
+
+       //build a net gun near enemy hq.  Difficult to test as miners don't typically go near enemy hq
+        if(enemyHqLoc != null) {
+            if(rc.getLocation().isWithinDistanceSquared(enemyHqLoc, 15) && numNetGuns <1) {
+                Direction dir = Util.randomDirection();
+                if (tryBuildBuilding(RobotType.NET_GUN, dir)) {
+                    System.out.println("Built Net Gun");
+                    numNetGuns++;
+                }
+            }
+        }
+
         System.out.println("num of refineries: " + numRefineries);
         System.out.println("num of design school: " + numDesignSchools);
         if (numDesignSchools < 1) {
