@@ -21,6 +21,8 @@ public class Landscaper extends Unit{
     int roundCreated = 0;
     boolean searchedBlockChainForEnemyHq = false;
 
+    ArrayList<MapLocation> enemyBuildings = new ArrayList<>();
+
     public Landscaper(RobotController r){
         super(r);
 
@@ -29,14 +31,15 @@ public class Landscaper extends Unit{
     public void takeTurn() throws GameActionException {
         super.takeTurn();
 
+        // Decipher all blockchain
         if(!teamMessagesSearched){
             decipherAllBlockChainMessages();
         }
 
+        // Decipher current blockchain messages
         decipherCurrentBlockChainMessage();
 
-
-
+        // Decide whether to rush enemy hq or defend hq
         if(!job){
             if(enemyHqLoc == null){
                 protect = true;
@@ -52,36 +55,46 @@ public class Landscaper extends Unit{
             job = true;
         }
 
+        // If rushing hq
         if (rush){
-            // Dig dirt
-            if(rc.getDirtCarrying() == 0){
-                tryDig();
-            }
+            int distanceToEnemyHq = rc.getLocation().distanceSquaredTo(enemyHqLoc);
+            Direction dirToEnemyHq = rc.getLocation().directionTo(enemyHqLoc);
 
-            if(rc.getLocation().distanceSquaredTo(enemyHqLoc) < 4
-                    && rc.canDepositDirt(rc.getLocation().directionTo(enemyHqLoc))){
-                rc.depositDirt(rc.getLocation().directionTo(enemyHqLoc));
-            }
-            else{
-                System.out.println(enemyHqLoc.distanceSquaredTo(rc.getLocation()));
-                if(rc.getLocation().distanceSquaredTo(enemyHqLoc) == 4 && !rc.canMove(rc.getLocation().directionTo(enemyHqLoc))){
-                    System.out.println("THERE IS A WALL");
-                    for (Direction direction : Util.directions){
-                        if(rc.getLocation().add(direction).isAdjacentTo(enemyHqLoc))
-                            if(rc.canDigDirt(direction)){
-                                rc.digDirt(direction);
-                            }
+            // If next to enemy hq, deposit dirt on top enemy hq
+            if( distanceToEnemyHq < 4){
+                if(rc.getDirtCarrying() == 0){
+                    if(rc.canDigDirt(Direction.CENTER)){
+                        rc.digDirt(Direction.CENTER);
                     }
-                    if(rc.canDepositDirt(Direction.CENTER)){
-                        rc.depositDirt(Direction.CENTER);
+                }else {
+                    if (rc.canDepositDirt(dirToEnemyHq)){
+                        rc.depositDirt(dirToEnemyHq);
+                        System.out.println(rc.getLocation().add(dirToEnemyHq));
                     }
                 }
-                nav.goTo(enemyHqLoc);
+            }
+
+            // Try and get to enemy Hq
+            else{
+                //If next to wall, try to build up, else move to enemy hq
+                if(distanceToEnemyHq < 9 && !rc.canMove(dirToEnemyHq)){
+                    System.out.println("THERE IS A WALL");
+                    // Try to move to enemy hq if possible
+                    if(!nav.tryMoveForward(dirToEnemyHq)){
+                        digToDir(rc.getLocation().directionTo(enemyHqLoc));
+                    }
+
+                } else {
+                    nav.goTo(enemyHqLoc);
+                }
             }
         } else {
-            // Dig dirt off of hq if being attacked
+            // PROTECTING HQ
+
             if (hqLoc.isAdjacentTo(rc.getLocation())) {
                 Direction dirtohq = rc.getLocation().directionTo(hqLoc);
+
+                // Dig dirt off of hq if being attacked
                 if(rc.canDigDirt(dirtohq)){
                     rc.digDirt(dirtohq);
                 }else {
@@ -97,7 +110,7 @@ public class Landscaper extends Unit{
                     }
                 }
 
-
+                // Find best location to place dirt
                 MapLocation bestLocation = null;
 
                 int lowestElevation = 9999999;
@@ -115,7 +128,6 @@ public class Landscaper extends Unit{
                     }
                 }
 
-                System.out.println(bestLocation);
                 if(rc.isReady()){
                     if (Math.random() < .8) {
                         if (bestLocation != null) {
@@ -129,11 +141,12 @@ public class Landscaper extends Unit{
                 }
 
             } else {
+                // If next to enemy building, try to bury it
                 RobotInfo[] robots = rc.senseNearbyRobots(30, rc.getTeam().opponent());
-
                 for(RobotInfo robot : robots){
                     if(robot.getType() == RobotType.DESIGN_SCHOOL || robot.getType() == RobotType.REFINERY){
                         System.out.println("Found enemy building");
+
                         if(rc.getLocation().isAdjacentTo(robot.location)){
                             if(rc.getDirtCarrying() == 0){
                                 for(Direction dir : Util.directions){
@@ -152,43 +165,52 @@ public class Landscaper extends Unit{
                     }
                 }
 
+                // If no enemy robots nearby, try to head to hq
                 if(robots.length == 0)
                     nav.goTo(hqLoc);
-
-//                int distanceToHq = rc.getLocation().distanceSquaredTo(hqLoc);
-//                if(distanceToHq < 9 && distanceToHq > 3){
-//                    int elevationChange = rc.senseElevation(rc.getLocation().add(rc.getLocation().directionTo(hqLoc))) - rc.senseElevation(rc.getLocation());
-//                    if(elevationChange > 3){
-//                        System.out.println("Wall found, can't move");
-//                        if(rc.getDirtCarrying() == 0){
-//                            Direction[] dirToDig = {rc.getLocation().directionTo(hqLoc).opposite(),rc.getLocation().directionTo(hqLoc).opposite().rotateRight(),rc.getLocation().directionTo(hqLoc).opposite().rotateLeft()};
-//                            for(Direction dir : dirToDig){
-//                                if(rc.canDigDirt(dir)){
-//                                    rc.digDirt(dir);
-//                                    System.out.println("Dug dirt");
-//                                }
-//                            }
-//                        } else {
-//                            if(rc.canDepositDirt((Direction.CENTER))){
-//                                rc.depositDirt(Direction.CENTER);
-//                            }
-//                        }
-//                    }
-//                }
-
             }
         }
     }
 
-    boolean tryDig() throws GameActionException {
-        Direction dir = Util.randomDirection();
-        if(rc.canDigDirt(dir)){
-            rc.digDirt(dir);
-            return true;
+    // Digs up or down depending on the elevation
+    void digToDir(Direction toGo) throws GameActionException {
+        MapLocation currentLoc = rc.getLocation();
+        int currentElevation = rc.senseElevation(currentLoc);
+        int elevationToGo = rc.senseElevation(currentLoc.add(toGo));
+        if(currentElevation < elevationToGo){
+            digUp(toGo);
+        } else {
+            digDown(toGo);
         }
-        return false;
     }
 
+    // Dig down
+    void digDown(Direction toGo) throws GameActionException {
+        if(rc.getDirtCarrying() == 0){
+            if(rc.canDigDirt(Direction.CENTER)){
+                rc.digDirt(Direction.CENTER);
+            }
+        } else {
+            if(rc.canDepositDirt(toGo)){
+                rc.depositDirt(toGo);
+            }
+        }
+    }
+
+    // Dig up
+    void digUp(Direction toGo) throws GameActionException {
+        if(rc.getDirtCarrying() == 0){
+            if(rc.canDigDirt(toGo)){
+                rc.digDirt(toGo);
+            }
+        } else {
+            if(rc.canDepositDirt(Direction.CENTER)){
+                rc.depositDirt(Direction.CENTER);
+            }
+        }
+    }
+
+    // Decipher all blockchain messages
     public void decipherAllBlockChainMessages(){
         for(int [] message : teamMessages){
             // Set Hq Location
@@ -198,23 +220,29 @@ public class Landscaper extends Unit{
                 System.out.println(hqLoc);
             }
             // Set Enemy Hq Location
-            if(message[1] == 6){
+            else if(message[1] == 6){
                 System.out.println("Got enemy location");
                 enemyHqLoc = new MapLocation(message[2], message[3]);
                 System.out.println(enemyHqLoc);
             }
             // Robot specific messages
-            if(message[1] == 7){
+            else if(message[1] == 7){
                 System.out.print("Recieved personal message");
             }
         }
         teamMessagesSearched = true;
     }
 
+    // Decipher current blockchain messages
     public void decipherCurrentBlockChainMessage() throws GameActionException {
         ArrayList<int []> currentBlockChainMessage = comms.getPrevRoundMessages();
         for(int [] message : currentBlockChainMessage){
-            if (message[1] == 6) {
+            // Add enemy buildings
+            if (message[1] == 10) {
+                enemyBuildings.add(new MapLocation(message[2], message[3]));
+            }
+            // Add enemy hq loc
+            else if (message[1] == 6) {
                 enemyHqLoc = new MapLocation(message[2], message[3]);
             }
         }

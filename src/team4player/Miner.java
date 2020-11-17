@@ -23,7 +23,7 @@ public class Miner extends Unit{
         super.takeTurn();
 
         // Destroy self
-        if(stuck > 200){
+        if(stuck > 500){
             rc.disintegrate();
         }
 
@@ -116,15 +116,21 @@ public class Miner extends Unit{
             }
         }
 
+        // If miner reached soup carrying capacity
         if(rc.getSoupCarrying() == rc.getType().soupLimit) {
             System.out.println("At soup carrying limit " + rc.getType().soupLimit);
-            //find refinery
-            MapLocation closestRefinery = findClosestRefinery(refineryLocations);
-            if(nav.goTo(closestRefinery)){
-                stuck = 0;
+            // If early in the game head to hq, else head to closest refinery
+            if(rc.getRoundNum() < 150){
+                nav.goTo(hqLoc);
             } else {
-                ++stuck;
+                MapLocation closestRefinery = getClosestLoc(refineryLocations);
+                if(nav.goTo(closestRefinery)){
+                    stuck = 0;
+                } else {
+                    ++stuck;
+                }
             }
+
         } else if (soupLocations.size() > 0){
             System.out.println("Moving toward soup loc: " + soupLocations.get(0));
             if(nav.goTo(soupLocations.get(0))){
@@ -140,41 +146,6 @@ public class Miner extends Unit{
             }
         }
     }
-
-    public MapLocation findClosestSoup(ArrayList<MapLocation> soupLocations){
-        MapLocation currentLoc = rc.getLocation();
-        int closestDistance = 9999;
-        MapLocation closestSoup = null;
-
-        for(MapLocation souploc : soupLocations){
-            int distanceToSoup = currentLoc.distanceSquaredTo(souploc);
-            if( distanceToSoup < closestDistance){
-                closestDistance = distanceToSoup;
-                closestSoup = souploc;
-            }
-        }
-        return closestSoup;
-    }
-
-    public MapLocation findClosestRefinery(ArrayList<MapLocation> refineryLocations){
-        MapLocation currentLoc = rc.getLocation();
-        int closestDistance = 99999;
-        MapLocation closestRefinery = null;
-        if(rc.getRoundNum() < 150){
-            closestDistance = currentLoc.distanceSquaredTo(hqLoc);
-            closestRefinery = hqLoc;
-        }
-
-        for(MapLocation refinery : refineryLocations){
-            int distanceToRefinery = currentLoc.distanceSquaredTo(refinery);
-            if( distanceToRefinery < closestDistance){
-                closestDistance = distanceToRefinery;
-                closestRefinery = refinery;
-            }
-        }
-        return closestRefinery;
-    }
-
 
     void checkIfSoupGone() throws GameActionException {
         if(soupLocations.size() > 0){
