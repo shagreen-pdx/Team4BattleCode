@@ -13,7 +13,6 @@ public strictfp class RobotPlayer {
      **/
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
-
         Robot me = null;
 
         // Here, we've separated the controls into a different method for each RobotType.
