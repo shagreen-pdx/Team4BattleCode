@@ -16,8 +16,6 @@ import java.util.ArrayList;
 import static org.mockito.Mockito.*;
 
 public class UnitTest {
-  //Field enemyHqLoc of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
-  //Field hqLoc of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
   @Mock
   Navigation nav;
   @Mock
@@ -38,7 +36,12 @@ public class UnitTest {
 
   @Test
   public void testTakeTurn() throws Exception {
+    nav.prevLocations = new ArrayList<MapLocation>(10);
+    for(int i = 0; i < 10; i++)
+      nav.prevLocations.add(new MapLocation(i + 1,i + 10));
+    //Assert.assertEquals(10, nav.prevLocations.size());
     unit.takeTurn();
+    Assert.assertEquals(10, nav.prevLocations.size());
   }
 
   @Test (expected = NullPointerException.class)
@@ -46,9 +49,22 @@ public class UnitTest {
     boolean result = unit.tryBuildBuilding(RobotType.HQ, Direction.NORTH);
     Assert.assertEquals(true, result);
   }
+  public void testTryBuildBuildingFirstCondition() throws Exception {
+
+    boolean result = unit.tryBuildBuilding(RobotType.HQ, Direction.NORTH);
+    Assert.assertEquals(true, result);
+  }
+
 
   @Test
   public void testCalcPosEnemyHqLoc() throws Exception {
     unit.calcPosEnemyHqLoc();
   }
+
+  @Test
+  public void testCalcPosEnemyHqLocNotNull() throws Exception {
+    unit.hqLoc = new MapLocation(3,4);
+    unit.calcPosEnemyHqLoc();
+  }
 }
+
