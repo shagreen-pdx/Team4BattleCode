@@ -8,6 +8,7 @@ import battlecode.common.RobotController;
 import java.util.ArrayList;
 
 public class Navigation {
+    boolean stuck = false;
     RobotController rc;
     int mapHeight;
     int mapWidth;
@@ -41,6 +42,19 @@ public class Navigation {
         return false;
     }
 
+    boolean tryMoveForward(Direction toGo) throws GameActionException {
+        Direction [] directions = {toGo, toGo.rotateLeft(), toGo.rotateRight()};
+
+        for (Direction dir : directions){
+            if (rc.canMove(dir)){
+                rc.move(dir);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     boolean goTo(Direction dir) throws GameActionException {
         Direction[] toTry = {dir, dir.rotateLeft(), dir.rotateRight(),dir.rotateLeft().rotateLeft(), dir.rotateRight().rotateRight(), dir.opposite().rotateLeft(), dir.opposite().rotateRight(),  dir.opposite() };
         for(Direction d : toTry){
@@ -59,17 +73,19 @@ public class Navigation {
 
     // DRONE NAVIGATION
     boolean tryFly(Direction dir) throws GameActionException {
-        if (rc.isReady() && rc.canMove(dir)) {
+        if (rc.isReady() && rc.canMove(dir) ) {
             rc.move(dir);
             return true;
         } else return false;
     }
 
     boolean flyTo(Direction dir) throws GameActionException {
-        Direction[] toTry = {dir, dir.rotateLeft(), dir.rotateRight(),dir.rotateLeft().rotateLeft(), dir.rotateRight().rotateRight()};
+        Direction[] toTry = {dir, dir.rotateLeft(), dir.rotateRight(),dir.rotateLeft().rotateLeft(), dir.rotateRight().rotateRight(), dir.opposite().rotateLeft(), dir.opposite().rotateRight(),  dir.opposite() };
         for(Direction d : toTry){
-            if(tryFly(d)){
-                return true;
+            if(!prevLocations.contains(rc.getLocation().add(d))){
+                if(tryFly(d)){
+                    return true;
+                }
             }
         }
         return false;
