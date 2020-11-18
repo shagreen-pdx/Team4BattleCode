@@ -23,12 +23,12 @@ public class DeliveryDrone extends Unit{
         super(r);
     }
 
-    public void takeTurn() throws GameActionException{
+    public void takeTurn() throws GameActionException {
         super.takeTurn();
 
         // Decipher all blockchain messages. Only happens once.
-        if(!teamMessagesSearched){
-           decipherAllBlockChainMessages();
+        if (!teamMessagesSearched) {
+            decipherAllBlockChainMessages();
         }
 
         // Decipher last blockchain message. Once per turn.
@@ -37,86 +37,98 @@ public class DeliveryDrone extends Unit{
         // Record flooded locations
         recordWater();
 
+        takeTurnBot();
+
+        if(haveEnemyBot)
+            takeTurnBot();
+        else if(rush)
+            takeTurnRush();
+        else if(search)
+            takeTurnSearch();
+        else
+            takeTurnRest();
+
+    }
+    public void takeTurnBot() throws GameActionException {
         // If holding enemy bot, try to drop in water
-        if(haveEnemyBot){
-            for(Direction dir : Util.directions){
-                if(rc.canSenseLocation(rc.getLocation().add(dir)) && rc.senseFlooding(rc.getLocation().add(dir))){
-                    rc.dropUnit(dir);
-                    haveEnemyBot = false;
-                }
+        for (Direction dir : Util.directions) {
+            if (rc.canSenseLocation(rc.getLocation().add(dir)) && rc.senseFlooding(rc.getLocation().add(dir))) {
+                rc.dropUnit(dir);
+                haveEnemyBot = false;
             }
-            MapLocation closestFloodedLoc = findClosestFloodedLoc(floodedLocations);
-            if(closestFloodedLoc != null){
-                nav.tryFly(rc.getLocation().directionTo(closestFloodedLoc));
-            }else {
-                nav.tryFly(randomDirection());
-            }
-
-        } else if(rush){
-            System.out.println("Rush HQ");
-            if(rc.canSenseLocation(enemyHqLoc)){
-                if(rc.isCurrentlyHoldingUnit()){
-                    for(Direction dir : directions){
-                        if (rc.canDropUnit(dir)) {
-                            rc.dropUnit(dir);
-                            comms.broadcastMessage(currentlyHeldRobotId, 7);
-                        }
-                    }
-                }
-
-                pickupEnemyBots();
-
-            } else {
-                nav.flyTo(enemyHqLoc);
-            }
-
-
-        } else if(search){
-            System.out.println("Search for hq");
-            // Calculate all possible enemey locations
-            if(posEnemyHqLoc.isEmpty()){
-                calcPosEnemyHqLoc();
-            }
-            // Pick up miner before traveling to enemy hq
-            if (!rc.isCurrentlyHoldingUnit()) {
-                RobotInfo[] robots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, rc.getTeam());
-
-                System.out.println(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED);
-                System.out.println();
-                if (robots.length > 0) {
-                    // Pick up a first robot within range
-                    for(RobotInfo robot : robots){
-                        if(robot.getType() == RobotType.MINER){
-                            rc.pickUpUnit(robot.getID());
-                            currentlyHeldRobotId = robot.getID();
-                            System.out.println("I picked up " + robot.getID() + "!");
-                            break;
-                        }
-                    }
-                }
-                if (!refineryLocations.isEmpty()){
-                    MapLocation newestRefinery = refineryLocations.get(refineryLocations.size() -1);
-                    System.out.println("Moving towards: " + newestRefinery);
-                    if (rc.getLocation().isWithinDistanceSquared(newestRefinery,100)){
-                        nav.tryFly(randomDirection());
-                    } else {
-                        nav.flyTo(newestRefinery);
-                    }
-                }
-                else {
-                    nav.tryFly(randomDirection());
-                }
-            }
-            // Once have miner, fly to enemy hq
-            if (rc.isCurrentlyHoldingUnit()) {
-                searchForEnemyHq();
-            }
-
+        }
+        MapLocation closestFloodedLoc = findClosestFloodedLoc(floodedLocations);
+        if (closestFloodedLoc != null) {
+            nav.tryFly(rc.getLocation().directionTo(closestFloodedLoc));
         } else {
-            System.out.println("Protect Hq");
-            pickupEnemyBots();
+            nav.tryFly(randomDirection());
         }
     }
+
+    public void takeTurnRush() throws GameActionException {
+        System.out.println("Rush HQ");
+        if (rc.canSenseLocation(enemyHqLoc)) {
+            if (rc.isCurrentlyHoldingUnit()) {
+                for (Direction dir : directions) {
+                    if (rc.canDropUnit(dir)) {
+                        rc.dropUnit(dir);
+                        comms.broadcastMessage(currentlyHeldRobotId, 7);
+                    }
+                }
+            }
+
+            pickupEnemyBots();
+
+        } else {
+            nav.flyTo(enemyHqLoc);
+        }
+    }
+    public void takeTurnSearch() throws GameActionException {
+        System.out.println("Search for hq");
+        // Calculate all possible enemey locations
+        if (posEnemyHqLoc.isEmpty()) {
+            calcPosEnemyHqLoc();
+        }
+        // Pick up miner before traveling to enemy hq
+        if (!rc.isCurrentlyHoldingUnit()) {
+            RobotInfo[] robots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, rc.getTeam());
+
+            System.out.println(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED);
+            System.out.println();
+            if (robots.length > 0) {
+                // Pick up a first robot within range
+                for (RobotInfo robot : robots) {
+                    if (robot.getType() == RobotType.MINER) {
+                        rc.pickUpUnit(robot.getID());
+                        currentlyHeldRobotId = robot.getID();
+                        System.out.println("I picked up " + robot.getID() + "!");
+                        break;
+                    }
+                }
+            }
+            if (!refineryLocations.isEmpty()) {
+                MapLocation newestRefinery = refineryLocations.get(refineryLocations.size() - 1);
+                System.out.println("Moving towards: " + newestRefinery);
+                if (rc.getLocation().isWithinDistanceSquared(newestRefinery, 100)) {
+                    nav.tryFly(randomDirection());
+                } else {
+                    nav.flyTo(newestRefinery);
+                }
+            } else {
+                nav.tryFly(randomDirection());
+            }
+        }
+        // Once have miner, fly to enemy hq
+        if (rc.isCurrentlyHoldingUnit()) {
+            searchForEnemyHq();
+        }
+    }
+
+    public void takeTurnRest() throws GameActionException{
+        System.out.println("Protect Hq");
+        pickupEnemyBots();
+    }
+
 
     public void searchForEnemyHq() throws GameActionException{
 

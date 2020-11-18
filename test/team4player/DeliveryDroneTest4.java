@@ -1,6 +1,8 @@
 package team4player;
 
-import battlecode.common.*;
+import battlecode.common.Direction;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,11 +15,13 @@ import java.util.Arrays;
 
 import static org.mockito.Mockito.*;
 
-public class DeliveryDroneTest {
+public class DeliveryDroneTest4 {
     @Mock
     ArrayList<MapLocation> refineryLocations;
     @Mock
     ArrayList<MapLocation> floodedLocations;
+    //Field enemyHqLoc of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
+    //Field hqLoc of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
     @Mock
     Navigation nav;
     @Mock
@@ -38,17 +42,51 @@ public class DeliveryDroneTest {
 
     @Test(expected = NullPointerException.class)
     public void testTakeTurn() throws Exception {
-        when(nav.tryFly(any())).thenReturn(true);
-        when(nav.flyTo((Direction) any())).thenReturn(true);
-        when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
-        when(comms.broadcastMessage(anyInt(), anyInt())).thenReturn(true);
-        //when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int>(Arrays.asList(new int[]{0})));
+//        when(nav.tryFly(any())).thenReturn(true);
+//        when(nav.flyTo((Direction) any())).thenReturn(true);
+//        when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
+//        when(comms.broadcastMessage(anyInt(), anyInt())).thenReturn(true);
+        //when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<Integer>(Arrays.asList(new int[]{0})));
 
         deliveryDrone.takeTurn();
     }
 
     @Test(expected = NullPointerException.class)
+    public void testTakeTurnBot() throws Exception {
+        deliveryDrone.haveEnemyBot = true;
+        when(nav.tryFly(any())).thenReturn(true);
+
+        deliveryDrone.takeTurnBot();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testTakeTurnRush() throws Exception {
+        when(nav.tryFly(any())).thenReturn(true);
+        when(nav.flyTo((Direction) any())).thenReturn(true);
+        when(comms.broadcastMessage(anyInt(), anyInt())).thenReturn(true);
+
+        deliveryDrone.takeTurnRush();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testTakeTurnSearch() throws Exception {
+        deliveryDrone.search = true;
+        when(nav.tryFly(any())).thenReturn(true);
+        when(nav.flyTo((Direction) any())).thenReturn(true);
+        when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
+
+        deliveryDrone.takeTurnSearch();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testTakeTurnRest() throws Exception {
+        when(nav.tryFly(any())).thenReturn(true);
+        deliveryDrone.takeTurnRest();
+    }
+
+    @Test(expected = NullPointerException.class)
     public void testSearchForEnemyHq() throws Exception {
+        posEnemyHqLoc = null;
         when(nav.flyTo((Direction) any())).thenReturn(true);
         when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
 
@@ -76,7 +114,7 @@ public class DeliveryDroneTest {
 
     @Test(expected = NullPointerException.class)
     public void testDecipherCurrentBlockChainMessage() throws Exception {
-       // when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int>(Arrays.asList(new int[]{0})));
+        //when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int>(Arrays.asList(new int[]{0})));
 
         deliveryDrone.decipherCurrentBlockChainMessage();
     }
@@ -86,14 +124,15 @@ public class DeliveryDroneTest {
         deliveryDrone.recordWater();
     }
 
-//    @Test(expected = NullPointerException.class)
-//    public void testFindClosestFloodedLoc() throws Exception {
-//        MapLocation result = deliveryDrone.findClosestFloodedLoc(new ArrayList<MapLocation>(Arrays.asList(null)));
-//        Assert.assertEquals(null, result);
-//    }
+    @Test(expected = NullPointerException.class)
+    public void testFindClosestFloodedLoc() throws Exception {
+        MapLocation result = deliveryDrone.findClosestFloodedLoc(new ArrayList<MapLocation>(Arrays.asList(null)));
+        Assert.assertEquals(null, result);
+    }
 
     @Test
     public void testCalcPosEnemyHqLoc() throws Exception {
         deliveryDrone.calcPosEnemyHqLoc();
     }
 }
+
