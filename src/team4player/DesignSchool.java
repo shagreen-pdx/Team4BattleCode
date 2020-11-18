@@ -39,6 +39,7 @@ public class DesignSchool extends Building{
                 }
             }
         } else {
+            System.out.println("Can Build? " + canBuild);
             if(canBuild && rc.getTeamSoup() > 210) {
                 if (rc.isReady()) {
                     for (Direction dir : Util.directions) {

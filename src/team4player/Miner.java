@@ -35,7 +35,7 @@ public class Miner extends Unit{
             if(!nearbyRobot(RobotType.DESIGN_SCHOOL, rc.getTeam())){
                 for(Direction dir : Util.directions){
 
-                    if(tryBuildBuilding(RobotType.DESIGN_SCHOOL, dir)){
+                    if(rc.getTeamSoup() > 160 && tryBuildBuilding(RobotType.DESIGN_SCHOOL, dir)){
                         buildDesignSchool = false;
                         RobotInfo designSchool = rc.senseRobotAtLocation(rc.getLocation().add(dir));
                         comms.broadcastMessage(designSchool.ID, 8);

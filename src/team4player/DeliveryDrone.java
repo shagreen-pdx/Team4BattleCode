@@ -11,6 +11,7 @@ import static team4player.Util.randomDirection;
 
 public class DeliveryDrone extends Unit{
 
+    int crunch = 0;
     int numRobotsAdjacentToHq = 0;
     MapLocation locEnemyBot = null;
     ArrayList<MapLocation> refineryLocations = new ArrayList<MapLocation>();
@@ -58,8 +59,13 @@ public class DeliveryDrone extends Unit{
             }
 
         } else if(rush){
+            ++crunch;
             System.out.println("Rush HQ");
-            if(rc.getLocation().isWithinDistanceSquared(enemyHqLoc,35)){
+
+            if(crunch > 75){
+                crunch();
+            }
+            else if(rc.getLocation().isWithinDistanceSquared(enemyHqLoc,35)){
                 if(rc.isCurrentlyHoldingUnit()){
                     for(Direction dir : directions){
                         if (rc.canDropUnit(dir) && !rc.senseFlooding(rc.getLocation().add(dir))) {
@@ -329,6 +335,26 @@ public class DeliveryDrone extends Unit{
             } else {
                 comms.broadcastMessage(curLoc, 11);
             }
+        }
+    }
+
+    public void crunch() throws GameActionException {
+
+        MapLocation curLoc = rc.getLocation();
+        int distanceToEnemyHQ = curLoc.distanceSquaredTo(enemyHqLoc);
+
+        if(distanceToEnemyHQ < 9){
+            RobotInfo [] robots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED,rc.getTeam().opponent());
+            for(RobotInfo robot : robots){
+                if(rc.canPickUpUnit(robot.getID())){
+                    rc.pickUpUnit(robot.getID());
+                    haveEnemyBot = true;
+                    break;
+                }
+            }
+
+        } else {
+            nav.flyTo(enemyHqLoc);
         }
     }
 }

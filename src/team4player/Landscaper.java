@@ -90,7 +90,6 @@ public class Landscaper extends Unit{
             }
         } else {
             // PROTECTING HQ
-
             if (hqLoc.isAdjacentTo(rc.getLocation())) {
                 Direction dirtohq = rc.getLocation().directionTo(hqLoc);
 
