@@ -58,11 +58,11 @@ public class NavigationTest {
     Assert.assertEquals(false, result);
   }
 
-  @Test
-  public void testFlyTo() throws Exception {
-    boolean result = navigation.flyTo(Direction.NORTH);
-    Assert.assertEquals(false, result);
-  }
+  //@Test
+  //public void testFlyTo() throws Exception {
+  //  boolean result = navigation.flyTo(Direction.NORTH);
+  //  Assert.assertEquals(false, result);
+  //}
 
   @Test(expected = NullPointerException.class)
   public void testFlyTo2() throws Exception {

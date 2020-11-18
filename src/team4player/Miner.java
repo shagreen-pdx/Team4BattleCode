@@ -152,6 +152,7 @@ public class Miner extends Unit{
             MapLocation targetSoupLoc = soupLocations.get(0);
             if(rc.canSenseLocation(targetSoupLoc) && rc.senseSoup(targetSoupLoc) == 0){
                 soupLocations.remove(0);
+                comms.broadcastMessage(targetSoupLoc, 13);
             }
         }
     }
@@ -275,6 +276,12 @@ public class Miner extends Unit{
             }
             else if (message[1] == 7 && message[4] == rc.getID()){
                 buildDesignSchool = true;
+            }
+            else if (message[1] == 13){
+                MapLocation soupGone = new MapLocation(message[2], message[3]);
+                if(soupLocations.contains(soupGone)){
+                    soupLocations.remove(soupGone);
+                }
             }
         }
     }
