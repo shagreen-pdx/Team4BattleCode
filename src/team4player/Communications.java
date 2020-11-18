@@ -50,6 +50,21 @@ public class Communications {
         return false;
     }
 
+    // Broadcast message to every team
+    public boolean broadcastMessage(int messageIndex, MapLocation loc, int cost) throws GameActionException {
+        int [] message = new int [7];
+        message[0] = (secretCode + rc.getRoundNum());
+        message[1] = messageIndex; //index of message type - 6 = landscaper location
+        message[2] = loc.x;
+        message[3] = loc.y;
+
+        if(rc.canSubmitTransaction(message, cost)){
+            rc.submitTransaction(message, cost);
+            return true;
+        }
+        return false;
+    }
+
     // Send message to specific robot
     public boolean broadcastMessage(int id, int messageIndex) throws GameActionException {
         int [] message = new int [7];
@@ -63,6 +78,7 @@ public class Communications {
         }
         return false;
     }
+
 
 
     // Used in robot.java. After robot is created, it searches through the blockchain for team messages

@@ -77,7 +77,7 @@ public class Landscaper extends Unit{
             // Try and get to enemy Hq
             else{
                 //If next to wall, try to build up, else move to enemy hq
-                if(distanceToEnemyHq < 9 && !rc.canMove(dirToEnemyHq)){
+                if(distanceToEnemyHq < 14 && !rc.canMove(dirToEnemyHq)){
                     System.out.println("THERE IS A WALL");
                     // Try to move to enemy hq if possible
                     if(!nav.tryMoveForward(dirToEnemyHq)){

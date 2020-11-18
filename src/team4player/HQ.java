@@ -13,13 +13,14 @@ public class HQ extends Building{
         super(r);
     }
     boolean wallBuilt = false;
+    boolean locBroadcasted = false;
 
     public void takeTurn() throws GameActionException {
         super.takeTurn();
 
         // Broadcast location
         if(turnCount == 1) {
-            comms.broadcastMessage(rc.getLocation(), 0);
+            comms.broadcastMessage(0, rc.getLocation(), 15);
         }
 
         // Every turn try to decipher blockchain messages

@@ -16,6 +16,17 @@ public class HQ extends Building {
         if(turnCount == 1) {
             comms.broadcastMessage(rc.getLocation(), 0);
         }
+        if(turnCount < 3){
+            comms.broadcastMessage(1,123213);
+            comms.broadcastMessage(1,123213);
+            comms.broadcastMessage(1,123213);
+            comms.broadcastMessage(1,123213);
+            comms.broadcastMessage(1,123213);
+            comms.broadcastMessage(1,123213);
+            comms.broadcastMessage(1,123213);
+            comms.broadcastMessage(1,123213);
+            comms.broadcastMessage(1,123213);
+        }
 
         // Try and shoot robots
         RobotInfo[] robots = rc.senseNearbyRobots(49, rc.getTeam().opponent());

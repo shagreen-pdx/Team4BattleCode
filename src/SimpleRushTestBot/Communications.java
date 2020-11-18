@@ -54,8 +54,8 @@ public class Communications {
         message[1] = messageIndex; //index of message type - 6 = landscaper location
         message[4] = id;
 
-        if(rc.canSubmitTransaction(message, 3)){
-            rc.submitTransaction(message, 3);
+        if(rc.canSubmitTransaction(message, 5)){
+            rc.submitTransaction(message, 5);
             return true;
         }
         return false;

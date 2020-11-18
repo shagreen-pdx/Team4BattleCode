@@ -27,8 +27,10 @@ public class Miner extends Unit{
             rc.disintegrate();
         }
 
-        if(!teamMessagesSearched){
+        if(hqLoc == null){
+            System.out.println("HQ LOC is null");
             decipherAllBlockChainMessages();
+            System.out.println("Read messages");
         }
 
         if(buildDesignSchool){
@@ -217,7 +219,9 @@ public class Miner extends Unit{
     }
 
     public void decipherAllBlockChainMessages() {
+
         for(int [] message : teamMessages) {
+            System.out.println(message);
             // Set Hq Location
             if (message[1] == 0) {
                 System.out.println("Got Hq Location");
