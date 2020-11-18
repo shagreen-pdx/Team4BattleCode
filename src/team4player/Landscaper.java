@@ -29,24 +29,29 @@ public class Landscaper extends Unit{
     public void takeTurn() throws GameActionException {
         super.takeTurn();
 
-        if(!teamMessagesSearched){
+        if (!teamMessagesSearched) {
             decipherAllBlockChainMessages();
         }
 
         decipherCurrentBlockChainMessage();
 
         // Dig dirt
-        if(rc.getDirtCarrying() == 0){
+        if (rc.getDirtCarrying() == 0) {
             tryDig();
         }
+        takeTurnJob(job);
+        takeTurnRush(rush);
+    }
 
-        if(!job){
-            if(enemyHqLoc == null){
+    public boolean takeTurnJob(boolean job) throws GameActionException {
+
+        if (!job) {
+            if (enemyHqLoc == null) {
                 protect = true;
             } else {
                 int distanceToHq = rc.getLocation().distanceSquaredTo(hqLoc);
                 int distanceToEnemyHq = rc.getLocation().distanceSquaredTo(enemyHqLoc);
-                if(distanceToEnemyHq < distanceToHq){
+                if (distanceToEnemyHq < distanceToHq) {
                     rush = true;
                 } else {
                     protect = true;
@@ -54,7 +59,10 @@ public class Landscaper extends Unit{
             }
             job = true;
         }
+        return job;
+    }
 
+    public boolean takeTurnRush(boolean rush) throws GameActionException {
         if (rush){
             if(rc.getLocation().distanceSquaredTo(enemyHqLoc) < 4
                     && rc.canDepositDirt(rc.getLocation().directionTo(enemyHqLoc))){
@@ -117,6 +125,7 @@ public class Landscaper extends Unit{
                 nav.goTo(hqLoc);
             }
         }
+        return rush;
     }
 
     boolean tryDig() throws GameActionException {
@@ -128,7 +137,7 @@ public class Landscaper extends Unit{
         return false;
     }
 
-    public void decipherAllBlockChainMessages(){
+    public boolean decipherAllBlockChainMessages(){
         for(int [] message : teamMessages){
             // Set Hq Location
             if(message[1] == 0){
@@ -148,6 +157,7 @@ public class Landscaper extends Unit{
             }
         }
         teamMessagesSearched = true;
+        return teamMessagesSearched;
     }
 
     public void decipherCurrentBlockChainMessage() throws GameActionException {

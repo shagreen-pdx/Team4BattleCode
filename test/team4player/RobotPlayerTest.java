@@ -15,7 +15,7 @@ public class RobotPlayerTest {
         RobotPlayer.run(rc);
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testRunException() throws Exception {
         Robot me = new DeliveryDrone(rc);
         RobotPlayer.run(rc);
@@ -23,4 +23,3 @@ public class RobotPlayerTest {
     }
 }
 
-//Generated with love by TestMe :) Please report issues and submit feature requests at: http://weirddev.com/forum#!/testme
