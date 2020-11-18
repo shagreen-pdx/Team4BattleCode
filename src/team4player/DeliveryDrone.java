@@ -19,6 +19,7 @@ public class DeliveryDrone extends Unit{
     boolean haveEnemyBot = false;
     boolean search = true;
     boolean rush = false;
+    MapLocation enemyToPickUp = null;
 
     public DeliveryDrone(RobotController r){
         super(r);
@@ -58,6 +59,25 @@ public class DeliveryDrone extends Unit{
                 nav.tryFly(randomDirection());
             }
 
+        }
+        else if(hqIsUnderAttack){
+            RobotInfo[] robots = rc.senseNearbyRobots(50, rc.getTeam().opponent());
+
+            // Drop currently held unit
+            if(rc.isCurrentlyHoldingUnit()){
+                for(Direction dir : directions){
+                    if(rc.canDropUnit(dir)){
+                        rc.dropUnit(dir);
+                        break;
+                    }
+                }
+            }
+
+            if(robots.length > 0){
+                tryToPickUpEnemyBots(robots);
+            } else {
+                nav.flyTo(enemyToPickUp);
+            }
         } else if(rush){
             ++crunch;
             System.out.println("Rush HQ");
@@ -191,6 +211,30 @@ public class DeliveryDrone extends Unit{
         }
     }
 
+    // Try and pick up an enemy bot. Returns true if picked up and false if not
+    public boolean tryToPickUpEnemyBots(RobotInfo[] robots) throws GameActionException {
+        int closestBotDistance = 999;
+        MapLocation closestBot = null;
+
+        for(RobotInfo robot : robots){
+            if (robot.getType() == RobotType.LANDSCAPER || robot.getType() == RobotType.MINER){
+                if(rc.canPickUpUnit(robot.getID())){
+                    rc.pickUpUnit(robot.getID());
+                    haveEnemyBot = true;
+                    return true;
+                } else {
+                    int distanceToBot = rc.getLocation().distanceSquaredTo(robot.location);
+                    if (distanceToBot < closestBotDistance){
+                        closestBotDistance = distanceToBot;
+                        closestBot = robot.location;
+                    }
+                }
+            }
+        }
+        nav.flyTo(closestBot);
+        return false;
+    }
+
     public void pickupEnemyBots() throws GameActionException {
         System.out.println("Trying to pick up enemy bot");
         if (!rc.isCurrentlyHoldingUnit()) {
@@ -295,8 +339,11 @@ public class DeliveryDrone extends Unit{
         for(int [] message : currentBlockChainMessage){
             if (message[1] == 8) {
                 rush = true;
-            }else if (message[1] == 9){
+            }else if (message[1] == 9) {
                 locEnemyBot = new MapLocation(message[2], message[3]);
+            } else if (message[1] == 13){
+                hqIsUnderAttack = true;
+                enemyToPickUp = new MapLocation(message[2], message[3]);
             }else if (message[1] == 11){
                 floodedLocations.add(new MapLocation(message[2], message[3]));
             } else if (message[1] == 12){

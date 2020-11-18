@@ -65,10 +65,12 @@ public class HQ extends Building{
                     rc.shootUnit(robot.getID());
                 }
             }
+            if(robot.getType() == RobotType.NET_GUN){
+                comms.broadcastMessage(rc.getLocation(), 14);
+            }
         }
 
-        // Try and build miners
-        if((numMiners < 5 && rc.getTeamSoup() > 300) || rc.getRoundNum() < 50){
+        if((numMiners < 5)){
             for (Direction dir : Util.directions){
                 if(tryBuild(RobotType.MINER, dir)){
                     ++numMiners;

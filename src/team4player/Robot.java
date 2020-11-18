@@ -8,6 +8,7 @@ public class Robot {
     boolean teamMessagesSearched = false;
     RobotController rc;
     Communications comms;
+    boolean hqIsUnderAttack = false;
 
     int turnCount = 0;
 
@@ -21,6 +22,20 @@ public class Robot {
             comms.getAllTeamMessages(teamMessages);
         }
         turnCount += 1;
+
+        // Check if being rushed
+        if(rc.getRoundNum() < 250 && !hqIsUnderAttack){
+            RobotInfo[] robots = rc.senseNearbyRobots(50, rc.getTeam().opponent());
+            if(robots.length > 0){
+                comms.broadcastMessage(13,robots[0].location,3);
+                for(RobotInfo robot : robots){
+                    if(robot.getType() == RobotType.DESIGN_SCHOOL){
+                        comms.broadcastMessage(robot.location, 10);
+                    }
+                }
+                hqIsUnderAttack = true;
+            }
+        }
     }
 
 

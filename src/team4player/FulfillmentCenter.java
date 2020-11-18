@@ -7,6 +7,7 @@ import java.util.ArrayList;
 public class FulfillmentCenter extends Building{
 
     int numDeliveryDrones = 0;
+    boolean haltProduction = false;
 
     public FulfillmentCenter(RobotController r){
         super(r);
@@ -23,7 +24,7 @@ public class FulfillmentCenter extends Building{
 
         decipherCurrentBlockChainMessage();
 
-        if(canBuild && rc.getTeamSoup() > 210){
+        if(canBuild && rc.getTeamSoup() > 210 && !haltProduction){
             if (rc.isReady() ) {
                 for (Direction dir : Util.directions) {
                     if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
@@ -49,6 +50,8 @@ public class FulfillmentCenter extends Building{
                 if(!loc.equals(rc.getLocation())){
                     canBuild = true;
                 }
+            } else if (message[1] == 14){
+                haltProduction = true;
             }
         }
     }

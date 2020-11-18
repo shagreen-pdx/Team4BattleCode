@@ -6,6 +6,7 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -36,6 +37,7 @@ public class UnitTest {
     MockitoAnnotations.initMocks(this);
   }
 
+  @Ignore
   @Test
   public void testTakeTurn() throws Exception {
     unit.takeTurn();

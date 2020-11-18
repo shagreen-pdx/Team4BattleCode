@@ -77,7 +77,9 @@ public class DesignSchool extends Building{
                 if(!loc.equals(rc.getLocation())){
                     canBuild = true;
                 }
-
+            }
+            else if (message[1] == 14){
+                rampUpProduction = true;
             }
         }
     }

@@ -27,7 +27,10 @@ public class Communications {
             "Enemy Miner", // 9,
             "Enemy Design School", // 10
             "Flooded Location", // 11
-            "num units around hq" // 12
+            "num units around hq", // 12
+            "HQ is being rushed", // 13
+            "Enemy Net gun", // 14
+            "Can build" // 15
     };
 
 

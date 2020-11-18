@@ -89,8 +89,9 @@ public class Landscaper extends Unit{
                 }
             }
         } else {
+
             // PROTECTING HQ
-            if (hqLoc.isAdjacentTo(rc.getLocation())) {
+            if (hqLoc.isAdjacentTo(rc.getLocation()) && rc.getRoundNum() > 200) {
                 Direction dirtohq = rc.getLocation().directionTo(hqLoc);
 
                 // Dig dirt off of hq if being attacked
@@ -143,7 +144,7 @@ public class Landscaper extends Unit{
                 // If next to enemy building, try to bury it
                 RobotInfo[] robots = rc.senseNearbyRobots(30, rc.getTeam().opponent());
                 for(RobotInfo robot : robots){
-                    if(robot.getType() == RobotType.DESIGN_SCHOOL || robot.getType() == RobotType.REFINERY){
+                    if(robot.getType() == RobotType.DESIGN_SCHOOL || robot.getType() == RobotType.NET_GUN){
                         System.out.println("Found enemy building");
 
                         if(rc.getLocation().isAdjacentTo(robot.location)){

@@ -83,7 +83,7 @@ public class Miner extends Unit{
         for (Direction dir : Util.directions){
             if(rc.onTheMap(rc.getLocation().add(dir)) && rc.senseSoup(rc.getLocation().add(dir)) > 0){
 
-                if(canBuildRefinery(rc.getLocation())){
+                if(canBuildRefinery(rc.getLocation()) && rc.getRoundNum() > 250){
                     for(Direction dir2 : Util.directions){
                         if (tryBuildBuilding(RobotType.REFINERY, dir2)) {
                             System.out.println("Built Refinery");
@@ -109,7 +109,7 @@ public class Miner extends Unit{
             }
         }
 
-        if(numFulfillmentCenters < 1) {
+        if(numFulfillmentCenters < 1 && numDesignSchools > 0) {
             if (!nearbyRobot(RobotType.FULFILLMENT_CENTER)) {
                 Direction dir = Util.randomDirection();
                 if (tryBuildBuilding(RobotType.FULFILLMENT_CENTER, dir)) {
@@ -122,14 +122,22 @@ public class Miner extends Unit{
         if(rc.getSoupCarrying() == rc.getType().soupLimit) {
             System.out.println("At soup carrying limit " + rc.getType().soupLimit);
             // If early in the game head to hq, else head to closest refinery
-            if(rc.getRoundNum() < 150){
+            if(rc.getRoundNum() < 250){
                 nav.goTo(hqLoc);
             } else {
-                MapLocation closestRefinery = getClosestLoc(refineryLocations);
-                if(nav.goTo(closestRefinery)){
-                    stuck = 0;
+                if(!refineryLocations.isEmpty()){
+                    MapLocation closestRefinery = getClosestLoc(refineryLocations);
+                    if(nav.goTo(closestRefinery)){
+                        stuck = 0;
+                    } else {
+                        ++stuck;
+                    }
                 } else {
-                    ++stuck;
+                    for(Direction dir : Util.directions){
+                        if(rc.canBuildRobot(RobotType.REFINERY,dir)){
+                            rc.buildRobot(RobotType.REFINERY,dir);
+                        }
+                    }
                 }
             }
 

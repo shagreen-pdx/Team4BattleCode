@@ -2,6 +2,7 @@ package team4player;
 
 import battlecode.common.RobotController;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -26,6 +27,7 @@ public class BuildingTest {
     MockitoAnnotations.initMocks(this);
   }
 
+  @Ignore
   @Test
   public void testTakeTurn() throws Exception {
     building.takeTurn();
