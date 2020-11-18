@@ -37,8 +37,6 @@ public class DeliveryDrone extends Unit{
         // Record flooded locations
         recordWater();
 
-        takeTurnBot();
-
         if(haveEnemyBot)
             takeTurnBot();
         else if(rush)

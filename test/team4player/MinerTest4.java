@@ -56,7 +56,7 @@ public class MinerTest4 {
 
     @Test(expected = NullPointerException.class)
     public void testFindClosestRefinery() throws Exception {
-        MapLocation result = miner.findClosestRefinery(new ArrayList<MapLocation>(Arrays.asList(null)));
+        MapLocation result = miner.findClosestRefinery(new ArrayList<MapLocation>(Arrays.asList()));
         Assert.assertEquals(null, result);
     }
 
