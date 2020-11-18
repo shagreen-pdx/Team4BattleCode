@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class Miner extends Unit{
 
+    boolean isStuck = false;
     int stuck = 0;
     boolean buildDesignSchool = false;
     int numDesignSchools = 0;
@@ -25,6 +26,14 @@ public class Miner extends Unit{
         // Destroy self
         if(stuck > 500){
             rc.disintegrate();
+        }
+
+        if(isStuck){
+            System.out.println("Miner is stuck.");
+            if (!tryUnstuck()){
+                System.out.println("Miner cannot get unstuck.");
+                //call a drone to pick you up?
+            }
         }
 
         if(!teamMessagesSearched){
@@ -120,7 +129,7 @@ public class Miner extends Unit{
         if(rc.getSoupCarrying() == rc.getType().soupLimit) {
             System.out.println("At soup carrying limit " + rc.getType().soupLimit);
             // If early in the game head to hq, else head to closest refinery
-            if(rc.getRoundNum() < 150){
+            if(rc.getRoundNum() < 150 || refineryLocations.size() < 1){
                 nav.goTo(hqLoc);
             } else {
                 MapLocation closestRefinery = getClosestLoc(refineryLocations);
@@ -283,6 +292,35 @@ public class Miner extends Unit{
                     soupLocations.remove(soupGone);
                 }
             }
+        }
+    }
+
+    void trackPreviousLocations(MapLocation location){
+        if (nav.prevLocations.contains(location)){
+            System.out.println("Miner is stuck.");
+            isStuck = true;
+        }else{
+            if(nav.prevLocations.size() < 10){
+                nav.prevLocations.add(location);
+            }else{
+                nav.prevLocations.remove(0);
+                nav.prevLocations.add(location);
+            }
+        }
+        return;
+    }
+    boolean tryUnstuck(){
+        if (nav.targetDestination != null){
+            if (soupLocations.contains(nav.targetDestination)){
+                soupLocations.remove(nav.targetDestination);
+            }
+            if (refineryLocations.contains(nav.targetDestination)){
+                refineryLocations.remove(nav.targetDestination);
+            }
+            return true;
+        }
+        else{
+            return false;
         }
     }
 }

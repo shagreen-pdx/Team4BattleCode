@@ -13,6 +13,7 @@ public class Navigation {
     int mapHeight;
     int mapWidth;
     ArrayList<MapLocation> prevLocations = new ArrayList<MapLocation>();
+    MapLocation targetDestination;
 
     public Navigation(RobotController r){
         rc = r;
@@ -68,6 +69,7 @@ public class Navigation {
     }
 
     boolean goTo(MapLocation destination) throws GameActionException {
+        targetDestination = destination;
         return goTo(rc.getLocation().directionTo(destination));
     }
 
