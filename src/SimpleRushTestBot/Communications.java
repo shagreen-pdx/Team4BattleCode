@@ -35,7 +35,7 @@ public class Communications {
     // Broadcast message to every team
     public boolean broadcastMessage(MapLocation loc, int messageIndex) throws GameActionException {
         int [] message = new int [7];
-        message[0] = teamSecret;
+        message[5] = teamSecret;
         message[1] = messageIndex; //index of message type - 6 = landscaper location
         message[2] = loc.x;
         message[3] = loc.y;
@@ -50,7 +50,7 @@ public class Communications {
     // Send message to specific robot
     public boolean broadcastMessage(int id, int messageIndex) throws GameActionException {
         int [] message = new int [7];
-        message[0] = teamSecret;
+        message[5] = teamSecret;
         message[1] = messageIndex; //index of message type - 6 = landscaper location
         message[4] = id;
 
@@ -68,7 +68,7 @@ public class Communications {
         for(int i = 1; i < rc.getRoundNum(); i++) {
             for (Transaction tx : rc.getBlock(i)) {
                 int[] myMessage = tx.getMessage();
-                if (myMessage[0] == teamSecret) { //check that message is from our team and the type is hqloc
+                if (myMessage[5] == teamSecret) { //check that message is from our team and the type is hqloc
                     teamMessages.add(myMessage);
                 }
             }
@@ -81,7 +81,7 @@ public class Communications {
 
         for (Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
             int[] myMessage = tx.getMessage();
-            if (myMessage[0] == teamSecret) { //check that message is from our team and the type is hqloc
+            if (myMessage[5] == teamSecret) { //check that message is from our team and the type is hqloc
                 currentRoundMessages.add(myMessage);
             }
         }

@@ -7,12 +7,13 @@ import java.util.Map;
 
 public class Miner extends Unit{
 
+    int stuck = 0;
     boolean buildDesignSchool = false;
     int numDesignSchools = 0;
     int numFulfillmentCenters = 0;
     int numRefineries = 0;
     ArrayList<MapLocation> soupLocations = new ArrayList<MapLocation>();
-        ArrayList<MapLocation> refineryLocations = new ArrayList<MapLocation>();
+    ArrayList<MapLocation> refineryLocations = new ArrayList<MapLocation>();
 
     public Miner(RobotController r){
         super(r);
@@ -21,42 +22,13 @@ public class Miner extends Unit{
     public void takeTurn() throws GameActionException{
         super.takeTurn();
 
-        if(!teamMessagesSearched){
-            for(int [] message : teamMessages){
-                // Set Hq Location
-                if(message[1] == 0){
-                    System.out.println("Got Hq Location");
-                    hqLoc = new MapLocation(message[2], message[3]);
-                    System.out.println(hqLoc);
-                }
-                // Set Enemy Hq Location
-                else if(message[1] == 6){
-                    System.out.println("Got enemy location");
-                    enemyHqLoc = new MapLocation(message[2], message[3]);
-                    System.out.println(enemyHqLoc);
-                }
-                //Get Num of design schools
-                else if(message[1] == 1){
-                    ++numDesignSchools;
-                }
-                // Get num of fulfilment Centers
-                else if(message[1] == 4){
-                    ++numFulfillmentCenters;
+        // Destroy self
+        if(stuck > 500){
+            rc.disintegrate();
+        }
 
-                }
-                else if(message[1] == 3){
-                    ++numRefineries;
-                    refineryLocations.add(new MapLocation(message[2],message[3]));
-                }
-                // Robot specific messages
-                else if(message[1] == 7){
-                    System.out.print("Recieved personal message");
-                }
-            }
-            System.out.println("Num of design schools = " + numDesignSchools);
-            System.out.println("Num of fulfilment centers = " + numFulfillmentCenters);
-            System.out.println("Num of Refineries = " + numRefineries);
-            teamMessagesSearched = true;
+        if(!teamMessagesSearched){
+            decipherAllBlockChainMessages();
         }
 
         if(buildDesignSchool){
@@ -68,45 +40,43 @@ public class Miner extends Unit{
                         RobotInfo designSchool = rc.senseRobotAtLocation(rc.getLocation().add(dir));
                         comms.broadcastMessage(designSchool.ID, 8);
                     }
-
                 }
             }
         }
 
-        ArrayList<int []> currentRoundMessages = comms.getPrevRoundMessages();
-        for(int [] message : currentRoundMessages){
-            if (message[1] == 1) {
-                ++numDesignSchools;
-            }
-            else if (message[1] == 4) {
-                ++numFulfillmentCenters;
-            }
-            else if (message[1] == 3) {
-                ++numRefineries;
-                refineryLocations.add(new MapLocation(message[2], message[3]));
-            }
-            else if (message[1] == 2) {
-                soupLocations.add(new MapLocation(message[2], message[3]));
-            }
-            else if (message[1] == 7 && message[4] == rc.getID()){
-                buildDesignSchool = true;
-            }
-        }
-//        numDesignSchools += comms.getNewDesignSchoolCount();
-//        numFulfillmentCenters += comms.getNewFulfillmentCenterCount();
-//        numRefineries += comms.getNewRefineryCount();
-//        comms.updateRefineryLocation(refineryLocations);
-//        comms.updateSoupLocation(soupLocations);
-
+        decipherCurrentBlockChainMessage();
 
         // Try and refine
         for (Direction dir : Util.directions){
-            if (tryRefine(dir))
+            if (tryRefine(dir)){
+                nav.prevLocations.clear();
                 System.out.println("I refined soup! " + rc.getTeamSoup());
+            }
+            MapLocation tileToCheckForFlooding = rc.getLocation().add(dir);
+            if(rc.canSenseLocation(tileToCheckForFlooding) && rc.senseFlooding(tileToCheckForFlooding)){
+                for(MapLocation loc : floodedLocations){
+                    if(!tileToCheckForFlooding.isWithinDistanceSquared(loc ,25)){
+                        comms.broadcastMessage(tileToCheckForFlooding,11);
+                        floodedLocations.add(tileToCheckForFlooding);
+                    }
+                }
+            }
+
         }
 
         checkIfSoupGone();
 
+
+//        if(turnCount % 5==0){
+//            MapLocation[] sensedSoup = rc.senseNearbySoup();
+//            System.out.println(soupLocations);
+//            for(MapLocation location : sensedSoup){
+//                System.out.println(location);
+//                if(!soupLocations.contains(location))
+//                    comms.broadcastMessage(location, 2);
+//            }
+//
+//        }
         // Try and mine soup
         for (Direction dir : Util.directions){
             if(rc.onTheMap(rc.getLocation().add(dir)) && rc.senseSoup(rc.getLocation().add(dir)) > 0){
@@ -130,6 +100,13 @@ public class Miner extends Unit{
             }
         }
 
+        if (numDesignSchools < 1) {
+            Direction dir = Util.randomDirection();
+            if (tryBuildBuilding(RobotType.DESIGN_SCHOOL, dir)) {
+                System.out.println("Built Design School");
+            }
+        }
+
         if(numFulfillmentCenters < 1) {
             if (!nearbyRobot(RobotType.FULFILLMENT_CENTER)) {
                 Direction dir = Util.randomDirection();
@@ -139,52 +116,36 @@ public class Miner extends Unit{
             }
         }
 
-        System.out.println("num of refineries: " + numRefineries);
-        System.out.println("num of design school: " + numDesignSchools);
-        if (numDesignSchools < 1) {
-            Direction dir = Util.randomDirection();
-            if (tryBuildBuilding(RobotType.DESIGN_SCHOOL, dir)) {
-                System.out.println("Built Design School");
-            }
-        }
-
+        // If miner reached soup carrying capacity
         if(rc.getSoupCarrying() == rc.getType().soupLimit) {
             System.out.println("At soup carrying limit " + rc.getType().soupLimit);
-            //find refinery
-            MapLocation closestRefinery = findClosestRefinery(refineryLocations);
-            nav.goTo(closestRefinery);
+            // If early in the game head to hq, else head to closest refinery
+            if(rc.getRoundNum() < 150){
+                nav.goTo(hqLoc);
+            } else {
+                MapLocation closestRefinery = getClosestLoc(refineryLocations);
+                if(nav.goTo(closestRefinery)){
+                    stuck = 0;
+                } else {
+                    ++stuck;
+                }
+            }
+
         } else if (soupLocations.size() > 0){
-            nav.goTo(soupLocations.get(0));
-        }else if (nav.goTo(Util.randomDirection()))
-            System.out.println("I moved in random direction!");
-
-    }
-
-    public MapLocation findClosestRefinery(ArrayList<MapLocation> refineryLocations){
-        MapLocation currentLoc = rc.getLocation();
-        int closestDistance = currentLoc.distanceSquaredTo(hqLoc);
-        MapLocation closestRefinery = hqLoc;
-
-        for(MapLocation refinery : refineryLocations){
-            int distanceToRefinery = currentLoc.distanceSquaredTo(refinery);
-            if( distanceToRefinery < closestDistance){
-                closestDistance = distanceToRefinery;
-                closestRefinery = refinery;
+            System.out.println("Moving toward soup loc: " + soupLocations.get(0));
+            if(nav.goTo(soupLocations.get(0))){
+                stuck = 0;
+            } else {
+                ++stuck;
+            }
+        }else {
+            if (nav.goTo(Util.randomDirection())){
+                stuck = 0;
+            }else {
+                ++stuck;
             }
         }
-        return closestRefinery;
     }
-
-//    void checkIfRefineryNearby() throws GameActionException {
-//        RobotInfo[] robots = rc.senseNearbyRobots();
-//        for (RobotInfo robot : robots) {
-//            if (robot.type == RobotType.REFINERY && robot.team == rc.getTeam() && !refineryLocations.contains(robot.location)) {
-//                comms.broadcastMessage(robot.location, 3);
-//                System.out.println("Refinery Nearby");  //FOR TESTING DELETE LATER
-//            }
-//        }
-//    }
-
 
     void checkIfSoupGone() throws GameActionException {
         if(soupLocations.size() > 0){
@@ -237,21 +198,84 @@ public class Miner extends Unit{
              return false;
          }
 
-         // Check if close to hq
-         if(locToBuild.isWithinDistanceSquared(hqLoc, 100)){
-             System.out.println("To close to other refinery");
-             return false;
-         }
-         System.out.println("Distance to HQ = " + locToBuild.distanceSquaredTo(hqLoc));
-
          // Check if close to refineries
-         for (MapLocation refinery : refineryLocations){
-             if(locToBuild.isWithinDistanceSquared(refinery, 75)){
-                 System.out.println("To close to other refinery");
+         RobotInfo[] robots = rc.senseNearbyRobots(30, rc.getTeam());
+
+         for(RobotInfo robot : robots){
+             if(robot.getType() == RobotType.REFINERY){
                  return false;
              }
          }
+//         for (MapLocation refinery : refineryLocations){
+//             if(locToBuild.isWithinDistanceSquared(refinery, 75)){
+//                 System.out.println("To close to other refinery");
+//                 return false;
+//             }
+//         }
 
          return true;
+    }
+
+    public void decipherAllBlockChainMessages() {
+        for(int [] message : teamMessages) {
+            // Set Hq Location
+            if (message[1] == 0) {
+                System.out.println("Got Hq Location");
+                hqLoc = new MapLocation(message[2], message[3]);
+                System.out.println(hqLoc);
+            }
+            // Set Enemy Hq Location
+            else if (message[1] == 6) {
+                System.out.println("Got enemy Hq location");
+                enemyHqLoc = new MapLocation(message[2], message[3]);
+                System.out.println(enemyHqLoc);
+            }
+            //Get Num of design schools
+            else if (message[1] == 1) {
+                ++numDesignSchools;
+            }
+            // Get num of fulfilment Centers
+            else if (message[1] == 4) {
+                ++numFulfillmentCenters;
+
+            } else if (message[1] == 3) {
+                ++numRefineries;
+                refineryLocations.add(new MapLocation(message[2], message[3]));
+            }
+            // Robot specific messages
+            else if (message[1] == 7) {
+                System.out.print("Recieved personal message");
+            }
+        }
+        teamMessagesSearched = true;
+    }
+
+    public void decipherCurrentBlockChainMessage() throws GameActionException {
+        ArrayList<int []> currentRoundMessages = comms.getPrevRoundMessages();
+        for(int [] message : currentRoundMessages){
+            if (message[1] == 1) {
+                ++numDesignSchools;
+            }
+            else if (message[1] == 4) {
+                ++numFulfillmentCenters;
+            }
+            else if (message[1] == 3) {
+                ++numRefineries;
+                refineryLocations.add(new MapLocation(message[2], message[3]));
+            }
+            else if (message[1] == 2) {
+                System.out.println("New Soup Location");
+                soupLocations.add(new MapLocation(message[2], message[3]));
+            }
+            // Set Enemy Hq Location
+            else if (message[1] == 6) {
+                System.out.println("Got enemy location");
+                enemyHqLoc = new MapLocation(message[2], message[3]);
+                System.out.println(enemyHqLoc);
+            }
+            else if (message[1] == 7 && message[4] == rc.getID()){
+                buildDesignSchool = true;
+            }
+        }
     }
 }
