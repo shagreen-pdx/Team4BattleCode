@@ -26,12 +26,12 @@ public class NetGunTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testTakeTurn() throws Exception {
         netGun.takeTurn();
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testTakeTurn2() throws Exception {
         netGun.takeTurn();
     }
