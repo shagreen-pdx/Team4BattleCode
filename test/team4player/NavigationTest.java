@@ -3,6 +3,7 @@ package team4player;
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.world.maps.NoU;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +59,7 @@ public class NavigationTest {
     Assert.assertEquals(false, result);
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testFlyTo() throws Exception {
     boolean result = navigation.flyTo(Direction.NORTH);
     Assert.assertEquals(false, result);

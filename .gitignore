@@ -21,6 +21,7 @@ src/lectureplayer
 *.ipr
 *.iws
 /.idea/
+/client32
 
 
 # User-specific stuff:
