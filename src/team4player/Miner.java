@@ -79,19 +79,6 @@ public class Miner extends Unit{
         }
 
         checkIfSoupGone();
-
-
-//        if(turnCount % 5==0){
-//            MapLocation[] sensedSoup = rc.senseNearbySoup();
-//            System.out.println(soupLocations);
-//            for(MapLocation location : sensedSoup){
-//                System.out.println(location);
-//                if(!soupLocations.contains(location))
-//                    comms.broadcastMessage(location, 2);
-//            }
-//
-//        }
-        // Try and mine soup
         for (Direction dir : Util.directions){
             if(rc.onTheMap(rc.getLocation().add(dir)) && rc.senseSoup(rc.getLocation().add(dir)) > 0){
 
@@ -145,8 +132,7 @@ public class Miner extends Unit{
                 }
             }
 
-        }
-        else if (soupLocations.size() > 0){
+        } else if (soupLocations.size() > 0){
             System.out.println("Moving toward soup loc: " + soupLocations.get(0));
             if(nav.goTo(soupLocations.get(0))){
                 stuck = 0;
