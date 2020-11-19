@@ -28,11 +28,16 @@ public class Miner extends Unit{
             rc.disintegrate();
         }
 
-        if(isStuck){
-            System.out.println("Miner is stuck.");
-            if (!tryUnstuck()){
-                System.out.println("Miner cannot get unstuck.");
-                //call a drone to pick you up?
+        //allow enough time to pass for miners to no longer be moving randomly
+        if(rc.getRoundNum() > 150) {
+            //check if the miner is stuck
+            trackPreviousLocations(rc.getLocation());
+            if (isStuck) {
+                System.out.println(nav.prevLocations);
+                if (!tryUnstuck()) {
+                    System.out.println("Miner cannot get unstuck.");
+                    //call a drone to pick you up?
+                }
             }
         }
 
@@ -140,7 +145,8 @@ public class Miner extends Unit{
                 }
             }
 
-        } else if (soupLocations.size() > 0){
+        }
+        else if (soupLocations.size() > 0){
             System.out.println("Moving toward soup loc: " + soupLocations.get(0));
             if(nav.goTo(soupLocations.get(0))){
                 stuck = 0;
@@ -296,20 +302,27 @@ public class Miner extends Unit{
     }
 
     void trackPreviousLocations(MapLocation location){
-        if (nav.prevLocations.contains(location)){
-            System.out.println("Miner is stuck.");
-            isStuck = true;
-        }else{
-            if(nav.prevLocations.size() < 10){
-                nav.prevLocations.add(location);
-            }else{
-                nav.prevLocations.remove(0);
-                nav.prevLocations.add(location);
-            }
-        }
+         double distTravelled = 0;
+         //check if the miner has moved 10 times before checking how far it's moved in those last 10 moves
+         if(nav.prevLocations.size() > 10) {
+             //find furthest distance travelled
+             for (MapLocation loc : nav.prevLocations) {
+                 double temp = Math.sqrt(Math.pow(loc.x - location.x, 2) + Math.pow(loc.y - location.y, 2));
+                 if (temp > distTravelled) {
+                     distTravelled = temp;
+                 }
+             }
+             //if distance is less than 2, the miner is stuck
+             if (distTravelled < 2) {
+                 System.out.println("Miner is stuck.");
+                 isStuck = true;
+             }
+         }
         return;
     }
+
     boolean tryUnstuck(){
+         //if the miner is stuck and is trying to get to a specific location, remove that location so it can go somewhere else
         if (nav.targetDestination != null){
             if (soupLocations.contains(nav.targetDestination)){
                 soupLocations.remove(nav.targetDestination);
