@@ -32,7 +32,7 @@ public class Landscaper extends Unit{
         super.takeTurn();
 
         // Decipher all blockchain
-        if(!teamMessagesSearched){
+        if (!teamMessagesSearched) {
             decipherAllBlockChainMessages();
         }
 
@@ -40,137 +40,158 @@ public class Landscaper extends Unit{
         decipherCurrentBlockChainMessage();
 
         // Decide whether to rush enemy hq or defend hq
-        if(!job){
-            if(enemyHqLoc == null){
-                protect = true;
-            } else {
-                int distanceToHq = rc.getLocation().distanceSquaredTo(hqLoc);
-                int distanceToEnemyHq = rc.getLocation().distanceSquaredTo(enemyHqLoc);
-                if(distanceToEnemyHq < distanceToHq){
-                    rush = true;
-                } else {
-                    protect = true;
-                }
-            }
-            job = true;
-        }
+        if(!job)
+            takeTurnJob();
+        else if(rush)
+            takeTurnRush();
+        else
+            takeTurnRest();
+    }
 
-        // If rushing hq
-        if (rush){
-            int distanceToEnemyHq = rc.getLocation().distanceSquaredTo(enemyHqLoc);
-            Direction dirToEnemyHq = rc.getLocation().directionTo(enemyHqLoc);
 
-            // If next to enemy hq, deposit dirt on top enemy hq
-            if( distanceToEnemyHq < 4){
-                if(rc.getDirtCarrying() == 0){
-                    if(rc.canDigDirt(Direction.CENTER)){
-                        rc.digDirt(Direction.CENTER);
-                    }
-                }else {
-                    if (rc.canDepositDirt(dirToEnemyHq)){
-                        rc.depositDirt(dirToEnemyHq);
-                        System.out.println(rc.getLocation().add(dirToEnemyHq));
-                    }
-                }
-            }
 
-            // Try and get to enemy Hq
-            else{
-                //If next to wall, try to build up, else move to enemy hq
-                if(distanceToEnemyHq < 9 && !rc.canMove(dirToEnemyHq)){
-                    System.out.println("THERE IS A WALL");
-                    // Try to move to enemy hq if possible
-                    if(!nav.tryMoveForward(dirToEnemyHq)){
-                        digToDir(rc.getLocation().directionTo(enemyHqLoc));
-                    }
-
-                } else {
-                    nav.goTo(enemyHqLoc);
-                }
-            }
+    public void takeTurnJob() throws GameActionException {
+        if (enemyHqLoc == null) {
+            protect = true;
         } else {
-            // PROTECTING HQ
+            int distanceToHq = rc.getLocation().distanceSquaredTo(hqLoc);
+            int distanceToEnemyHq = rc.getLocation().distanceSquaredTo(enemyHqLoc);
+            if (distanceToEnemyHq < distanceToHq) {
+                rush = true;
+            } else {
+                protect = true;
+            }
+        }
+        job = true;
+    }
 
-            if (hqLoc.isAdjacentTo(rc.getLocation())) {
-                Direction dirtohq = rc.getLocation().directionTo(hqLoc);
 
-                // Dig dirt off of hq if being attacked
-                if(rc.canDigDirt(dirtohq)){
-                    rc.digDirt(dirtohq);
-                }else {
-                    if (rc.getDirtCarrying() == 0){
-                        Direction[] directions = {dirtohq.opposite(),dirtohq.opposite().rotateLeft(), dirtohq.rotateRight()};
-                        boolean dugDirt = false;
-                        for(int i = 0; i < directions.length && !dugDirt; ++i){
-                            if(rc.canDigDirt(directions[i])){
-                                rc.digDirt(directions[i]);
-                                dugDirt = true;
-                            }
-                        }
-                    }
+
+
+    public void takeTurnRush() throws GameActionException {
+        // If rushing hq
+        int distanceToEnemyHq = rc.getLocation().distanceSquaredTo(enemyHqLoc);
+        Direction dirToEnemyHq = rc.getLocation().directionTo(enemyHqLoc);
+
+        // If next to enemy hq, deposit dirt on top enemy hq
+        if (distanceToEnemyHq < 4) {
+            if (rc.getDirtCarrying() == 0) {
+                if (rc.canDigDirt(Direction.CENTER)) {
+                    rc.digDirt(Direction.CENTER);
                 }
-
-                // Find best location to place dirt
-                MapLocation bestLocation = null;
-
-                int lowestElevation = 9999999;
-                //Loops through all of the locations around hq and checks for the lowest elevation that can be dropped, then drops it
-                for(Direction dir : Util.directions){
-                    // Add function: Takes a map location add a direction and returns the first location plus the direction
-                    MapLocation tileToCheck = hqLoc.add(dir);
-                    System.out.println(tileToCheck);
-                    if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
-                            && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))){
-                        if(rc.senseElevation(tileToCheck) < lowestElevation){
-                            lowestElevation = rc.senseElevation(tileToCheck);
-                            bestLocation = tileToCheck;
-                        }
-                    }
+            } else {
+                if (rc.canDepositDirt(dirToEnemyHq)) {
+                    rc.depositDirt(dirToEnemyHq);
+                    System.out.println(rc.getLocation().add(dirToEnemyHq));
                 }
-
-                if(rc.isReady()){
-                    if (Math.random() < .8) {
-                        if (bestLocation != null) {
-                            rc.depositDirt(rc.getLocation().directionTo(bestLocation));
-                        }
-                    } else {
-                        if (bestLocation != null && rc.canMove(rc.getLocation().directionTo(bestLocation))){
-                            rc.move(rc.getLocation().directionTo(bestLocation));
-                        }
-                    }
+            }
+        }
+        // Try and get to enemy Hq
+        else {
+            //If next to wall, try to build up, else move to enemy hq
+            if (distanceToEnemyHq < 9 && !rc.canMove(dirToEnemyHq)) {
+                System.out.println("THERE IS A WALL");
+                // Try to move to enemy hq if possible
+                if (!nav.tryMoveForward(dirToEnemyHq)) {
+                    digToDir(rc.getLocation().directionTo(enemyHqLoc));
                 }
 
             } else {
-                // If next to enemy building, try to bury it
-                RobotInfo[] robots = rc.senseNearbyRobots(30, rc.getTeam().opponent());
-                for(RobotInfo robot : robots){
-                    if(robot.getType() == RobotType.DESIGN_SCHOOL || robot.getType() == RobotType.REFINERY){
-                        System.out.println("Found enemy building");
-
-                        if(rc.getLocation().isAdjacentTo(robot.location)){
-                            if(rc.getDirtCarrying() == 0){
-                                for(Direction dir : Util.directions){
-                                    if(rc.canDigDirt(dir)){
-                                        rc.digDirt(dir);
-                                    }
-                                }
-                            } else {
-                                if(rc.canDepositDirt(rc.getLocation().directionTo(robot.location))){
-                                    rc.depositDirt(rc.getLocation().directionTo(robot.location));
-                                }
-                            }
-                        } else {
-                            nav.goTo(robot.location);
-                        }
-                    }
-                }
-
-                // If no enemy robots nearby, try to head to hq
-                if(robots.length == 0)
-                    nav.goTo(hqLoc);
+                nav.goTo(enemyHqLoc);
             }
         }
     }
+
+
+
+
+    public void takeTurnRest() throws GameActionException {
+        // PROTECTING HQ
+        if (hqLoc.isAdjacentTo(rc.getLocation())) {
+            Direction dirtohq = rc.getLocation().directionTo(hqLoc);
+
+            // Dig dirt off of hq if being attacked
+            if(rc.canDigDirt(dirtohq)){
+                rc.digDirt(dirtohq);
+            }else {
+                if (rc.getDirtCarrying() == 0){
+                    Direction[] directions = {dirtohq.opposite(),dirtohq.opposite().rotateLeft(), dirtohq.rotateRight()};
+                    boolean dugDirt = false;
+                    for(int i = 0; i < directions.length && !dugDirt; ++i){
+                        if(rc.canDigDirt(directions[i])){
+                            rc.digDirt(directions[i]);
+                            dugDirt = true;
+                        }
+                    }
+                }
+            }
+
+            // Find best location to place dirt
+            MapLocation bestLocation = null;
+
+            int lowestElevation = 9999999;
+            //Loops through all of the locations around hq and checks for the lowest elevation that can be dropped, then drops it
+            for(Direction dir : Util.directions){
+                // Add function: Takes a map location add a direction and returns the first location plus the direction
+                MapLocation tileToCheck = hqLoc.add(dir);
+                System.out.println(tileToCheck);
+                if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
+                        && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))){
+                    if(rc.senseElevation(tileToCheck) < lowestElevation){
+                        lowestElevation = rc.senseElevation(tileToCheck);
+                        bestLocation = tileToCheck;
+                    }
+                }
+            }
+
+            if(rc.isReady()){
+                if (Math.random() < .8) {
+                    if (bestLocation != null) {
+                        rc.depositDirt(rc.getLocation().directionTo(bestLocation));
+                    }
+                } else {
+                    if (bestLocation != null && rc.canMove(rc.getLocation().directionTo(bestLocation))){
+                        rc.move(rc.getLocation().directionTo(bestLocation));
+                    }
+                }
+            }
+
+        } else {
+            takeTurnAtEnemyHQ();
+        }
+    }
+
+
+    public void takeTurnAtEnemyHQ() throws GameActionException {
+        // If next to enemy building, try to bury it
+        RobotInfo[] robots = rc.senseNearbyRobots(30, rc.getTeam().opponent());
+        for(RobotInfo robot : robots){
+            if(robot.getType() == RobotType.DESIGN_SCHOOL || robot.getType() == RobotType.REFINERY){
+                System.out.println("Found enemy building");
+
+                if(rc.getLocation().isAdjacentTo(robot.location)){
+                    if(rc.getDirtCarrying() == 0){
+                        for(Direction dir : Util.directions){
+                            if(rc.canDigDirt(dir)){
+                                rc.digDirt(dir);
+                            }
+                        }
+                    } else {
+                        if(rc.canDepositDirt(rc.getLocation().directionTo(robot.location))){
+                            rc.depositDirt(rc.getLocation().directionTo(robot.location));
+                        }
+                    }
+                } else {
+                    nav.goTo(robot.location);
+                }
+            }
+        }
+
+        // If no enemy robots nearby, try to head to hq
+        if(robots.length == 0)
+            nav.goTo(hqLoc);
+    }
+
 
     // Digs up or down depending on the elevation
     void digToDir(Direction toGo) throws GameActionException {

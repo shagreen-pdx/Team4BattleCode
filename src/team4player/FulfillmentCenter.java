@@ -7,20 +7,15 @@ import java.util.ArrayList;
 public class FulfillmentCenter extends Building{
 
     int numDeliveryDrones = 0;
-
     public FulfillmentCenter(RobotController r){
         super(r);
     }
 
     public void takeTurn() throws GameActionException {
-
-//        numDeliveryDrones += comms.getNewDeliveryDroneCount();
-
         if(!comms.broadcastedCreation){
             comms.broadcastedCreation = comms.broadcastMessage(rc.getLocation(), 4);
         }
         System.out.println(numDeliveryDrones);
-
         decipherCurrentBlockChainMessage();
 
         if(canBuild && rc.getTeamSoup() > 210){

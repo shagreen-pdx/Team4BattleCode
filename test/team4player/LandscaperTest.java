@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.internal.configuration.MockAnnotationProcessor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,15 +17,17 @@ import static org.mockito.Mockito.*;
 
 public class LandscaperTest {
     @Mock
+    ArrayList<MapLocation> enemyBuildings;
+    @Mock
     Navigation nav;
+    @Mock
+    ArrayList<MapLocation> floodedLocations;
     @Mock
     ArrayList<MapLocation> posEnemyHqLoc;
     @Mock
-    ArrayList<Integer> teamMessages;
+    ArrayList<int[]> teamMessages;
     @Mock
     RobotController rc;
-    @Mock
-    Robot robot;
     @Mock
     Communications comms;
     @InjectMocks
@@ -39,55 +40,63 @@ public class LandscaperTest {
 
     @Test(expected = NullPointerException.class)
     public void testTakeTurn() throws Exception {
+        when(nav.tryMoveForward(any())).thenReturn(true);
         when(nav.goTo((Direction) any())).thenReturn(true);
-        //when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int>(Arrays.asList(new int[]{0})));
+        when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int[]>(Arrays.asList(new int[]{0})));
 
         landscaper.takeTurn();
     }
 
     @Test
     public void testTakeTurnJob() throws Exception {
-        MapLocation enemyHqLoc = null;
-        boolean result = landscaper.takeTurnJob(true);
-        Assert.assertEquals(true, result);
+        landscaper.takeTurnJob();
     }
 
     @Test(expected = NullPointerException.class)
     public void testTakeTurnRush() throws Exception {
+        when(nav.tryMoveForward(any())).thenReturn(true);
         when(nav.goTo((Direction) any())).thenReturn(true);
 
-        boolean result = landscaper.takeTurnRush(true);
-        Assert.assertEquals(true, result);
+        landscaper.takeTurnRush();
     }
 
     @Test(expected = NullPointerException.class)
-    public void testTakeTurnRushFalse() throws Exception {
-        when(nav.goTo((Direction) any())).thenReturn(false);
+    public void testTakeTurnRest() throws Exception {
+        when(nav.goTo((Direction) any())).thenReturn(true);
 
-        boolean result = landscaper.takeTurnRush(true);
-        Assert.assertEquals(false, result);
+        landscaper.takeTurnRest();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testTakeTurnAtEnemyHQ() throws Exception {
+        when(nav.goTo((Direction) any())).thenReturn(true);
+
+        landscaper.takeTurnAtEnemyHQ();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testDigToDir() throws Exception {
+        landscaper.digToDir(Direction.NORTH);
     }
 
     @Test
-    public void testTryDig() throws Exception {
-        boolean result = landscaper.tryDig();
-        Assert.assertEquals(false, result);
+    public void testDigDown() throws Exception {
+        landscaper.digDown(Direction.NORTH);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
+    public void testDigUp() throws Exception {
+        landscaper.digUp(Direction.NORTH);
+    }
+
+    @Test
     public void testDecipherAllBlockChainMessages() throws Exception {
-        MapLocation hqLoc = null;
-        int[] message1 = {0,0,1,1,2,2};
-        int[] message2 = {0,0,1,1,2,2};
-        robot.teamMessages.add(message1);
-        robot.teamMessages.add(message2);
-        boolean result = landscaper.decipherAllBlockChainMessages();
-        Assert.assertEquals(true, result);
+        landscaper.decipherAllBlockChainMessages();
     }
 
     @Test(expected = NullPointerException.class)
     public void testDecipherCurrentBlockChainMessage() throws Exception {
-        //when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int>(Arrays.asList(new int[]{0})));
+        when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int[]>(Arrays.asList(new int[]{0})));
 
         landscaper.decipherCurrentBlockChainMessage();
     }
@@ -96,4 +105,18 @@ public class LandscaperTest {
     public void testCalcPosEnemyHqLoc() throws Exception {
         landscaper.calcPosEnemyHqLoc();
     }
+
+    @Test(expected = NullPointerException.class)
+    public void testIsPickable() throws Exception {
+        boolean result = landscaper.isPickable(null);
+        Assert.assertEquals(true, result);
+    }
+
+    @Test
+    public void testGetClosestLoc() throws Exception {
+        MapLocation result = landscaper.getClosestLoc(new ArrayList<MapLocation>(Arrays.asList()));
+        Assert.assertEquals(null, result);
+    }
 }
+
+//Generated with love by TestMe :) Please report issues and submit feature requests at: http://weirddev.com/forum#!/testme

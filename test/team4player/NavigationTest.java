@@ -59,7 +59,7 @@ public class NavigationTest {
     Assert.assertEquals(false, result);
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testFlyTo() throws Exception {
     boolean result = navigation.flyTo(Direction.NORTH);
     Assert.assertEquals(false, result);

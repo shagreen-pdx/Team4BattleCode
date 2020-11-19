@@ -16,18 +16,22 @@ import java.util.Arrays;
 import static org.mockito.Mockito.*;
 
 public class DeliveryDroneTest4 {
+    //Field locEnemyBot of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
     @Mock
     ArrayList<MapLocation> refineryLocations;
-    @Mock
-    ArrayList<MapLocation> floodedLocations;
+    //Field enemyHqSymetric of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
+    //Field enemyHqHorizontal of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
+    //Field enemyHqVertical of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
     //Field enemyHqLoc of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
     //Field hqLoc of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
     @Mock
     Navigation nav;
     @Mock
+    ArrayList<MapLocation> floodedLocations;
+    @Mock
     ArrayList<MapLocation> posEnemyHqLoc;
     @Mock
-    ArrayList<Integer> teamMessages;
+    ArrayList<int[]> teamMessages;
     @Mock
     RobotController rc;
     @Mock
@@ -42,21 +46,20 @@ public class DeliveryDroneTest4 {
 
     @Test(expected = NullPointerException.class)
     public void testTakeTurn() throws Exception {
-//        when(nav.tryFly(any())).thenReturn(true);
-//        when(nav.flyTo((Direction) any())).thenReturn(true);
-//        when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
-//        when(comms.broadcastMessage(anyInt(), anyInt())).thenReturn(true);
-        //when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<Integer>(Arrays.asList(new int[]{0})));
+        when(nav.tryFly(any())).thenReturn(true);
+        when(nav.flyTo((Direction) any())).thenReturn(true);
+        when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
+        when(comms.broadcastMessage(anyInt(), anyInt())).thenReturn(true);
+        when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int[]>(Arrays.asList(new int[]{0})));
 
         deliveryDrone.takeTurn();
     }
 
     @Test(expected = NullPointerException.class)
-    public void testTakeTurnBot() throws Exception {
-        deliveryDrone.haveEnemyBot = true;
+    public void testTakeTurnEnemyBot() throws Exception {
         when(nav.tryFly(any())).thenReturn(true);
 
-        deliveryDrone.takeTurnBot();
+        deliveryDrone.takeTurnEnemyBot();
     }
 
     @Test(expected = NullPointerException.class)
@@ -70,7 +73,6 @@ public class DeliveryDroneTest4 {
 
     @Test(expected = NullPointerException.class)
     public void testTakeTurnSearch() throws Exception {
-        deliveryDrone.search = true;
         when(nav.tryFly(any())).thenReturn(true);
         when(nav.flyTo((Direction) any())).thenReturn(true);
         when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
@@ -81,12 +83,13 @@ public class DeliveryDroneTest4 {
     @Test(expected = NullPointerException.class)
     public void testTakeTurnRest() throws Exception {
         when(nav.tryFly(any())).thenReturn(true);
+        when(nav.flyTo((Direction) any())).thenReturn(true);
+
         deliveryDrone.takeTurnRest();
     }
 
     @Test(expected = NullPointerException.class)
     public void testSearchForEnemyHq() throws Exception {
-        posEnemyHqLoc = null;
         when(nav.flyTo((Direction) any())).thenReturn(true);
         when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
 
@@ -102,9 +105,16 @@ public class DeliveryDroneTest4 {
 
     @Test(expected = NullPointerException.class)
     public void testPickupEnemyBots() throws Exception {
-        when(nav.tryFly(any())).thenReturn(true);
+        when(nav.flyTo((Direction) any())).thenReturn(true);
 
         deliveryDrone.pickupEnemyBots();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testMoveLandscaper() throws Exception {
+        when(nav.tryFly(any())).thenReturn(true);
+
+        deliveryDrone.moveLandscaper();
     }
 
     @Test
@@ -114,25 +124,32 @@ public class DeliveryDroneTest4 {
 
     @Test(expected = NullPointerException.class)
     public void testDecipherCurrentBlockChainMessage() throws Exception {
-        //when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int>(Arrays.asList(new int[]{0})));
+        when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int[]>(Arrays.asList(new int[]{0})));
 
         deliveryDrone.decipherCurrentBlockChainMessage();
     }
 
     @Test
     public void testRecordWater() throws Exception {
-        deliveryDrone.recordWater();
-    }
+        when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
 
-    @Test
-    public void testFindClosestFloodedLoc() throws Exception {
-        MapLocation result = deliveryDrone.findClosestFloodedLoc(new ArrayList<MapLocation>(Arrays.asList()));
-        //Assert.assertEquals(null, result);
+        deliveryDrone.recordWater();
     }
 
     @Test
     public void testCalcPosEnemyHqLoc() throws Exception {
         deliveryDrone.calcPosEnemyHqLoc();
     }
-}
 
+    @Test(expected = NullPointerException.class)
+    public void testIsPickable() throws Exception {
+        boolean result = deliveryDrone.isPickable(null);
+        Assert.assertEquals(true, result);
+    }
+
+    @Test
+    public void testGetClosestLoc() throws Exception {
+        MapLocation result = deliveryDrone.getClosestLoc(new ArrayList<MapLocation>(Arrays.asList()));
+        Assert.assertEquals(null, result);
+    }
+}
