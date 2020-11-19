@@ -5,6 +5,8 @@ import battlecode.common.RobotController;
 
 public class Building extends Robot{
 
+    boolean canBuild = true;
+
     public Building(RobotController r){
         super(r);
     }
