@@ -7,7 +7,7 @@ import java.util.Map;
 public class Communications {
     RobotController rc;
 
-    static final int teamSecret = 77;
+    static final int teamSecret = 9234;
     public static boolean broadcastedCreation = false;
     public static boolean rush = false;
 
@@ -21,7 +21,8 @@ public class Communications {
             "Search for hq", // 5
             "Enemy HQ loc", // 6
             "Build Design School", // 7
-            "Rush HQ" // 8
+            "Rush HQ", // 8
+            "Vaporator loc" //9
     };
 
 
