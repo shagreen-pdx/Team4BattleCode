@@ -5,10 +5,13 @@ name: Java CI with Gradle
 
 on:
   push:
+    branches:
+      - yufei
   pull_request:
     branches: 
       - master
       - new-dev
+
 jobs:
   build:
 
