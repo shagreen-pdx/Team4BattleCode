@@ -2,7 +2,6 @@ package team4player;
 
 import battlecode.common.RobotController;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -13,25 +12,24 @@ import java.util.ArrayList;
 import static org.mockito.Mockito.*;
 
 public class RefineryTest {
-  @Mock
-  ArrayList<Integer> teamMessages;
-  @Mock
-  RobotController rc;
-  @Mock
-  Communications comms;
-  @InjectMocks
-  Refinery refinery;
+    @Mock
+    RobotController rc;
+    @Mock
+    Communications comms;
+    @InjectMocks
+    Refinery refinery;
 
-  @Before
-  public void setUp() {
-    MockitoAnnotations.initMocks(this);
-  }
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
 
-  @Ignore
-  @Test (expected = NullPointerException.class)
-  public void testTakeTurn() throws Exception {
-    when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
+    @Test
+    public void testTakeTurnBroadcastedCreation() throws Exception {
+        comms.broadcastedCreation = true;
+        when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
 
-    refinery.takeTurn();
-  }
+        refinery.takeTurn();
+    }
 }
+

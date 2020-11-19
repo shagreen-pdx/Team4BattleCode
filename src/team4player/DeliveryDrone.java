@@ -16,7 +16,7 @@ public class DeliveryDrone extends Unit{
     ArrayList<MapLocation> refineryLocations = new ArrayList<MapLocation>();
     int currentlyHeldRobotId = 0;
     boolean haveEnemyBot = false;
-    boolean search = true;
+    boolean search = false;
     boolean rush = false;
 
     public DeliveryDrone(RobotController r){
@@ -325,12 +325,16 @@ public class DeliveryDrone extends Unit{
         // If flooded location is not near other recorded flooded locations, broadcast location.
         if(rc.senseFlooding(curLoc)){
             if(!floodedLocations.isEmpty()){
+                boolean toClose = false;
                 for(MapLocation floodedLoc : floodedLocations){
                     System.out.println("found flooded location");
-                    if(floodedLoc.distanceSquaredTo(curLoc) > 15){
-                        System.out.println("broadcast");
-                        comms.broadcastMessage(curLoc, 11);
+                    if(floodedLoc.distanceSquaredTo(curLoc) < 15){
+                        toClose = true;
                     }
+                }
+                if(!toClose){
+                    System.out.println("broadcast");
+                    comms.broadcastMessage(curLoc, 11);
                 }
             } else {
                 comms.broadcastMessage(curLoc, 11);

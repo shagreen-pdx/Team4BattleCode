@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class Miner extends Unit{
 
+    boolean isStuck = false;
     int stuck = 0;
     boolean buildDesignSchool = false;
     int numDesignSchools = 0;
@@ -25,6 +26,19 @@ public class Miner extends Unit{
         // Destroy self
         if(stuck > 500){
             rc.disintegrate();
+        }
+
+        //allow enough time to pass for miners to no longer be moving randomly
+        if(rc.getRoundNum() > 150) {
+            //check if the miner is stuck
+            trackPreviousLocations(rc.getLocation());
+            if (isStuck) {
+                System.out.println(nav.prevLocations);
+                if (!tryUnstuck()) {
+                    System.out.println("Miner cannot get unstuck.");
+                    //call a drone to pick you up?
+                }
+            }
         }
 
         if(!teamMessagesSearched){
@@ -107,7 +121,7 @@ public class Miner extends Unit{
         if(rc.getSoupCarrying() == rc.getType().soupLimit) {
             System.out.println("At soup carrying limit " + rc.getType().soupLimit);
             // If early in the game head to hq, else head to closest refinery
-            if(rc.getRoundNum() < 150){
+            if(rc.getRoundNum() < 150 || refineryLocations.size() < 1){
                 nav.goTo(hqLoc);
             } else {
                 MapLocation closestRefinery = getClosestLoc(refineryLocations);
@@ -139,6 +153,7 @@ public class Miner extends Unit{
             MapLocation targetSoupLoc = soupLocations.get(0);
             if(rc.canSenseLocation(targetSoupLoc) && rc.senseSoup(targetSoupLoc) == 0){
                 soupLocations.remove(0);
+                comms.broadcastMessage(targetSoupLoc, 13);
             }
         }
     }
@@ -263,6 +278,48 @@ public class Miner extends Unit{
             else if (message[1] == 7 && message[4] == rc.getID()){
                 buildDesignSchool = true;
             }
+            else if (message[1] == 13){
+                MapLocation soupGone = new MapLocation(message[2], message[3]);
+                if(soupLocations.contains(soupGone)){
+                    soupLocations.remove(soupGone);
+                }
+            }
+        }
+    }
+
+    void trackPreviousLocations(MapLocation location){
+         double distTravelled = 0;
+         //check if the miner has moved 10 times before checking how far it's moved in those last 10 moves
+         if(nav.prevLocations.size() > 10) {
+             //find furthest distance travelled
+             for (MapLocation loc : nav.prevLocations) {
+                 double temp = Math.sqrt(Math.pow(loc.x - location.x, 2) + Math.pow(loc.y - location.y, 2));
+                 if (temp > distTravelled) {
+                     distTravelled = temp;
+                 }
+             }
+             //if distance is less than 2, the miner is stuck
+             if (distTravelled < 2) {
+                 System.out.println("Miner is stuck.");
+                 isStuck = true;
+             }
+         }
+        return;
+    }
+
+    boolean tryUnstuck(){
+         //if the miner is stuck and is trying to get to a specific location, remove that location so it can go somewhere else
+        if (nav.targetDestination != null){
+            if (soupLocations.contains(nav.targetDestination)){
+                soupLocations.remove(nav.targetDestination);
+            }
+            if (refineryLocations.contains(nav.targetDestination)){
+                refineryLocations.remove(nav.targetDestination);
+            }
+            return true;
+        }
+        else{
+            return false;
         }
     }
 }
