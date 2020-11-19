@@ -6,18 +6,13 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.scalatest.Ignore;
 
 import java.util.ArrayList;
 
 import static org.mockito.Mockito.*;
 
 public class VaporatorTest {
-    @Mock
-    ArrayList<Integer> teamMessages;
-    @Mock
-    RobotController rc;
-    @Mock
-    Communications comms;
     @InjectMocks
     Vaporator vaporator;
 
@@ -26,12 +21,11 @@ public class VaporatorTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testTakeTurn() throws Exception {
         vaporator.takeTurn();
     }
-
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testTakeTurn2() throws Exception {
         vaporator.takeTurn();
     }
