@@ -8,11 +8,12 @@ import battlecode.common.RobotController;
 import java.util.ArrayList;
 
 public class Navigation {
-    boolean stuck = false;
+
     RobotController rc;
     int mapHeight;
     int mapWidth;
     ArrayList<MapLocation> prevLocations = new ArrayList<MapLocation>();
+    MapLocation targetDestination;
 
     public Navigation(RobotController r){
         rc = r;
@@ -68,6 +69,7 @@ public class Navigation {
     }
 
     boolean goTo(MapLocation destination) throws GameActionException {
+        targetDestination = destination;
         return goTo(rc.getLocation().directionTo(destination));
     }
 
