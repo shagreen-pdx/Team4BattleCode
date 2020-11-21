@@ -6,6 +6,8 @@ import java.util.ArrayList;
 
 public class HQ extends Building{
 
+    boolean rushFailed = false;
+
     int numRobotsAdjacentToHq = 0;
     boolean hqAttacked = false;
     static int numMiners = 0;
@@ -20,10 +22,17 @@ public class HQ extends Building{
         // Broadcast location
         if(turnCount == 1) {
             comms.broadcastMessage(rc.getLocation(), 0);
+        } else {
+            // Every turn try to decipher blockchain messages
+            decipherCurrentBlockChainMessage();
         }
 
-        // Every turn try to decipher blockchain messages
-        decipherCurrentBlockChainMessage();
+        // Check if rush failed
+        if(!rushFailed){
+            if(rc.getRoundNum() > 125 && enemyHqLoc == null ){
+                rushFailed = comms.broadcastMessage(14, 2);
+            }
+        }
 
 
         if(!hqAttacked){
@@ -44,17 +53,17 @@ public class HQ extends Building{
         }
 
         // Every turn try broadcast the number of robots around hq
-        RobotInfo [] robotsAdjacentToHq = rc.senseNearbyRobots(3);
-        int currentNumRobotsAroundHq = 0;
-        for(RobotInfo robot : robotsAdjacentToHq){
-            ++currentNumRobotsAroundHq;
-        }
-        System.out.println(numRobotsAdjacentToHq);
-        System.out.println(currentNumRobotsAroundHq);
-        if(currentNumRobotsAroundHq != numRobotsAdjacentToHq){
-            numRobotsAdjacentToHq = currentNumRobotsAroundHq;
-            comms.broadcastMessage(numRobotsAdjacentToHq, 12);
-        }
+//        RobotInfo [] robotsAdjacentToHq = rc.senseNearbyRobots(3);
+//        int currentNumRobotsAroundHq = 0;
+//        for(RobotInfo robot : robotsAdjacentToHq){
+//            ++currentNumRobotsAroundHq;
+//        }
+//        System.out.println(numRobotsAdjacentToHq);
+//        System.out.println(currentNumRobotsAroundHq);
+//        if(currentNumRobotsAroundHq != numRobotsAdjacentToHq){
+//            numRobotsAdjacentToHq = currentNumRobotsAroundHq;
+//            comms.broadcastMessage( 12, numRobotsAdjacentToHq, 1);
+//        }
 
         // Try and shoot robots
         RobotInfo [] robots = rc.senseNearbyRobots(49, rc.getTeam().opponent());
@@ -67,7 +76,7 @@ public class HQ extends Building{
         }
 
         // Try and build miners
-        if((numMiners < 5 && rc.getTeamSoup() > 300) || rc.getRoundNum() < 50){
+        if(numMiners < 4){
             for (Direction dir : Util.directions){
                 if(tryBuild(RobotType.MINER, dir)){
                     ++numMiners;
@@ -77,7 +86,7 @@ public class HQ extends Building{
     }
 
     // Read block chain messages
-    public void decipherCurrentBlockChainMessage() throws GameActionException {
+    public void decipherEnemyBlockChainMessage() throws GameActionException {
         ArrayList<int []> currentBlockChainMessage = comms.getEnemyPrevRoundMessages();
         for(int [] message : currentBlockChainMessage){
             // Try dumb hack
@@ -88,11 +97,26 @@ public class HQ extends Building{
             enemyMessage[3] = 0;
 
 
-            if(rc.canSubmitTransaction(enemyMessage, 3)){
-                rc.submitTransaction(enemyMessage, 3);
+            if(rc.canSubmitTransaction(enemyMessage, 1)){
+                rc.submitTransaction(enemyMessage, 1);
                 System.out.println("Broadcasted Enemy message");
             }else {
                 System.out.println("failed to broadcast");
+            }
+        }
+    }
+
+    // Decipher current blockchain messages
+    public void decipherCurrentBlockChainMessage() throws GameActionException {
+        ArrayList<int []> currentBlockChainMessage = comms.getPrevRoundMessages();
+        for(int [] message : currentBlockChainMessage){
+            // Add enemy buildings
+            if (message[1] == 6) {
+                enemyHqLoc = new MapLocation(message[2], message[3]);
+            }
+            // Add enemy hq loc
+            else if (message[1] == 14) {
+                rush = false;
             }
         }
     }

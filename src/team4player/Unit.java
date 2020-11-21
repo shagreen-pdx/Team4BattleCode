@@ -6,11 +6,11 @@ import com.sun.javafx.collections.MappingChange;
 import java.util.ArrayList;
 
 public class Unit extends Robot{
+
     MapLocation enemyHqSymetric;
     MapLocation enemyHqHorizontal;
     MapLocation enemyHqVertical;
 
-    MapLocation enemyHqLoc = null;
     MapLocation hqLoc = null;
     Navigation nav;
     ArrayList<MapLocation> floodedLocations = new ArrayList<MapLocation>();
@@ -81,5 +81,16 @@ public class Unit extends Robot{
             }
         }
         return closestLoc;
+    }
+
+    // Returns true if found robot type
+    public boolean findRobot(RobotInfo[] robots, RobotType robotType){
+        for(RobotInfo robot : robots){
+            System.out.println(robot.type);
+            if(robot.type == RobotType.HQ){
+                return true;
+            }
+        }
+        return false;
     }
 }

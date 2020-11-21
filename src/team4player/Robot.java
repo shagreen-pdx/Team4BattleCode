@@ -4,6 +4,9 @@ import battlecode.common.*;
 import java.util.ArrayList;
 
 public class Robot {
+
+    MapLocation enemyHqLoc = null;
+    boolean rush = false;
     ArrayList<int []> teamMessages = new ArrayList<int []>();
     boolean teamMessagesSearched = false;
     RobotController rc;
