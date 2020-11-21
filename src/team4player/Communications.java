@@ -2,6 +2,7 @@ package team4player;
 import battlecode.common.*;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class Communications {
     RobotController rc;
@@ -9,6 +10,7 @@ public class Communications {
     public final int secretCode = 9234;
     public static boolean broadcastedCreation = false;
     public static boolean rush = false;
+    public ArrayList<int[]> messageBacklog = new ArrayList<>();
 
     // Get secret code
     public int getSecretCode(){ return this.secretCode + rc.getRoundNum(); }
@@ -28,7 +30,8 @@ public class Communications {
             "Enemy Design School", // 10
             "Flooded Location", // 11
             "num units around hq", // 12
-            "Remove Soup Location" //13
+            "Remove Soup Location", //13
+            "Rush Failed" // 14
     };
 
 
@@ -51,25 +54,56 @@ public class Communications {
         return false;
     }
 
-    // Send message to specific robot
-    public boolean broadcastMessage(int id, int messageIndex) throws GameActionException {
+    // Sends message
+    public boolean broadcastMessage(int messageIndex, int cost) throws GameActionException {
         int [] message = new int [7];
         message[0] = (secretCode + rc.getRoundNum());
         message[1] = messageIndex; //index of message type - 6 = landscaper location
-        message[4] = id;
 
-        if(rc.canSubmitTransaction(message, 3)){
-            rc.submitTransaction(message, 3);
+        if(rc.canSubmitTransaction(message, cost)){
+            rc.submitTransaction(message, cost);
+            return true;
+        }
+        return false;
+    }
+
+    // Sends message with location
+    public boolean broadcastMessage(int messageIndex, MapLocation loc, int cost) throws GameActionException {
+        int [] message = new int [7];
+        message[0] = (secretCode + rc.getRoundNum());
+        message[1] = messageIndex; //index of message type - 6 = landscaper location
+        message[2] = loc.x;
+        message[3] = loc.y;
+
+        if(rc.canSubmitTransaction(message, cost)){
+            rc.submitTransaction(message, cost);
             return true;
         }
         return false;
     }
 
 
+    // Send message to specific robot
+    public boolean broadcastMessage(int messageIndex, int id, int cost) throws GameActionException {
+        int [] message = new int [7];
+        message[0] = (secretCode + rc.getRoundNum());
+        message[1] = messageIndex; //index of message type - 6 = landscaper location
+        message[4] = id;
+
+        if(rc.canSubmitTransaction(message, cost)){
+            rc.submitTransaction(message, cost);
+            return true;
+        }
+        return false;
+    }
+
+
+
+
     // Used in robot.java. After robot is created, it searches through the blockchain for team messages
     public void getAllTeamMessages(ArrayList<int []> teamMessages) throws GameActionException {
 
-        for(int i = 1; i < rc.getRoundNum(); i++) {
+        for(int i = 1; i < rc.getRoundNum();    i++) {
 
             for (Transaction tx : rc.getBlock(i)) {
                 int[] myMessage = tx.getMessage();
@@ -104,5 +138,26 @@ public class Communications {
             }
         }
         return currentRoundMessages;
+    }
+
+    // Try and get enemy hq loc
+    public MapLocation getEnemyHqLocFromBlockChain(ArrayList<MapLocation> posEnemyLocations) throws GameActionException{
+        ArrayList<int []> currentRoundMessages = new ArrayList<int []>();
+
+        for (Transaction tx : rc.getBlock(1)) {
+            int[] message = tx.getMessage();
+
+            // If enemy message
+            if(message[0] != 9235){
+                for(MapLocation loc : posEnemyLocations){
+                    if (message[2] == loc.x && message[3] == loc.y) {
+                        // Confirmed Enemy Location
+                        System.out.println("CONFIRMED ENEMY LOCATION");
+                        return loc;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
