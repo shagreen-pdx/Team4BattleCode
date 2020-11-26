@@ -86,8 +86,18 @@ public class Unit extends Robot{
     // Returns true if found robot type
     public boolean findRobot(RobotInfo[] robots, RobotType robotType){
         for(RobotInfo robot : robots){
+            if(robotType == robot.type){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Returns true if found robot type
+    public boolean findRobot(RobotInfo[] robots, RobotType robotType, Team team){
+        for(RobotInfo robot : robots){
             System.out.println(robot.type);
-            if(robot.type == RobotType.HQ){
+            if(team == robot.team && robotType == robot.type){
                 return true;
             }
         }

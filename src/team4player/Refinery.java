@@ -17,7 +17,7 @@ public class Refinery extends Building{
             comms.broadcastedCreation = comms.broadcastMessage(rc.getLocation(),3);
         }
         int old_soup = rc.getTeamSoup();
-        //System.out.println("Pollution(sense): " + rc.sensePollution(rc.getLocation()));
+        //// System.out.println("Pollution(sense): " + rc.sensePollution(rc.getLocation()));
         System.out.println("Team Soup deposited: " + rc.getTeamSoup());
         System.out.println("Soup Refined: " + min(RobotType.REFINERY.maxSoupProduced, rc.getSoupCarrying()));
         System.out.println("Globe pollution level: " + RobotType.REFINERY.globalPollutionAmount);
