@@ -19,7 +19,7 @@ object RobotPlayer {
     // and to get information on its current status.
     RobotPlayer.rc = rc
     turnCount = 0
-    System.out.println("I'm a " + rc.getType + " and I just got created!")
+
     while (true) {
       turnCount += 1
 
@@ -65,10 +65,12 @@ object RobotPlayer {
       tryBuild(RobotType.FULFILLMENT_CENTER, dir)
     }
     for (dir <- directions) {
-      if (tryRefine(dir)) System.out.println("I refined soup! " + rc.getTeamSoup)
+      tryRefine(dir);
+      System.out.println("I refined soup! " + rc.getTeamSoup);
     }
     for (dir <- directions) {
-      if (tryMine(dir)) System.out.println("I mined soup! " + rc.getSoupCarrying)
+      tryMine(dir);
+      System.out.println("I mined soup! " + rc.getSoupCarrying);
     }
   }
 
