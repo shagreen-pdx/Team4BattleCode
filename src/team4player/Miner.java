@@ -102,7 +102,7 @@ public class Miner extends Unit {
         robotsSensedDuringTurn = rc.senseNearbyRobots(-1, rc.getTeam());
 
         // Check if refinery is near
-        if(findRobot(robotsSensedDuringTurn, RobotType.REFINERY, rc.getTeam())){
+        if(isNearbyRobot(robotsSensedDuringTurn, RobotType.REFINERY, rc.getTeam())){
             return false;
         }
 
@@ -322,7 +322,7 @@ public class Miner extends Unit {
                 nav.goTo(enemyHqLoc);
             }
         } else {
-            if (findRobot(robotsSensedDuringTurn, RobotType.DELIVERY_DRONE)) {
+            if (isNearbyRobot(robotsSensedDuringTurn, RobotType.DELIVERY_DRONE)) {
                 if (builtNetGun == 0) {
                     builtNetGun = buildInDirection(RobotType.NET_GUN, Direction.CENTER);
                 }
@@ -349,14 +349,12 @@ public class Miner extends Unit {
 
         if (buildDesignSchool) {
             if (rc.getTeamSoup() >= 152) {
-                if (!nearbyRobot(RobotType.DESIGN_SCHOOL, rc.getTeam())) {
-                    for (Direction dir : Util.directions) {
+                for (Direction dir : Util.directions) {
 
-                        if (tryBuildBuilding(RobotType.DESIGN_SCHOOL, dir)) {
-                            buildDesignSchool = false;
-                            RobotInfo designSchool = rc.senseRobotAtLocation(rc.getLocation().add(dir));
-                            comms.broadcastMessage(8, designSchool.ID, 2);
-                        }
+                    if (tryBuildBuilding(RobotType.DESIGN_SCHOOL, dir)) {
+                        buildDesignSchool = false;
+                        RobotInfo designSchool = rc.senseRobotAtLocation(rc.getLocation().add(dir));
+                        comms.broadcastMessage(8, designSchool.ID, 2);
                     }
                 }
             }
@@ -405,6 +403,7 @@ public class Miner extends Unit {
             }
         }
 
+
         System.out.println("NUM DESIGN: " + numDesignSchools);
         if (numDesignSchools < 1 && canBuild) {
             Direction dir = Util.randomDirection();
@@ -415,12 +414,10 @@ public class Miner extends Unit {
         }
 
         if (numFulfillmentCenters < 1 && canBuild) {
-            if (!nearbyRobot(RobotType.FULFILLMENT_CENTER)) {
-                Direction dir = Util.randomDirection();
-                if (tryBuildBuilding(RobotType.FULFILLMENT_CENTER, dir)) {
-                    System.out.println("Built Fulfillment Center");
-                    comms.broadcastMessage(4, 1);
-                }
+            Direction dir = Util.randomDirection();
+            if (tryBuildBuilding(RobotType.FULFILLMENT_CENTER, dir)) {
+                System.out.println("Built Fulfillment Center");
+                comms.broadcastMessage(4, 1);
             }
         }
 
