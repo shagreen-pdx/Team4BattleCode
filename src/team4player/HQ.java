@@ -16,6 +16,8 @@ public class HQ extends Building{
     }
     boolean wallBuilt = false;
 
+    ArrayList<MapLocation> allEnemyDesignSchoolLocations = new ArrayList<>();
+
     public void takeTurn() throws GameActionException {
         super.takeTurn();
 
@@ -31,40 +33,29 @@ public class HQ extends Building{
 //            if(turnCount % 2 == 0){
 //                decipherEnemyBlockChainMessage();
 //            }
-//
-//            // Every turn try broadcast the number of robots around hq
-//            RobotInfo [] robotsAdjacentToHq = rc.senseNearbyRobots(3);
-//            int currentNumRobotsAroundHq = 0;
-//            for(RobotInfo robot : robotsAdjacentToHq){
-//                ++currentNumRobotsAroundHq;
-//            }
-//            System.out.println(numRobotsAdjacentToHq);
-//            System.out.println(currentNumRobotsAroundHq);
-//            if(currentNumRobotsAroundHq != numRobotsAdjacentToHq){
-//                numRobotsAdjacentToHq = currentNumRobotsAroundHq;
-//                comms.broadcastMessage( 12, numRobotsAdjacentToHq, 1);
-//            }
 //        }
 
+        RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1,rc.getTeam().opponent());
 
+
+        // Check to see if attacked
         if(!hqAttacked){
-            RobotInfo[] robots = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(),rc.getTeam().opponent());
-            if(robots.length != 0){
+            // If enemy rush happens first, call off rush
+            if(enemyRobots.length != 0 && !rush){
+                comms.broadcastMessage(14, 2);
                 hqAttacked = true;
-                for(RobotInfo robot : robots){
-                    // If enemy units found, broadcast warning
-                    if(robot.getType() == RobotType.MINER || robot.getType() == RobotType.LANDSCAPER){
-                        comms.broadcastMessage(robot.location,9);
-                    }
-                    // Broadcast enemy design school location
-                    if(robot.getType() == RobotType.DESIGN_SCHOOL){
-                        comms.broadcastMessage(robot.location, 10);
-                    }
-                }
             }
+        } else {
+            // If HQ is attack
+            // Broadcast the number of robots around hq
+            RobotInfo [] robotsAdjacentToHq = rc.senseNearbyRobots(3);
+            broadcastNumUnitsAdjacentToHq(robotsAdjacentToHq);
         }
 
-        shootEnemyDrones();
+        if (enemyRobots.length != 0){
+            defendHq(enemyRobots);
+        }
+
 
         // Try and build miners
         if(numMiners < 4){
@@ -119,15 +110,35 @@ public class HQ extends Building{
         }
     }
 
-    public void shootEnemyDrones() throws GameActionException {
-        // Try and shoot robots
-        RobotInfo [] robots = rc.senseNearbyRobots(49, rc.getTeam().opponent());
-        for(RobotInfo robot : robots){
+    // Depending on the unit type, perform different defensive actions
+    public void defendHq(RobotInfo[] enemyRobots) throws GameActionException{
+        for(RobotInfo robot : enemyRobots){
+            // Shoot Delivery Drones
             if(robot.getType() == RobotType.DELIVERY_DRONE){
                 if(rc.canShootUnit(robot.getID())){
                     rc.shootUnit(robot.getID());
                 }
             }
+
+            // If enemy units found, broadcast warning
+            if(robot.getType() == RobotType.MINER || robot.getType() == RobotType.LANDSCAPER){
+                comms.broadcastMessage(9,robot.location,1);
+            }
+            // Broadcast enemy design school location
+            if(robot.getType() == RobotType.DESIGN_SCHOOL){
+                if(!allEnemyDesignSchoolLocations.contains(robot.location)){
+                    comms.broadcastMessage(10, robot.location, 2);
+                }
+            }
+        }
+    }
+
+    public void broadcastNumUnitsAdjacentToHq(RobotInfo[] robotsAdjacentToHq) throws GameActionException {
+        int currentNumRobotsAroundHq = robotsAdjacentToHq.length;
+
+        if(currentNumRobotsAroundHq != numRobotsAdjacentToHq){
+            numRobotsAdjacentToHq = currentNumRobotsAroundHq;
+            comms.broadcastMessage( 12, numRobotsAdjacentToHq, 1);
         }
     }
 }
