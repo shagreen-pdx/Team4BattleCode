@@ -6,6 +6,7 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -41,16 +42,17 @@ public class RobotTest {
     Assert.assertEquals(false, result);
   }
 
-  @Test (expected = NullPointerException.class)
-  public void testNearbyRobot() throws Exception {
-    boolean result = robot.nearbyRobot(RobotType.HQ);
-    Assert.assertEquals(true, result);
-  }
+//  @Ignore
+//  @Test (expected = NullPointerException.class)
+//  public void testNearbyRobot() throws Exception {
+//    boolean result = robot.nearbyRobot(RobotType.HQ);
+//    Assert.assertEquals(true, result);
+//  }
 
-  @Test(expected = NullPointerException.class)
-  public void testNearbyRobot2() throws Exception {
-    boolean result = robot.nearbyRobot(RobotType.HQ, Team.A);
-    String expectedMessage = "java.lang.NullPointerException";
-    Assert.assertEquals(expectedMessage, result);
-  }
+//  @Test(expected = NullPointerException.class)
+//  public void testNearbyRobot2() throws Exception {
+//    boolean result = robot.nearbyRobot(RobotType.HQ, Team.A);
+//    String expectedMessage = "java.lang.NullPointerException";
+//    Assert.assertEquals(expectedMessage, result);
+//  }
 }

@@ -4,6 +4,10 @@ import battlecode.common.*;
 import java.util.ArrayList;
 
 public class Robot {
+
+    int roundNumberToCallOffRushIfAttackNotStarted = 125;
+    MapLocation enemyHqLoc = null;
+    boolean rush = false;
     ArrayList<int []> teamMessages = new ArrayList<int []>();
     boolean teamMessagesSearched = false;
     RobotController rc;
@@ -39,27 +43,21 @@ public class Robot {
         } else return false;
     }
 
-
-    /**
-     * @param target the robot that we want to see if nearby
-     * @return true if target robot is nearby
-     * @throws GameActionException
-     */
-    boolean nearbyRobot(RobotType target) throws GameActionException{
-        RobotInfo[] robots = rc.senseNearbyRobots();
+    // Returns true if found robot type
+    public boolean isNearbyRobot(RobotInfo[] robots, RobotType robotType){
         for(RobotInfo robot : robots){
-            if(robot.getType() == target){
+            if(robotType == robot.type){
                 return true;
             }
         }
         return false;
     }
 
-
-    boolean nearbyRobot(RobotType target, Team team) throws GameActionException{
-        RobotInfo[] robots = rc.senseNearbyRobots();
+    // Returns true if found robot type
+    public boolean isNearbyRobot(RobotInfo[] robots, RobotType robotType, Team team){
         for(RobotInfo robot : robots){
-            if(robot.getType() == target && robot.getTeam() == team){
+            System.out.println(robot.type);
+            if(team == robot.team && robotType == robot.type){
                 return true;
             }
         }

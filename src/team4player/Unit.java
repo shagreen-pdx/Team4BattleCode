@@ -6,11 +6,11 @@ import com.sun.javafx.collections.MappingChange;
 import java.util.ArrayList;
 
 public class Unit extends Robot{
+
     MapLocation enemyHqSymetric;
     MapLocation enemyHqHorizontal;
     MapLocation enemyHqVertical;
 
-    MapLocation enemyHqLoc = null;
     MapLocation hqLoc = null;
     Navigation nav;
     ArrayList<MapLocation> floodedLocations = new ArrayList<MapLocation>();
@@ -82,4 +82,6 @@ public class Unit extends Robot{
         }
         return closestLoc;
     }
+
+
 }

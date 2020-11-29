@@ -14,6 +14,18 @@ public class Util {
             Direction.NORTHWEST
     };
 
+    static Direction[] miningDirections = {
+            Direction.NORTH,
+            Direction.NORTHEAST,
+            Direction.EAST,
+            Direction.SOUTHEAST,
+            Direction.SOUTH,
+            Direction.SOUTHWEST,
+            Direction.WEST,
+            Direction.NORTHWEST,
+            Direction.CENTER
+    };
+
     /**
      * Returns a random Direction.
      *

@@ -18,7 +18,6 @@ public class DeliveryDrone extends Unit{
     boolean haveEnemyBot = false;
     boolean haveCow = false;
     boolean search = false;
-    boolean rush = false;
 
     public DeliveryDrone(RobotController r){
         super(r);
@@ -79,7 +78,7 @@ public class DeliveryDrone extends Unit{
                 for (Direction dir : directions) {
                     if (rc.canDropUnit(dir) && !rc.senseFlooding(rc.getLocation().add(dir))) {
                         rc.dropUnit(dir);
-                        comms.broadcastMessage(currentlyHeldRobotId, 7);
+                        comms.broadcastMessage(7, currentlyHeldRobotId, 2);
                     }
                 }
                 nav.tryFly(randomDirection());
