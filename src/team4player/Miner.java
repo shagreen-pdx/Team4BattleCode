@@ -320,7 +320,14 @@ public class Miner extends Unit {
                 System.out.println(nav.prevLocations);
                 if (!tryUnstuck()) {
                     System.out.println("Miner cannot get unstuck.");
-                    //call a drone to pick you up?
+                    //if stuck, try to build a refineru
+                    if (canBuildRefinery(rc.getLocation())) {
+                        for (Direction dir2 : Util.directions) {
+                            if (tryBuildBuilding(RobotType.REFINERY, dir2)) {
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
