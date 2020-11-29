@@ -31,7 +31,9 @@ public class Communications {
             "Flooded Location", // 11
             "num units around hq", // 12
             "Remove Soup Location", //13
-            "Rush Failed" // 14
+            "Rush Failed", // 14,
+            "Created landscaper", // 15
+            "Created drone" // 16
     };
 
 

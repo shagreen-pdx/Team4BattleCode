@@ -83,17 +83,11 @@ public class Miner extends Unit {
 
     // Check the list of soup locations for soup. Removes if soup is not found
     void checkIfSoupGone() throws GameActionException {
-        System.out.println("CHECK");
-
         Iterator<MapLocation> iter = soupLocations.iterator();
 
-        System.out.println(soupLocations);
         while(iter.hasNext()){
             MapLocation loc = iter.next();
-            System.out.println(loc);
-
             if (rc.canSenseLocation(loc) && rc.senseSoup(loc) == 0) {
-                System.out.println("Loc is empty");
                 iter.remove();
             }
         }
@@ -187,13 +181,30 @@ public class Miner extends Unit {
 
     // Broadcasts reachable soup locations
     public void findReachableSoupLocations(MapLocation[] possibleSoupLocations) throws GameActionException {
-        for (MapLocation loc : possibleSoupLocations) {
-            if (!soupLocations.contains(loc)) {
-                if (isSoupReachable(loc)) {
-                    comms.broadcastMessage(2, loc, 1);
+        boolean firstSoupLocationBroadcasted = false;
+        System.out.println("Checking soup locations");
+        System.out.println(Clock.getBytecodesLeft());
+
+        for(int i = 0; i < possibleSoupLocations.length; ++i){
+            System.out.println(possibleSoupLocations[i]);
+            System.out.println(Clock.getBytecodesLeft());
+            if (!soupLocations.contains(possibleSoupLocations[i])) {
+                System.out.println("New location");
+                System.out.println(Clock.getBytecodesLeft());
+                if (isSoupReachable(possibleSoupLocations[i])) {
+                    System.out.println("Soup is reachable");
+                    System.out.println(Clock.getBytecodesLeft());
+                    soupLocations.add(possibleSoupLocations[i]);
+//                    if(!firstSoupLocationBroadcasted){
+//                        comms.broadcastMessage(2, possibleSoupLocations[i], 1);
+//                        firstSoupLocationBroadcasted = true;
+//                    }
                 }
             }
         }
+
+        System.out.println("End search");
+        System.out.println(Clock.getBytecodesLeft());
     }
 
 
@@ -344,12 +355,17 @@ public class Miner extends Unit {
 //                }
         }
 
-        checkIfSoupGone();
+        if(rc.getRoundNum() % 5 == 0){
+            System.out.println("Before removing soup Locations: " + Clock.getBytecodesLeft());
+            checkIfSoupGone();
+        }
 
 
         System.out.println("Before checking soup Locations: " + Clock.getBytecodesLeft());
-        MapLocation[] possibleSoupLocations = rc.senseNearbySoup();
-        findReachableSoupLocations(possibleSoupLocations);
+        if(rc.getRoundNum() % 7 == 0){
+            MapLocation[] possibleSoupLocations = rc.senseNearbySoup();
+            findReachableSoupLocations(possibleSoupLocations);
+        }
         System.out.println("After checking soup Locations: " + Clock.getBytecodesLeft());
 
 

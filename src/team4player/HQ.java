@@ -9,6 +9,7 @@ public class HQ extends Building{
 
     boolean rush = true;
     boolean startedAttack = false;
+    boolean broadcastedRushFailed = false;
 
     int numRobotsAdjacentToHq = 0;
     boolean hqAttacked = false;
@@ -46,7 +47,7 @@ public class HQ extends Building{
 
         // If rushing, limit production of miners
         if(rush){
-            minerLimit = 5;
+            minerLimit = 4;
 
             if (!startedAttack){
                 System.out.println("ATTACK NOT STARTED");
@@ -54,7 +55,7 @@ public class HQ extends Building{
                 if(enemyRobots.length != 0 || rc.getRoundNum() == roundNumberToCallOffRushIfAttackNotStarted){
                     System.out.println("ATTACK FAILED");
                     rush = false;
-                    comms.broadcastMessage(14, 2);
+                    broadcastedRushFailed = comms.broadcastMessage(14, 2);
                 }
             } else {
                 System.out.println("STARTED ATTACK");
@@ -63,8 +64,12 @@ public class HQ extends Building{
         }
         // If not rush, implement defensive procedures
         else {
+            if(!broadcastedRushFailed){
+                broadcastedRushFailed = comms.broadcastMessage(14, 2);
+            }
+
             System.out.println("DEFEND HQ");
-            minerLimit = 7;
+            minerLimit = 5;
 
             RobotInfo [] robotsAdjacentToHq = rc.senseNearbyRobots(3);
             broadcastNumUnitsAdjacentToHq(robotsAdjacentToHq);
@@ -101,12 +106,13 @@ public class HQ extends Building{
             }
 
             // If enemy units found, broadcast warning
-            if(robot.getType() == RobotType.MINER || robot.getType() == RobotType.LANDSCAPER){
-                comms.broadcastMessage(9,robot.location,1);
-            }
+//            if(robot.getType() == RobotType.MINER || robot.getType() == RobotType.LANDSCAPER){
+//                comms.broadcastMessage(9,robot.location,1);
+//            }
             // Broadcast enemy design school location
             if(robot.getType() == RobotType.DESIGN_SCHOOL){
                 if(!allEnemyDesignSchoolLocations.contains(robot.location)){
+                    allEnemyDesignSchoolLocations.add(robot.location);
                     comms.broadcastMessage(10, robot.location, 2);
                 }
             }

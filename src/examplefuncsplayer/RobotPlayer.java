@@ -84,7 +84,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runRefinery() throws GameActionException {
-        // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
+        System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
     }
 
     static void runVaporator() throws GameActionException {
@@ -167,7 +167,7 @@ public strictfp class RobotPlayer {
      * @throws GameActionException
      */
     static boolean tryMove(Direction dir) throws GameActionException {
-        // System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
+        System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
         if (rc.isReady() && rc.canMove(dir)) {
             rc.move(dir);
             return true;
@@ -227,6 +227,6 @@ public strictfp class RobotPlayer {
             if (rc.canSubmitTransaction(message, 10))
                 rc.submitTransaction(message, 10);
         }
-        // System.out.println(rc.getRoundMessages(turnCount-1));
+        System.out.println(rc.getRoundMessages(turnCount-1));
     }
 }

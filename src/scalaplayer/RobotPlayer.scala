@@ -76,7 +76,7 @@ object RobotPlayer {
 
   @throws[GameActionException]
   private def runRefinery(): Unit = {
-    // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
+    System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
   }
 
   @throws[GameActionException]
@@ -147,7 +147,7 @@ object RobotPlayer {
    * @throws GameActionException
    */
   @throws[GameActionException]
-  private def tryMove(dir: Direction) = { // System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
+  private def tryMove(dir: Direction) = { System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
     if (rc.isReady && rc.canMove(dir)) {
       rc.move(dir)
       true
@@ -207,6 +207,6 @@ object RobotPlayer {
       }
       if (rc.canSubmitTransaction(message, 10)) rc.submitTransaction(message, 10)
     }
-    // System.out.println(rc.getRoundMessages(turnCount-1));
+    System.out.println(rc.getRoundMessages(turnCount-1));
   }
 }

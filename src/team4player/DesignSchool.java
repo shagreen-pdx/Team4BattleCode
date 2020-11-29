@@ -77,7 +77,7 @@ public class DesignSchool extends Building{
                 System.out.print("Recieved personal message");
                 rampUpProduction = true;
                 canBuild = true;
-            } else if (message[1] == 15 ){
+            } else if (message[1] == 16 ){
                 MapLocation loc = new MapLocation(message[2], message[3]);
                 if(!loc.equals(rc.getLocation())){
                     canBuild = true;
