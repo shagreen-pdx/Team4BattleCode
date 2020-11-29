@@ -14,10 +14,14 @@ Note: all this means that buildings may never change elevation, so be careful to
 When a landscaper dies, the dirt it’s carrying is dropped on the current tile.
 If enough dirt is placed on a flooded tile to raise its elevation above the water level, it becomes not flooded. */
 public class Landscaper extends Unit{
+
+    //RUSH
+    int stuck = 0;
+
     boolean job = false;
     boolean protect = false;
     boolean search = false;
-    boolean rush = false;
+
     int roundCreated = 0;
     boolean searchedBlockChainForEnemyHq = false;
 
@@ -40,12 +44,19 @@ public class Landscaper extends Unit{
         decipherCurrentBlockChainMessage();
 
         // Decide whether to rush enemy hq or defend hq
+
+        System.out.println(rc.getLocation());
         if(!job)
             takeTurnJob();
-        else if(rush)
+        else if(rush){
+            System.out.println("RUSH");
             takeTurnRush();
-        else
+        }
+        else{
+            System.out.println("PROTECT");
             takeTurnRest();
+        }
+        System.out.println(rc.getLocation());
     }
 
 
@@ -56,6 +67,8 @@ public class Landscaper extends Unit{
         } else {
             int distanceToHq = rc.getLocation().distanceSquaredTo(hqLoc);
             int distanceToEnemyHq = rc.getLocation().distanceSquaredTo(enemyHqLoc);
+            System.out.println(distanceToEnemyHq);
+            System.out.println(distanceToHq);
             if (distanceToEnemyHq < distanceToHq) {
                 rush = true;
             } else {
@@ -75,26 +88,37 @@ public class Landscaper extends Unit{
 
         // If next to enemy hq, deposit dirt on top enemy hq
         if (distanceToEnemyHq < 4) {
+
             if (rc.getDirtCarrying() == 0) {
                 if (rc.canDigDirt(Direction.CENTER)) {
                     rc.digDirt(Direction.CENTER);
+                    System.out.println("DUG");
                 }
             } else {
                 if (rc.canDepositDirt(dirToEnemyHq)) {
                     rc.depositDirt(dirToEnemyHq);
                     System.out.println(rc.getLocation().add(dirToEnemyHq));
+                    System.out.println("DEPOSIT");
                 }
             }
         }
         // Try and get to enemy Hq
         else {
+            System.out.println("FIND");
             //If next to wall, try to build up, else move to enemy hq
             if (distanceToEnemyHq < 9 && !rc.canMove(dirToEnemyHq)) {
-                System.out.println("THERE IS A WALL");
-                // Try to move to enemy hq if possible
-                if (!nav.tryMoveForward(dirToEnemyHq)) {
-                    digToDir(rc.getLocation().directionTo(enemyHqLoc));
+
+                ++stuck;
+                if(stuck > 20){
+                    System.out.println("THERE IS A WALL");
+                    // Try to move to enemy hq if possible
+                    if (!nav.tryMoveForward(dirToEnemyHq)) {
+                        digToDir(rc.getLocation().directionTo(enemyHqLoc));
+                    }
+                } else {
+                    nav.goTo(enemyHqLoc);
                 }
+
 
             } else {
                 nav.goTo(enemyHqLoc);
@@ -187,9 +211,7 @@ public class Landscaper extends Unit{
             }
         }
 
-        // If no enemy robots nearby, try to head to hq
-        if(robots.length == 0)
-            nav.goTo(hqLoc);
+        nav.goTo(hqLoc);
     }
 
 

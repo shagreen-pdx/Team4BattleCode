@@ -1,18 +1,29 @@
 package team4player;
 
 import battlecode.common.*;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.util.ArrayList;
 
 public class HQ extends Building{
 
+    boolean rush = true;
+    boolean startedAttack = false;
+    boolean broadcastedRushFailed = false;
+
     int numRobotsAdjacentToHq = 0;
     boolean hqAttacked = false;
+    boolean wallBuilt = false;
+
+    int minerLimit = 4;
     static int numMiners = 0;
+
+
     public HQ(RobotController r){
         super(r);
     }
-    boolean wallBuilt = false;
+
+    ArrayList<MapLocation> allEnemyDesignSchoolLocations = new ArrayList<>();
 
     public void takeTurn() throws GameActionException {
         super.takeTurn();
@@ -20,54 +31,62 @@ public class HQ extends Building{
         // Broadcast location
         if(turnCount == 1) {
             comms.broadcastMessage(rc.getLocation(), 0);
+        } else {
+            // Every turn try to decipher blockchain messages
+            decipherCurrentBlockChainMessage();
         }
 
-        // Every turn try to decipher blockchain messages
-        decipherCurrentBlockChainMessage();
+//        if(rushFailed){
+//            if(turnCount % 2 == 0){
+//                decipherEnemyBlockChainMessage();
+//            }
+//        }
 
+        // Sense Enemy Robots
+        RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1,rc.getTeam().opponent());
 
-        if(!hqAttacked){
-            RobotInfo[] robots = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(),rc.getTeam().opponent());
-            if(robots.length != 0){
-                hqAttacked = true;
-                for(RobotInfo robot : robots){
-                    // If enemy units found, broadcast warning
-                    if(robot.getType() == RobotType.MINER || robot.getType() == RobotType.LANDSCAPER){
-                        comms.broadcastMessage(robot.location,9);
-                    }
-                    // Broadcast enemy design school location
-                    if(robot.getType() == RobotType.DESIGN_SCHOOL){
-                        comms.broadcastMessage(robot.location, 10);
-                    }
+        // If rushing, limit production of miners
+        if(rush){
+            minerLimit = 4;
+
+            if (!startedAttack){
+                System.out.println("ATTACK NOT STARTED");
+                // If attack has not started by round, call off attack
+                if(enemyRobots.length != 0 || rc.getRoundNum() == roundNumberToCallOffRushIfAttackNotStarted){
+                    System.out.println("ATTACK FAILED");
+                    rush = false;
+                    broadcastedRushFailed = comms.broadcastMessage(14, 2);
                 }
+            } else {
+                System.out.println("STARTED ATTACK");
             }
-        }
 
-        // Every turn try broadcast the number of robots around hq
-        RobotInfo [] robotsAdjacentToHq = rc.senseNearbyRobots(3);
-        int currentNumRobotsAroundHq = 0;
-        for(RobotInfo robot : robotsAdjacentToHq){
-            ++currentNumRobotsAroundHq;
         }
-        System.out.println(numRobotsAdjacentToHq);
-        System.out.println(currentNumRobotsAroundHq);
-        if(currentNumRobotsAroundHq != numRobotsAdjacentToHq){
-            numRobotsAdjacentToHq = currentNumRobotsAroundHq;
-            comms.broadcastMessage(numRobotsAdjacentToHq, 12);
-        }
+        // If not rush, implement defensive procedures
+        else {
+            if(!broadcastedRushFailed){
+                broadcastedRushFailed = comms.broadcastMessage(14, 2);
+            }
 
-        // Try and shoot robots
-        RobotInfo [] robots = rc.senseNearbyRobots(49, rc.getTeam().opponent());
-        for(RobotInfo robot : robots){
-            if(robot.getType() == RobotType.DELIVERY_DRONE){
-                if(rc.canShootUnit(robot.getID())){
-                    rc.shootUnit(robot.getID());
-                }
+            System.out.println("DEFEND HQ");
+            minerLimit = 5;
+
+            RobotInfo [] robotsAdjacentToHq = rc.senseNearbyRobots(3);
+            broadcastNumUnitsAdjacentToHq(robotsAdjacentToHq);
+
+            if (enemyRobots.length != 0){
+                defendHq(enemyRobots);
             }
         }
 
         // Try and build miners
-        if((numMiners < 5 && rc.getTeamSoup() > 300) || rc.getRoundNum() < 50){
+        buildMiners();
+
+    }
+
+    // Build miners if wall is not built
+    public void buildMiners() throws GameActionException {
+        if(!wallBuilt && numMiners < minerLimit){
             for (Direction dir : Util.directions){
                 if(tryBuild(RobotType.MINER, dir)){
                     ++numMiners;
@@ -76,23 +95,84 @@ public class HQ extends Building{
         }
     }
 
+    // Depending on the unit type, perform different defensive actions
+    public void defendHq(RobotInfo[] enemyRobots) throws GameActionException{
+        for(RobotInfo robot : enemyRobots){
+            // Shoot Delivery Drones
+            if(robot.getType() == RobotType.DELIVERY_DRONE){
+                if(rc.canShootUnit(robot.getID())){
+                    rc.shootUnit(robot.getID());
+                }
+            }
+
+            // If enemy units found, broadcast warning
+//            if(robot.getType() == RobotType.MINER || robot.getType() == RobotType.LANDSCAPER){
+//                comms.broadcastMessage(9,robot.location,1);
+//            }
+            // Broadcast enemy design school location
+            if(robot.getType() == RobotType.DESIGN_SCHOOL){
+                if(!allEnemyDesignSchoolLocations.contains(robot.location)){
+                    allEnemyDesignSchoolLocations.add(robot.location);
+                    comms.broadcastMessage(10, robot.location, 2);
+                }
+            }
+        }
+    }
+
+    public void broadcastNumUnitsAdjacentToHq(RobotInfo[] robotsAdjacentToHq) throws GameActionException {
+        int currentNumRobotsAroundHq = robotsAdjacentToHq.length;
+
+        if(isNearbyRobot(robotsAdjacentToHq,RobotType.LANDSCAPER,rc.getTeam())){
+            wallBuilt = true;
+        }
+
+        if(currentNumRobotsAroundHq != numRobotsAdjacentToHq){
+            numRobotsAdjacentToHq = currentNumRobotsAroundHq;
+            comms.broadcastMessage( 12, numRobotsAdjacentToHq, 1);
+        }
+    }
+
+    // *************************BLOCK CHAIN*****************************
+
     // Read block chain messages
-    public void decipherCurrentBlockChainMessage() throws GameActionException {
+    public void decipherEnemyBlockChainMessage() throws GameActionException {
         ArrayList<int []> currentBlockChainMessage = comms.getEnemyPrevRoundMessages();
         for(int [] message : currentBlockChainMessage){
             // Try dumb hack
             int [] enemyMessage = new int [7];
             enemyMessage[0] = message[0];
             enemyMessage[1] = message[1];
-            enemyMessage[2] = 0;
-            enemyMessage[3] = 0;
+            enemyMessage[2] = -5;
+            enemyMessage[3] = -5;
+            enemyMessage[4] = -5;
+            enemyMessage[5] = -5;
+            enemyMessage[6] = -5;
 
 
-            if(rc.canSubmitTransaction(enemyMessage, 3)){
-                rc.submitTransaction(enemyMessage, 3);
+            if(rc.canSubmitTransaction(enemyMessage, 1)){
+                rc.submitTransaction(enemyMessage, 1);
                 System.out.println("Broadcasted Enemy message");
             }else {
                 System.out.println("failed to broadcast");
+            }
+        }
+    }
+
+    // Decipher current blockchain messages
+    public void decipherCurrentBlockChainMessage() throws GameActionException {
+        ArrayList<int []> currentBlockChainMessage = comms.getPrevRoundMessages();
+        for(int [] message : currentBlockChainMessage){
+            // Add enemy buildings
+            if (message[1] == 6) {
+                enemyHqLoc = new MapLocation(message[2], message[3]);
+            }
+            // Rush enemy HQ
+            if (message[1] == 8){
+                startedAttack = true;
+            }
+            // Add enemy hq loc
+            else if (message[1] == 14) {
+                rush = false;
             }
         }
     }

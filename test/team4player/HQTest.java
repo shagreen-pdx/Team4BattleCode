@@ -2,6 +2,7 @@ package team4player;
 
 import battlecode.common.RobotController;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -27,21 +28,23 @@ public class HQTest {
         MockitoAnnotations.initMocks(this);
     }
 
+    @Ignore
     @Test(expected = NullPointerException.class)
     public void testTakeTurn() throws Exception {
         when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
-        when(comms.broadcastMessage(anyInt(), anyInt())).thenReturn(true);
+        when(comms.broadcastMessage(anyInt(), anyInt(), 1)).thenReturn(true);
         when(comms.getEnemyPrevRoundMessages()).thenReturn(new ArrayList<int[]>(Arrays.asList(new int[]{0})));
 
         hQ.takeTurn();
     }
 
+    @Ignore
     @Test(expected = NullPointerException.class)
     public void testTakeTurnAttacked() throws Exception{
         hQ.hqAttacked = true;
 
         when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
-        when(comms.broadcastMessage(anyInt(), anyInt())).thenReturn(true);
+        when(comms.broadcastMessage(anyInt(), anyInt(), 1)).thenReturn(true);
         when(comms.getEnemyPrevRoundMessages()).thenReturn(new ArrayList<int[]>(Arrays.asList(new int[]{0})));
         hQ.takeTurn();
     }
@@ -50,6 +53,6 @@ public class HQTest {
     public void testDecipherCurrentBlockChainMessage() throws Exception {
         when(comms.getEnemyPrevRoundMessages()).thenReturn(new ArrayList<int[]>(Arrays.asList(new int[]{0})));
 
-        hQ.decipherCurrentBlockChainMessage();
+        hQ.decipherEnemyBlockChainMessage();
     }
 }
