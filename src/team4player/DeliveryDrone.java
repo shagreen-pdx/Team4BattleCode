@@ -45,6 +45,8 @@ public class DeliveryDrone extends Unit{
 
         if(haveEnemyBot)
             takeTurnEnemyBot();
+        else if(haveCow)
+            moooveCow();
         else if(rush)
             takeTurnRush();
         else if(search)
@@ -154,6 +156,7 @@ public class DeliveryDrone extends Unit{
         } else {
             pickupEnemyBots();
             moveLandscaper();
+            pickupCows();
         }
     }
 
@@ -338,4 +341,75 @@ public class DeliveryDrone extends Unit{
             }
         }
     }
+    public void pickupCows() throws GameActionException {
+        boolean cowFound = false;
+        int closestCowDistance = 9999;
+        RobotInfo closestCow = null;
+
+        System.out.println("Trying to pick up cow");
+        if (!rc.isCurrentlyHoldingUnit()) {
+            RobotInfo[] robots = rc.senseNearbyRobots();
+            if (robots.length > 0) {
+                // Pick up a first robot within range
+                for (int i = 0; i < robots.length && !haveCow; ++i) {
+                    if (robots[i].getType() == RobotType.COW) {
+                        System.out.println("Cow location: " + robots[i].location);
+                        if (rc.canPickUpUnit(robots[i].getID())) {
+                            rc.pickUpUnit(robots[i].getID());
+                            System.out.println("I picked up a cow");
+                            haveCow = true;
+                        } else {
+                            int cowDistance = rc.getLocation().distanceSquaredTo(robots[i].location);
+                            if (cowDistance < closestCowDistance) {
+                                closestCowDistance = cowDistance;
+                                closestCow = robots[i];
+                            }
+
+                        }
+                    }
+                }
+                if (!haveCow && closestCow != null) {
+                    nav.flyTo(closestCow.location);
+                    System.out.println("Flying to location: " + closestCow.location);
+                }
+            }
+        }
+    }
+
+    public void moooveCow() throws GameActionException {
+        //if holding a cow, drop near enemy hq.  if enemy hq loc is null, drop in water
+        if (haveCow) {
+            if (enemyHqLoc != null) {
+                int enemyHQdistance = rc.getLocation().distanceSquaredTo(enemyHqLoc);
+                if (enemyHQdistance < 9) {
+                    for (Direction dir : directions) {
+                        if (rc.canDropUnit(dir)) {
+                            rc.dropUnit(dir);
+                            haveCow = false;
+                            break;
+                        }
+                    }
+                } else {
+                    nav.flyTo(enemyHqLoc);
+                }
+            } else {
+                for (Direction dir : Util.directions) {
+                    if (rc.canSenseLocation(rc.getLocation().add(dir)) && rc.senseFlooding(rc.getLocation().add(dir))) {
+                        rc.dropUnit(dir);
+                        haveCow = false;
+                        break;
+                    }
+                }
+                if(haveCow){
+                    MapLocation closestFloodedLoc = getClosestLoc(floodedLocations);
+                    if (closestFloodedLoc != null) {
+                        nav.tryFly(rc.getLocation().directionTo(closestFloodedLoc));
+                    } else {
+                        nav.tryFly(randomDirection());
+                    }
+                }
+            }
+        }
+    }
 }
+
