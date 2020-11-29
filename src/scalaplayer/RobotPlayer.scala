@@ -207,6 +207,6 @@ object RobotPlayer {
       }
       if (rc.canSubmitTransaction(message, 10)) rc.submitTransaction(message, 10)
     }
-    System.out.println(rc.getRoundMessages(turnCount-1));
+    //System.out.println(rc.getRoundMessages(turnCount-1));
   }
 }
