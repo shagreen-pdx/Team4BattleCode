@@ -20,20 +20,32 @@ public class FulfillmentCenter extends Building{
 
         if(canBuild && rc.getTeamSoup() > 210){
             if (rc.isReady() ) {
-                for (Direction dir : Util.directions) {
-                    if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
-                        ++numDeliveryDrones;
-                        canBuild = false;
-                        comms.broadcastMessage(rc.getLocation(),16);
-                        if(numDeliveryDrones == -1){
-                            RobotInfo drone = rc.senseRobotAtLocation(rc.getLocation().add(dir));
-                            System.out.println("Drone id: " + drone.ID);
-                            comms.broadcastMessage( 5,drone.ID, 2);
-                        }
-                    }
+                tryBuildDrone();
+            }
+        }
+    }
+
+    public void tryBuildDrone() throws GameActionException{
+        for (Direction dir : Util.directions) {
+            if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
+                droneBuilt();
+                if(numDeliveryDrones == -1){
+                    broadcastDroneID(dir);
                 }
             }
         }
+    }
+
+    public void droneBuilt() throws GameActionException{
+        ++numDeliveryDrones;
+        canBuild = false;
+        comms.broadcastMessage(rc.getLocation(),16);
+    }
+
+    public void broadcastDroneID(Direction dir) throws  GameActionException{
+        RobotInfo drone = rc.senseRobotAtLocation(rc.getLocation().add(dir));
+        System.out.println("Drone id: " + drone.ID);
+        comms.broadcastMessage( 5,drone.ID, 2);
     }
 
     public void decipherCurrentBlockChainMessage() throws GameActionException{
