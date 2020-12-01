@@ -22,7 +22,6 @@ public class NetGun extends Building{
             }
         }
     }
-
     public void tryShootDrone(RobotInfo robot) throws GameActionException{
         if(rc.canShootUnit(robot.getID())){
             rc.shootUnit(robot.getID());

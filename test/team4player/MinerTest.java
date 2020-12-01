@@ -21,11 +21,6 @@ public class MinerTest {
     ArrayList<MapLocation> soupLocations;
     @Mock
     ArrayList<MapLocation> refineryLocations;
-    //Field enemyHqSymetric of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
-    //Field enemyHqHorizontal of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
-    //Field enemyHqVertical of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
-    //Field enemyHqLoc of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
-    //Field hqLoc of type MapLocation - was not mocked since Mockito doesn't mock a Final class when 'mock-maker-inline' option is not set
     @Mock
     Navigation nav;
     @Mock
