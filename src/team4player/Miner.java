@@ -135,7 +135,7 @@ public class Miner extends Unit {
     void trackPreviousLocations(MapLocation location) {
         double distTravelled = 0;
         //check if the miner has moved 10 times before checking how far it's moved in those last 10 moves
-        if (nav.prevLocations.size() > 6) {
+        if (nav.prevLocations.size() > 10) {
             //find furthest distance travelled
             for (MapLocation loc : nav.prevLocations) {
                 double temp = Math.sqrt(Math.pow(loc.x - location.x, 2) + Math.pow(loc.y - location.y, 2));
