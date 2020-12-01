@@ -1,8 +1,6 @@
 package team4player;
 
-import battlecode.common.Direction;
-import battlecode.common.RobotController;
-import battlecode.common.RobotType;
+import battlecode.common.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -63,8 +61,10 @@ public class FulfillmentCenterTest4 {
         fulfillmentCenter.decipherCurrentBlockChainMessage();
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testDroneBuilt() throws Exception{
+        MapLocation mapLocation = new MapLocation(1,1);
+        when(rc.getLocation()).thenReturn(mapLocation);
         when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
         int num = fulfillmentCenter.numDeliveryDrones;
 
@@ -74,8 +74,12 @@ public class FulfillmentCenterTest4 {
         Assert.assertEquals(num + 1, fulfillmentCenter.numDeliveryDrones);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testBroadcastDroneID() throws Exception{
+        MapLocation mapLocation = new MapLocation(1,1);
+        when(rc.getLocation()).thenReturn(mapLocation);
+        RobotInfo drone = new RobotInfo(1,null,RobotType.DELIVERY_DRONE,1,true,1,1,1,mapLocation);
+        when(rc.senseRobotAtLocation(any())).thenReturn(drone);
         when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
 
         Direction dir = Util.randomDirection();
