@@ -1,6 +1,8 @@
 package team4player;
 
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -31,9 +33,10 @@ public class NetGunTest {
         netGun.takeTurn();
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testTakeTurn2() throws Exception {
-        netGun.takeTurn();
+    @Test
+    public void testTryShootDrone() throws Exception {
+        RobotInfo robot = new RobotInfo(12, null, RobotType.DELIVERY_DRONE,2,false, 1,1,1, null);
+        netGun.tryShootDrone(robot);
     }
 }
 

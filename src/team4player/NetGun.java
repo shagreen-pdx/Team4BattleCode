@@ -18,10 +18,13 @@ public class NetGun extends Building{
         RobotInfo[] robots = rc.senseNearbyRobots(16, rc.getTeam().opponent());
         for(RobotInfo robot : robots){
             if(robot.getType() == RobotType.DELIVERY_DRONE){
-                if(rc.canShootUnit(robot.getID())){
-                    rc.shootUnit(robot.getID());
-                }
+                tryShootDrone(robot);
             }
+        }
+    }
+    public void tryShootDrone(RobotInfo robot) throws GameActionException{
+        if(rc.canShootUnit(robot.getID())){
+            rc.shootUnit(robot.getID());
         }
     }
 }

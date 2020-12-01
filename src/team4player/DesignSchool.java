@@ -23,14 +23,15 @@ public class DesignSchool extends Building{
         }
 
         decipherCurrentBlockChainMessage();
+
         if(rampUpProduction){
-            rampUp();
+            rampingUpProduction();
         } else {
-            elseProduction();
+            creatingNewLandscaper();
         }
     }
 
-    public void rampUp() throws GameActionException {
+    public void rampingUpProduction() throws GameActionException{
         for (Direction dir : Util.directions) {
             if (tryBuild(RobotType.LANDSCAPER, dir)) {
                 numLandscapers++;
@@ -46,14 +47,16 @@ public class DesignSchool extends Building{
         }
     }
 
-    public void elseProduction() throws GameActionException {
-        if(canBuild && rc.getTeamSoup() > 210 && rc.isReady()) {
-            for (Direction dir : Util.directions) {
-                if (tryBuild(RobotType.LANDSCAPER, dir)) {
-                    numLandscapers++;
-                    System.out.println("Created a new landscaper!");
-                    canBuild = false;
-                    comms.broadcastMessage(rc.getLocation(),15);
+    public void creatingNewLandscaper() throws GameActionException{
+        if(canBuild && rc.getTeamSoup() > 210) {
+            if (rc.isReady()) {
+                for (Direction dir : Util.directions) {
+                    if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                        numLandscapers++;
+                        System.out.println("Created a new landscaper!");
+                        canBuild = false;
+                        comms.broadcastMessage(rc.getLocation(),15);
+                    }
                 }
             }
         }

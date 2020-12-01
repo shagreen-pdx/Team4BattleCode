@@ -318,31 +318,13 @@ public class Miner extends Unit {
             //check if the miner is stuck
             trackPreviousLocations(rc.getLocation());
             if (isStuck) {
-                System.out.println(nav.prevLocations);
-                if (!tryUnstuck()) {
-                    System.out.println("Miner cannot get unstuck.");
-                    //if stuck, try to build a refineru
-                    if (canBuildRefinery(rc.getLocation())) {
-                        for (Direction dir2 : Util.directions) {
-                            if (tryBuildBuilding(RobotType.REFINERY, dir2)) {
-                                break;
-                            }
-                        }
-                    }
-                }
+                ifIsStuck();
             }
         }
 
         if (buildDesignSchool) {
             if (rc.getTeamSoup() >= 152) {
-                for (Direction dir : Util.directions) {
-
-                    if (tryBuildBuilding(RobotType.DESIGN_SCHOOL, dir)) {
-                        buildDesignSchool = false;
-                        RobotInfo designSchool = rc.senseRobotAtLocation(rc.getLocation().add(dir));
-                        comms.broadcastMessage(8, designSchool.ID, 2);
-                    }
-                }
+                attemptBuildDesignSchool();
             }
         }
 
@@ -352,15 +334,6 @@ public class Miner extends Unit {
                 nav.prevLocations.clear();
                 System.out.println("I refined soup! " + rc.getTeamSoup());
             }
-//                MapLocation tileToCheckForFlooding = rc.getLocation().add(dir);
-//                if(rc.canSenseLocation(tileToCheckForFlooding) && rc.senseFlooding(tileToCheckForFlooding)){
-//                    for(MapLocation loc : floodedLocations){
-//                        if(!tileToCheckForFlooding.isWithinDistanceSquared(loc ,25)){
-//                            comms.broadcastMessage(11, tileToCheckForFlooding, 1);
-//                            floodedLocations.add(tileToCheckForFlooding);
-//                        }
-//                    }
-//                }
         }
 
         if(rc.getRoundNum() % 5 == 0){
@@ -379,14 +352,7 @@ public class Miner extends Unit {
 
         for (Direction dir : Util.miningDirections) {
             if (rc.onTheMap(rc.getLocation().add(dir)) && rc.senseSoup(rc.getLocation().add(dir)) > 0) {
-
-                if (canBuildRefinery(rc.getLocation())) {
-                    for (Direction dir2 : Util.directions) {
-                        if (tryBuildBuilding(RobotType.REFINERY, dir2)) {
-                            break;
-                        }
-                    }
-                }
+                attemptBuildRefinery();
 
                 if (tryMine(dir)) {
                     System.out.println("I mined soup! " + rc.getSoupCarrying());
@@ -421,29 +387,10 @@ public class Miner extends Unit {
 
         // If miner reached soup carrying capacity
         if (rc.getSoupCarrying() == rc.getType().soupLimit) {
-            System.out.println("At soup carrying limit " + rc.getType().soupLimit);
-            // If early in the game head to hq, else head to closest refinery
-            if (rc.getRoundNum() < 150 || refineryLocations.size() < 1) {
-                nav.goTo(hqLoc);
-            } else {
-                MapLocation closestRefinery = getClosestLoc(refineryLocations);
-                if (nav.goTo(closestRefinery)) {
-                    stuck = 0;
-                } else {
-                    ++stuck;
-                }
-            }
+            goTowardsRefinery();
 
         } else if (soupLocations.size() > 0) {
-            System.out.println(Clock.getBytecodesLeft());
-            MapLocation closestSoup = getClosestLoc(soupLocations);
-
-            System.out.println("Moving toward soup loc: " + closestSoup);
-            if (nav.goTo(closestSoup)) {
-                stuck = 0;
-            } else {
-                ++stuck;
-            }
+            goTowardSoup();
         } else {
             if (nav.goTo(Util.randomDirection())) {
                 stuck = 0;
@@ -454,6 +401,68 @@ public class Miner extends Unit {
         System.out.println(Clock.getBytecodesLeft());
     }
 
+    public void ifIsStuck() throws GameActionException{
+        System.out.println(nav.prevLocations);
+        if (!tryUnstuck()) {
+            System.out.println("Miner cannot get unstuck.");
+            //if stuck, try to build a refineru
+            if (canBuildRefinery(rc.getLocation())) {
+                for (Direction dir2 : Util.directions) {
+                    if (tryBuildBuilding(RobotType.REFINERY, dir2)) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public void goTowardSoup() throws GameActionException{
+        System.out.println(Clock.getBytecodesLeft());
+        MapLocation closestSoup = getClosestLoc(soupLocations);
+
+        System.out.println("Moving toward soup loc: " + closestSoup);
+        if (nav.goTo(closestSoup)) {
+            stuck = 0;
+        } else {
+            ++stuck;
+        }
+    }
+
+    public void attemptBuildDesignSchool() throws GameActionException {
+        for (Direction dir : Util.directions) {
+
+            if (tryBuildBuilding(RobotType.DESIGN_SCHOOL, dir)) {
+                buildDesignSchool = false;
+                RobotInfo designSchool = rc.senseRobotAtLocation(rc.getLocation().add(dir));
+                comms.broadcastMessage(8, designSchool.ID, 2);
+            }
+        }
+    }
+
+    public void attemptBuildRefinery() throws GameActionException {
+        if (canBuildRefinery(rc.getLocation())) {
+            for (Direction dir2 : Util.directions) {
+                if (tryBuildBuilding(RobotType.REFINERY, dir2)) {
+                    break;
+                }
+            }
+        }
+    }
+
+    public void goTowardsRefinery() throws GameActionException {
+        System.out.println("At soup carrying limit " + rc.getType().soupLimit);
+        // If early in the game head to hq, else head to closest refinery
+        if (rc.getRoundNum() < 150 || refineryLocations.size() < 1) {
+            nav.goTo(hqLoc);
+        } else {
+            MapLocation closestRefinery = getClosestLoc(refineryLocations);
+            if (nav.goTo(closestRefinery)) {
+                stuck = 0;
+            } else {
+                ++stuck;
+            }
+        }
+    }
     // ****************************** Block Chain *********************************
 
     public void decipherAllBlockChainMessages() {

@@ -1,5 +1,6 @@
 package team4player;
 
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +28,16 @@ public class RefineryTest {
     @Test
     public void testTakeTurnBroadcastedCreation() throws Exception {
         comms.broadcastedCreation = true;
+        when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
+
+        refinery.takeTurn();
+    }
+
+    @Test
+    public void testTakeTurn() throws Exception {
+        comms.broadcastedCreation = false;
+        MapLocation mapLocation = new MapLocation(1,1);
+        when(rc.getLocation()).thenReturn(mapLocation);
         when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
 
         refinery.takeTurn();
