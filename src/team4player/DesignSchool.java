@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 public class DesignSchool extends Building{
 
-
     int numLandscapers = 0;
     boolean broadcastedCreation = false;
     boolean rampUpProduction = false;
@@ -20,9 +19,9 @@ public class DesignSchool extends Building{
 
         System.out.println(numLandscapers);
 
-        if(!broadcastedCreation){
-            broadcastedCreation = comms.broadcastMessage(rc.getLocation(), 1);
-        }
+//        if(!broadcastedCreation){
+//            broadcastedCreation = comms.broadcastMessage(rc.getLocation(), 1);
+//        }
 
         if(!teamMessagesSearched){
             decipherAllBlockChainMessages();
@@ -35,8 +34,14 @@ public class DesignSchool extends Building{
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     numLandscapers++;
                     System.out.println("Created a new landscaper!");
-
+                    if(numLandscapers == 5){
+                        rampUpProduction = false;
+                        comms.broadcastMessage(14, 1);
+                    }
                 }
+            }
+            if(rc.getDirtCarrying() == 14){
+                comms.broadcastMessage(14, 1);
             }
         } else {
             if(canBuild && rc.getTeamSoup() > 210) {
@@ -71,7 +76,8 @@ public class DesignSchool extends Building{
             if(message[1] == 8 && message[4] == rc.getID()){
                 System.out.print("Recieved personal message");
                 rampUpProduction = true;
-            } else if (message[1] == 15 ){
+                canBuild = true;
+            } else if (message[1] == 16 ){
                 MapLocation loc = new MapLocation(message[2], message[3]);
                 if(!loc.equals(rc.getLocation())){
                     canBuild = true;

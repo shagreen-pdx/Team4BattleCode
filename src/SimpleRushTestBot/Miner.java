@@ -100,7 +100,7 @@ public class Miner extends Unit {
 
         // Try and refine
         for (Direction dir : Util.directions){
-            if (tryRefine(dir))
+            tryRefine(dir);
                 System.out.println("I refined soup! " + rc.getTeamSoup());
         }
 
@@ -154,7 +154,9 @@ public class Miner extends Unit {
             nav.goTo(closestRefinery);
         } else if (soupLocations.size() > 0){
             nav.goTo(soupLocations.get(0));
-        }else if (nav.goTo(Util.randomDirection()))
+        }else {
+            nav.goTo(Util.randomDirection());
+        }
             System.out.println("I moved in random direction!");
 
     }
