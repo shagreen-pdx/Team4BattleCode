@@ -41,14 +41,64 @@ public class UnitTest {
     unit.takeTurn();
   }
 
-  @Test (expected = NullPointerException.class)
+  @Test
   public void testTryBuildBuilding() throws Exception {
+    unit.hqLoc = new MapLocation(1,1);
+    when(rc.getLocation()).thenReturn(new MapLocation(1,1));
+    when(rc.isReady()).thenReturn(true);
+    when(rc.canBuildRobot(any(), any())).thenReturn(true);
+    boolean result = unit.tryBuildBuilding(RobotType.HQ, Direction.NORTH);
+    Assert.assertEquals(false, result);
+  }
+
+  @Test
+  public void testTryBuildBuilding1() throws Exception {
+    unit.hqLoc = new MapLocation(100,100);
+    when(rc.getLocation()).thenReturn(new MapLocation(1,1));
+    when(rc.isReady()).thenReturn(true);
+    when(rc.canBuildRobot(any(), any())).thenReturn(true);
+
     boolean result = unit.tryBuildBuilding(RobotType.HQ, Direction.NORTH);
     Assert.assertEquals(true, result);
   }
 
   @Test
+  public void testTryBuildBuilding2() throws Exception {
+    unit.hqLoc = new MapLocation(100,100);
+    when(rc.getLocation()).thenReturn(new MapLocation(1,1));
+    when(rc.isReady()).thenReturn(false);
+    when(rc.canBuildRobot(any(), any())).thenReturn(false);
+
+    boolean result = unit.tryBuildBuilding(RobotType.HQ, Direction.NORTH);
+    Assert.assertEquals(false, result);
+  }
+
+  @Test
   public void testCalcPosEnemyHqLoc() throws Exception {
+    unit.hqLoc = new MapLocation(1,1);
+    nav.mapWidth = 100;
+    nav.mapHeight = 100;
     unit.calcPosEnemyHqLoc();
   }
+
+  @Test
+  public void testCalcPosEnemyHqLoc1() throws Exception {
+    unit.hqLoc = new MapLocation(1,1);
+    nav.mapWidth = 100;
+    nav.mapHeight = 200;
+    unit.calcPosEnemyHqLoc();
+  }
+
+  @Test
+  public void testGetClosestLoc() throws Exception {
+    ArrayList<MapLocation> mapLocations = new ArrayList<>();
+    for (int i = 0; i < 5; i++)
+    {
+      MapLocation temp = new MapLocation(i,i);
+      mapLocations.add(temp);
+    }
+    when(rc.getLocation()).thenReturn(new MapLocation(50,50));
+    MapLocation closest = unit.getClosestLoc(mapLocations);
+  }
+
 }

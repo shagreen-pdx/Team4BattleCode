@@ -88,19 +88,7 @@ public class Landscaper extends Unit{
 
         // If next to enemy hq, deposit dirt on top enemy hq
         if (distanceToEnemyHq < 4) {
-
-            if (rc.getDirtCarrying() == 0) {
-                if (rc.canDigDirt(Direction.CENTER)) {
-                    rc.digDirt(Direction.CENTER);
-                    System.out.println("DUG");
-                }
-            } else {
-                if (rc.canDepositDirt(dirToEnemyHq)) {
-                    rc.depositDirt(dirToEnemyHq);
-                    System.out.println(rc.getLocation().add(dirToEnemyHq));
-                    System.out.println("DEPOSIT");
-                }
-            }
+            depositDirt(dirToEnemyHq);
         }
         // Try and get to enemy Hq
         else {
@@ -126,7 +114,20 @@ public class Landscaper extends Unit{
         }
     }
 
-
+    public void depositDirt(Direction dirToEnemyHq) throws GameActionException {
+        if (rc.getDirtCarrying() == 0) {
+            if (rc.canDigDirt(Direction.CENTER)) {
+                rc.digDirt(Direction.CENTER);
+                System.out.println("DUG");
+            }
+        } else {
+            if (rc.canDepositDirt(dirToEnemyHq)) {
+                rc.depositDirt(dirToEnemyHq);
+                System.out.println(rc.getLocation().add(dirToEnemyHq));
+                System.out.println("DEPOSIT");
+            }
+        }
+    }
 
 
     public void takeTurnRest() throws GameActionException {

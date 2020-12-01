@@ -42,6 +42,7 @@ public class Miner extends Unit {
         // Destroy self
         if (stuck > 500) {
             rc.disintegrate();
+            return;
         }
 
         // Search team messages
