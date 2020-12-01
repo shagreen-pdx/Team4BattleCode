@@ -28,6 +28,7 @@ public class Miner extends Unit {
     int numDesignSchools = 0;
     int numFulfillmentCenters = 0;
     int numRefineries = 0;
+    int numVaporators = 0;
     ArrayList<MapLocation> soupLocations = new ArrayList<MapLocation>();
     ArrayList<MapLocation> refineryLocations = new ArrayList<MapLocation>();
 
@@ -320,7 +321,14 @@ public class Miner extends Unit {
                 System.out.println(nav.prevLocations);
                 if (!tryUnstuck()) {
                     System.out.println("Miner cannot get unstuck.");
-                    //call a drone to pick you up?
+                    //if stuck, try to build a refineru
+                    if (canBuildRefinery(rc.getLocation())) {
+                        for (Direction dir2 : Util.directions) {
+                            if (tryBuildBuilding(RobotType.REFINERY, dir2)) {
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -401,6 +409,13 @@ public class Miner extends Unit {
                 if(buildInDirection(RobotType.FULFILLMENT_CENTER,rc.getLocation().directionTo(hqLoc).opposite()) != 0){
                     comms.broadcastMessage(4, 1);
                 }
+            }
+        }
+        if(numVaporators < 1) {
+            Direction dir = Util.randomDirection();
+            if (tryBuildBuilding(RobotType.VAPORATOR, dir)) {
+                System.out.println("Built Vaporator");
+                numVaporators++;
             }
         }
 
