@@ -17,7 +17,7 @@ public class DeliveryDrone extends Unit{
     int currentlyHeldRobotId = 0;
     boolean haveEnemyBot = false;
     boolean haveCow = false;
-    boolean search = false;
+    boolean search = true;
 
     public DeliveryDrone(RobotController r){
         super(r);
@@ -154,8 +154,8 @@ public class DeliveryDrone extends Unit{
             nav.flyTo(hqLoc);
         } else {
             pickupEnemyBots();
-            moveLandscaper();
             pickupCows();
+            moveLandscaper();
         }
     }
 
