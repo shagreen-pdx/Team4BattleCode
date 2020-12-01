@@ -5,7 +5,7 @@ import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.util.ArrayList;
 
-public class HQ extends Building{
+public class HQ extends Building {
 
     boolean rush = true;
     boolean startedAttack = false;
@@ -19,7 +19,7 @@ public class HQ extends Building{
     static int numMiners = 0;
 
 
-    public HQ(RobotController r){
+    public HQ(RobotController r) {
         super(r);
     }
 
@@ -29,54 +29,23 @@ public class HQ extends Building{
         super.takeTurn();
 
         // Broadcast location
-        if(turnCount == 1) {
+        if (turnCount == 1) {
             comms.broadcastMessage(rc.getLocation(), 0);
         } else {
             // Every turn try to decipher blockchain messages
             decipherCurrentBlockChainMessage();
         }
 
-//        if(rushFailed){
-//            if(turnCount % 2 == 0){
-//                decipherEnemyBlockChainMessage();
-//            }
-//        }
-
         // Sense Enemy Robots
-        RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1,rc.getTeam().opponent());
+        RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
 
         // If rushing, limit production of miners
-        if(rush){
-            minerLimit = 4;
-
-            if (!startedAttack){
-                System.out.println("ATTACK NOT STARTED");
-                // If attack has not started by round, call off attack
-                if(enemyRobots.length != 0 || rc.getRoundNum() == roundNumberToCallOffRushIfAttackNotStarted){
-                    System.out.println("ATTACK FAILED");
-                    rush = false;
-                    broadcastedRushFailed = comms.broadcastMessage(14, 2);
-                }
-            } else {
-                System.out.println("STARTED ATTACK");
-            }
-
+        if (rush) {
+            enemyRobots = takeRush(enemyRobots);
         }
         // If not rush, implement defensive procedures
         else {
-            if(!broadcastedRushFailed){
-                broadcastedRushFailed = comms.broadcastMessage(14, 2);
-            }
-
-            System.out.println("DEFEND HQ");
-            minerLimit = 5;
-
-            RobotInfo [] robotsAdjacentToHq = rc.senseNearbyRobots(3);
-            broadcastNumUnitsAdjacentToHq(robotsAdjacentToHq);
-
-            if (enemyRobots.length != 0){
-                defendHq(enemyRobots);
-            }
+            enemyRobots = takeElse(enemyRobots);
         }
 
         // Try and build miners
@@ -84,8 +53,46 @@ public class HQ extends Building{
 
     }
 
+    public RobotInfo[] takeRush(RobotInfo[] enemyRobots) throws GameActionException {
+        minerLimit = 4;
+        if (!startedAttack) {
+            System.out.println("ATTACK NOT STARTED");
+            // If attack has not started by round, call off attack
+            if (enemyRobots.length != 0 || rc.getRoundNum() == roundNumberToCallOffRushIfAttackNotStarted) {
+                System.out.println("ATTACK FAILED");
+                rush = false;
+                broadcastedRushFailed = comms.broadcastMessage(14, 2);
+            }
+        } else {
+            System.out.println("STARTED ATTACK");
+        }
+        return enemyRobots;
+    }
+
+    public RobotInfo[] takeElse(RobotInfo[] enemyRobots) throws GameActionException {
+        if (!broadcastedRushFailed) {
+            broadcastedRushFailed = comms.broadcastMessage(14, 2);
+        }
+
+        System.out.println("DEFEND HQ");
+        minerLimit = 5;
+
+        RobotInfo[] robotsAdjacentToHq = rc.senseNearbyRobots(3);
+        broadcastNumUnitsAdjacentToHq(robotsAdjacentToHq);
+
+        if (enemyRobots.length != 0) {
+            defendHq(enemyRobots);
+        }
+        return enemyRobots;
+    }
+
+
+
+
+
+
     // Build miners if wall is not built
-    public void buildMiners() throws GameActionException {
+    public int buildMiners() throws GameActionException {
         if(!wallBuilt && numMiners < minerLimit){
             for (Direction dir : Util.directions){
                 if(tryBuild(RobotType.MINER, dir)){
@@ -93,6 +100,7 @@ public class HQ extends Building{
                 }
             }
         }
+        return numMiners;
     }
 
     // Depending on the unit type, perform different defensive actions
@@ -105,10 +113,6 @@ public class HQ extends Building{
                 }
             }
 
-            // If enemy units found, broadcast warning
-//            if(robot.getType() == RobotType.MINER || robot.getType() == RobotType.LANDSCAPER){
-//                comms.broadcastMessage(9,robot.location,1);
-//            }
             // Broadcast enemy design school location
             if(robot.getType() == RobotType.DESIGN_SCHOOL){
                 if(!allEnemyDesignSchoolLocations.contains(robot.location)){
