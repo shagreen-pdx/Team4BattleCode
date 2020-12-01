@@ -33,8 +33,7 @@ public class Communications {
             "Remove Soup Location", //13
             "Rush Failed", // 14,
             "Created landscaper", // 15
-            "Created drone", // 16
-            "Vaporator location" //17
+            "Created drone" // 16
     };
 
 
