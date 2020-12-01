@@ -56,6 +56,23 @@ public class MinerTest {
     }
 
     @Test
+    public void testTakeTurn1() throws Exception {
+        miner.stuck = 600;
+        miner.takeTurn();
+    }
+
+    @Test (expected = NullPointerException.class)
+    public void testTakeTurn2() throws Exception {
+        miner.teamMessagesSearched = true;
+        when(rc.getRoundNum()).thenReturn(2);
+        miner.rush = true;
+        miner.startedAttack = false;
+        miner.isAttacking = true;
+
+        miner.takeTurn();
+    }
+
+    @Test
     public void testCheckIfSoupGone() throws Exception {
         when(rc.canSenseLocation(any())).thenReturn(true);
         when(rc.senseSoup(any())).thenReturn(0);
@@ -77,11 +94,27 @@ public class MinerTest {
     }
 
     @Test
+    public void testTryMine1() throws Exception {
+        when(rc.isReady()).thenReturn(false);
+        when(rc.canMineSoup(any())).thenReturn(true);
+        boolean result = miner.tryMine(Direction.NORTH);
+        Assert.assertEquals(false, result);
+    }
+
+    @Test
     public void testTryRefine() throws Exception {
         when(rc.isReady()).thenReturn(true);
         when(rc.canDepositSoup(any())).thenReturn(true);
         boolean result = miner.tryRefine(Direction.NORTH);
         Assert.assertEquals(true, result);
+    }
+
+    @Test
+    public void testTryRefine1() throws Exception {
+        when(rc.isReady()).thenReturn(false);
+        when(rc.canDepositSoup(any())).thenReturn(true);
+        boolean result = miner.tryRefine(Direction.NORTH);
+        Assert.assertEquals(false, result);
     }
 
     @Test
@@ -104,7 +137,7 @@ public class MinerTest {
     @Test
     public void testTrackPreviousLocations() throws Exception {
         nav.prevLocations = new ArrayList<>();
-        for(int i = 0; i < 10; i++){
+        for(int i = 0; i < 12; i++){
             MapLocation loc = new MapLocation(i, i);
             nav.prevLocations.add(loc);
         }
@@ -135,6 +168,44 @@ public class MinerTest {
         when(rc.senseRobotAtLocation(any())).thenReturn(bot);
         int result = miner.buildInDirection(RobotType.DESIGN_SCHOOL, Direction.NORTH);
         Assert.assertEquals(1,result);
+    }
+
+    @Test
+    public void testFindReachableSoupLocations() throws Exception {
+        when(rc.getLocation()).thenReturn(new MapLocation(1,1));
+        MapLocation temp1 = new MapLocation(1,1);
+        MapLocation temp2 = new MapLocation(2,2);
+        MapLocation temp3 = new MapLocation(3,3);
+
+        MapLocation loc[] = {temp1,temp2,temp3};
+        miner.findReachableSoupLocations(loc);
+    }
+
+    @Test
+    public void testIsSoupReachable() throws Exception {
+        when(rc.getLocation()).thenReturn(new MapLocation(1,1));
+        when(rc.canSenseLocation(any())).thenReturn(true);
+        when(rc.senseFlooding(any())).thenReturn(false);
+        when(rc.senseElevation(any())).thenReturn(1);
+        boolean result = miner.isSoupReachable(new MapLocation(2,2));
+    }
+
+    @Test
+    public void testIsSoupReachable1() throws Exception {
+        when(rc.getLocation()).thenReturn(new MapLocation(1,1));
+        when(rc.canSenseLocation(any())).thenReturn(false);
+        when(rc.senseFlooding(any())).thenReturn(false);
+        when(rc.senseElevation(any())).thenReturn(1);
+        boolean result = miner.isSoupReachable(new MapLocation(2,2));
+    }
+
+    @Test
+    public void testIsSoupReachable2() throws Exception {
+        when(rc.getLocation()).thenReturn(new MapLocation(1,1));
+        when(rc.canSenseLocation(any())).thenReturn(true);
+        when(rc.senseFlooding(any())).thenReturn(true);
+        when(rc.senseElevation(any())).thenReturn(1);
+        boolean result = miner.isSoupReachable(new MapLocation(2,2));
     }
 
     @Test
@@ -193,6 +264,12 @@ public class MinerTest {
         when(rc.getTeamSoup()).thenReturn(1000);
         boolean result = miner.canBuildUnit(RobotType.DESIGN_SCHOOL, 10);
         Assert.assertEquals(true, result);
+    }
+
+    @Test
+    public void testAttackEnemyHQ() throws Exception {
+        
+        miner.attackEnemyHq();
     }
 
     @Test(expected = NullPointerException.class)
