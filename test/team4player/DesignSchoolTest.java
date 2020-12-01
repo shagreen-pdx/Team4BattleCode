@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import scala.xml.Null;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,9 +32,30 @@ public class DesignSchoolTest {
     MockitoAnnotations.initMocks(this);
   }
 
+  @Test (expected = NullPointerException.class)
+  public void testTakeTurn() throws Exception {
+    when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int[]>(Arrays.asList(new int[]{0})));
+
+    designSchool.teamMessagesSearched = false;
+    designSchool.rampUpProduction = true;
+    designSchool.takeTurn();
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testTakeTurn2() throws Exception {
+    designSchool.teamMessagesSearched = true;
+    designSchool.rampUpProduction = false;
+    designSchool.takeTurn();
+  }
 
   @Test
   public void testDecipherAllBlockChainMessages() throws Exception {
+    ArrayList<int[]> list = new ArrayList<>();
+    int temp[]={0,8,0,0,1};
+    list.add(temp);
+    when(rc.getID()).thenReturn(1);
+
+    designSchool.teamMessages = list;
     designSchool.decipherAllBlockChainMessages();
   }
 
