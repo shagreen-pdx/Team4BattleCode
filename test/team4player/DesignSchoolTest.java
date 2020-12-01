@@ -25,6 +25,8 @@ public class DesignSchoolTest {
     RobotController rc;
     @Mock
     Communications comms;
+    @Mock
+    Robot robot;
     @InjectMocks
     DesignSchool designSchool;
 
@@ -42,9 +44,35 @@ public class DesignSchoolTest {
         designSchool.takeTurn();
     }
 
+    @Test(expected = NullPointerException.class)
+    public void testTakeTurn1() throws Exception {
+        when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int[]>(Arrays.asList(new int[]{0})));
+
+        designSchool.teamMessagesSearched = false;
+        designSchool.rampUpProduction = true;
+        designSchool.takeTurn();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testTakeTurn2() throws Exception {
+        designSchool.teamMessagesSearched = true;
+        designSchool.rampUpProduction = false;
+        designSchool.takeTurn();
+    }
 
     @Test
     public void testDecipherAllBlockChainMessages() throws Exception {
+        designSchool.decipherAllBlockChainMessages();
+    }
+
+    @Test
+    public void testDecipherAllBlockChainMessages1() throws Exception {
+        ArrayList<int[]> list = new ArrayList<>();
+        int temp[]={0,8,0,0,1};
+        list.add(temp);
+        when(rc.getID()).thenReturn(1);
+
+        designSchool.teamMessages = list;
         designSchool.decipherAllBlockChainMessages();
     }
 
@@ -72,6 +100,29 @@ public class DesignSchoolTest {
     public void testIsNearbyRobot2() throws Exception {
         boolean result = designSchool.isNearbyRobot(new RobotInfo[]{null}, RobotType.HQ, Team.A);
         Assert.assertEquals(true, result);
+    }
+
+    @Test
+    public void testRampingUpProduction() throws Exception {
+        when(robot.tryBuild(any(), any())).thenReturn(true);
+        when(rc.getDirtCarrying()).thenReturn(14);
+
+        designSchool.rampingUpProduction();
+    }
+
+    @Test
+    public void testCreatingNewLandscaper() throws Exception {
+        designSchool.numLandscapers = 1;
+        designSchool.canBuild = true;
+        when(rc.getTeamSoup()).thenReturn(211);
+        when(rc.isReady()).thenReturn(true);
+        when(robot.tryBuild(any(), any())).thenReturn(true);
+        when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
+
+        designSchool.creatingNewLandscaper();
+
+        Assert.assertEquals(1, designSchool.numLandscapers);
+        Assert.assertEquals(true,designSchool.canBuild);
     }
 }
 
