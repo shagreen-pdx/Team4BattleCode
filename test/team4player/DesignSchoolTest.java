@@ -42,19 +42,6 @@ public class DesignSchoolTest {
         designSchool.takeTurn();
     }
 
-    @Test
-    public void testRampUp() throws Exception {
-        when(comms.broadcastMessage(anyInt(), anyInt())).thenReturn(true);
-
-        designSchool.rampUp();
-    }
-
-    @Test
-    public void testElseProduction() throws Exception {
-        when(comms.broadcastMessage(any(), anyInt())).thenReturn(true);
-
-        designSchool.elseProduction();
-    }
 
     @Test
     public void testDecipherAllBlockChainMessages() throws Exception {
