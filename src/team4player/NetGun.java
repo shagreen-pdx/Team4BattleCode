@@ -16,6 +16,9 @@ public class NetGun extends Building{
         super.takeTurn();
 
         RobotInfo[] robots = rc.senseNearbyRobots(16, rc.getTeam().opponent());
+        findDrone(robots);
+    }
+    public void findDrone(RobotInfo[] robots) throws GameActionException {
         for(RobotInfo robot : robots){
             if(robot.getType() == RobotType.DELIVERY_DRONE){
                 tryShootDrone(robot);

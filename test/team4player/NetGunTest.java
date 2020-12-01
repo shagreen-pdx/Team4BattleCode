@@ -20,6 +20,8 @@ public class NetGunTest {
     RobotController rc;
     @Mock
     Communications comms;
+    @Mock
+    RobotInfo robotInfo;
     @InjectMocks
     NetGun netGun;
 
@@ -31,6 +33,16 @@ public class NetGunTest {
     @Test(expected = NullPointerException.class)
     public void testTakeTurn() throws Exception {
         netGun.takeTurn();
+    }
+
+    @Test
+    public void testFindDrone() throws Exception {
+        RobotInfo robot1 = new RobotInfo(12, null, RobotType.DELIVERY_DRONE,2,false, 1,1,1, null);
+        RobotInfo robot2 = new RobotInfo(12, null, RobotType.DELIVERY_DRONE,2,false, 1,1,1, null);
+
+        RobotInfo robotInfo[] = {robot1, robot2};
+
+        netGun.findDrone(robotInfo);
     }
 
     @Test
