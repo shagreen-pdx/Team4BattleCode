@@ -45,6 +45,7 @@ public class LandscaperTest {
 
     @Test(expected = NullPointerException.class)
     public void testTakeTurn() throws Exception {
+        when(rc.getLocation()).thenReturn(new MapLocation(1,1));
         when(nav.tryMoveForward(any())).thenReturn(true);
         when(nav.goTo((Direction) any())).thenReturn(true);
         when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int[]>(Arrays.asList(new int[]{0})));
@@ -68,6 +69,7 @@ public class LandscaperTest {
         robot.teamMessagesSearched = true;
         landscaper.job = true;
         landscaper.rush = true;
+        when(rc.getLocation()).thenReturn(new MapLocation(1,1));
         when(nav.tryMoveForward(any())).thenReturn(true);
         when(nav.goTo((Direction) any())).thenReturn(true);
         when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int[]>(Arrays.asList(new int[]{0})));
@@ -80,6 +82,7 @@ public class LandscaperTest {
         robot.teamMessagesSearched = true;
         landscaper.job = true;
         landscaper.rush = false;
+        when(rc.getLocation()).thenReturn(new MapLocation(1,1));
         when(nav.tryMoveForward(any())).thenReturn(true);
         when(nav.goTo((Direction) any())).thenReturn(true);
         when(comms.getPrevRoundMessages()).thenReturn(new ArrayList<int[]>(Arrays.asList(new int[]{0})));
@@ -115,6 +118,23 @@ public class LandscaperTest {
         when(nav.goTo((Direction) any())).thenReturn(true);
 
         landscaper.takeTurnRush();
+    }
+
+    @Test
+    public void testDepositDirt() throws Exception {
+        when(rc.getDirtCarrying()).thenReturn(0);
+        when(rc.canDigDirt(any())).thenReturn(true);
+
+        landscaper.depositDirt(Direction.NORTH);
+    }
+
+    @Test
+    public void testDepositDirt1() throws Exception {
+        when(rc.getDirtCarrying()).thenReturn(1);
+        when(rc.canDepositDirt(any())).thenReturn(true);
+        when(rc.getLocation()).thenReturn(new MapLocation(1,1));
+
+        landscaper.depositDirt(Direction.NORTH);
     }
 
     @Test(expected = NullPointerException.class)
