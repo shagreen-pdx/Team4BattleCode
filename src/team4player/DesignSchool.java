@@ -30,29 +30,37 @@ public class DesignSchool extends Building{
         decipherCurrentBlockChainMessage();
 
         if(rampUpProduction){
-            for (Direction dir : Util.directions) {
-                if (tryBuild(RobotType.LANDSCAPER, dir)) {
-                    numLandscapers++;
-                    System.out.println("Created a new landscaper!");
-                    if(numLandscapers == 5){
-                        rampUpProduction = false;
-                        comms.broadcastMessage(14, 1);
-                    }
+            rampingUpProduction();
+        } else {
+            creatingNewLandscaper();
+        }
+    }
+
+    public void rampingUpProduction() throws GameActionException{
+        for (Direction dir : Util.directions) {
+            if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                numLandscapers++;
+                System.out.println("Created a new landscaper!");
+                if(numLandscapers == 5){
+                    rampUpProduction = false;
+                    comms.broadcastMessage(14, 1);
                 }
             }
-            if(rc.getDirtCarrying() == 14){
-                comms.broadcastMessage(14, 1);
-            }
-        } else {
-            if(canBuild && rc.getTeamSoup() > 210) {
-                if (rc.isReady()) {
-                    for (Direction dir : Util.directions) {
-                        if (tryBuild(RobotType.LANDSCAPER, dir)) {
-                            numLandscapers++;
-                            System.out.println("Created a new landscaper!");
-                            canBuild = false;
-                            comms.broadcastMessage(rc.getLocation(),15);
-                        }
+        }
+        if(rc.getDirtCarrying() == 14){
+            comms.broadcastMessage(14, 1);
+        }
+    }
+
+    public void creatingNewLandscaper() throws GameActionException{
+        if(canBuild && rc.getTeamSoup() > 210) {
+            if (rc.isReady()) {
+                for (Direction dir : Util.directions) {
+                    if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                        numLandscapers++;
+                        System.out.println("Created a new landscaper!");
+                        canBuild = false;
+                        comms.broadcastMessage(rc.getLocation(),15);
                     }
                 }
             }
