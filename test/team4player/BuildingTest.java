@@ -1,5 +1,6 @@
 package team4player;
 
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import org.junit.Before;
 import org.junit.Test;
