@@ -266,12 +266,6 @@ public class MinerTest {
         Assert.assertEquals(true, result);
     }
 
-    @Test
-    public void testAttackEnemyHQ() throws Exception {
-        
-        miner.attackEnemyHq();
-    }
-
     @Test(expected = NullPointerException.class)
     public void testMineAndBuild() throws Exception {
         miner.mineAndBuild();
