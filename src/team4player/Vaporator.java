@@ -12,7 +12,7 @@ public class Vaporator extends Building{
 
     public void takeTurn() throws GameActionException {
         if (!comms.broadcastedCreation) {
-            comms.broadcastedCreation = comms.broadcastMessage(rc.getLocation(), 9);
+            comms.broadcastedCreation = comms.broadcastMessage(rc.getLocation(), 14);
         }
         int localPollution = rc.sensePollution(rc.getLocation());
         System.out.println("Global pollution level: " + RobotType.VAPORATOR.globalPollutionAmount);

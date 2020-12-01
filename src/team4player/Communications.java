@@ -28,7 +28,8 @@ public class Communications {
             "Enemy Design School", // 10
             "Flooded Location", // 11
             "num units around hq", // 12
-            "Remove Soup Location" //13
+            "Remove Soup Location", //13
+            "Vaporator loc" //14
     };
 
 
